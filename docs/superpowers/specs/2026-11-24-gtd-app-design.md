@@ -390,6 +390,100 @@ class Prompt {
 2. **AI 建议不打断**：以**徽标 / 卡片**形式呈现，用户可稍后处理或忽略，**不强制弹窗**。
 3. **确认权在用户**：所有 AI 输出进入"确认/修改"路径后才写库，界面无任何"AI 直接生效"操作。
 
+### 7.4 视觉设计规范（质感拟物 + 双主题）
+
+#### 7.4.1 总体风格
+
+- 视觉方向为 **Material 3 基础上的「质感拟物」**（用户已确认预览稿 `preview-ui-v3.html`「质感拟物 v3 强化版」为正式规范）；本节所有色值、透明度、模糊值均取自该稿，作为 Task 33（`lib/app/theme.dart`）实现的唯一数值来源。
+- 四大视觉特征：
+  - **彩色光斑背景**：4 个径向渐变彩色光斑（红 / 紫 / 青 / 黄）叠加一层线性渐变底色；
+  - **强对比渐变**：按钮、激活项、徽标、复选框大面积使用双色 `135deg` 渐变；
+  - **彩色投影**：阴影带蓝色 / 紫色光晕（如 `0 18px 50px rgba(36,86,255,.28)`），浅深两套均有；
+  - **高饱和毛玻璃**：`backdrop-filter: blur(24–28px) saturate(180%)` 用于导航条、侧边栏、容器、卡片，卡片同时使用半透明底色。
+- **双主题**：浅色 / 深色两套完整 token，跟随系统自动切换（`ThemeMode.system`）；预览稿中的「🌙 / ☀️ 切换主题」按钮仅作设计预览对比，**不作为产品功能**（本规格无应用内手动主题切换）。
+
+#### 7.4.2 双主题设计 Token
+
+下表取值取自 `preview-ui-v3.html` 的 `:root`（浅色）与 `body.dark`（深色）CSS 变量；渐变类 token 以「端点色值对」给出，具体应用方向见 §7.4.3 组件规则。
+
+| Token | 浅色（light） | 深色（dark） | 说明 |
+|------|--------------|--------------|------|
+| 主色 primary 渐变端点 | `#2456FF` / `#00C2FF` | `#4D7DFF` / `#00D4FF` | 侧边栏激活项、导航激活点；应用方向 primary→primary2 |
+| 辅助色 accent 渐变端点 | `#00B478` / `#00E676` | `#00E676` / `#00C4FF` | 快速收集框、复选框选中、主按钮；应用方向 accent2→accent |
+| AI 色 ai 渐变端点 | `#7C3DFF` / `#D400FF` | `#B388FF` / `#FF66E5` | AI 徽标、AI 卡片；应用方向 ai2→ai |
+| 文字色 text | `#141B33` | `#EEF1FF` | 主文字 |
+| 次要文字 muted | `#5A6285` | `#8F97C0` | 次要文字、未激活图标 |
+| 卡片底色 card | `rgba(255,255,255,.60)` | `rgba(28,34,64,.55)` | 容器 / 卡片半透明底（配合毛玻璃） |
+| 卡片实底 card-solid | `rgba(255,255,255,.92)` | `rgba(30,38,72,.9)` | 任务卡片 / 列表行实底 |
+| 边框高光 stroke | `rgba(255,255,255,.9)` | `rgba(255,255,255,.22)` | 卡片描边、分隔线（浅色下呈高光感） |
+| 导航条底 nav | `rgba(255,255,255,.45)` | `rgba(16,22,46,.5)` | 手机底部导航 |
+| 侧边栏底 sidebar | `rgba(255,255,255,.40)` | `rgba(16,22,46,.45)` | 桌面侧边栏 |
+| 输入框底 field | `rgba(255,255,255,.55)` | `rgba(255,255,255,.08)` | 输入类控件底 |
+| 建议徽标底 chip / 字 chip-text | `rgba(0,180,120,.16)` / `#00775A` | `rgba(0,230,118,.2)` / `#6DF7B3` | 建议徽标（accent 浅底深字） |
+| 大投影 shadow | `0 18px 50px rgba(36,86,255,.28), 0 4px 12px rgba(20,27,51,.12)` | `0 20px 60px rgba(0,0,0,.6), 0 4px 16px rgba(0,0,0,.4)` | 容器、桌面壳、手机壳 |
+| 小投影 shadow-sm | `0 8px 22px rgba(36,86,255,.18)` | `0 10px 28px rgba(0,0,0,.45)` | 卡片、列表行 |
+| 底色渐变 bg1 / bg2 | `#DDE7FF` / `#FFE9D6` | `#0A0E22` / `#1C0F2E` | 光斑背景最底层 `linear-gradient(160deg)` |
+
+#### 7.4.3 组件样式规则
+
+**背景（结构两主题通用，底色两套）**
+
+- 底层：`linear-gradient(160deg, bg1, bg2)` 固定铺满（浅 `#DDE7FF→#FFE9D6`；深 `#0A0E22→#1C0F2E`）。
+- 叠加 4 个径向渐变彩色光斑（位置 / 尺寸按 preview 的比例参考，Flutter 端用视口相对坐标）：
+  - 红：`radial-gradient(520px 380px at 12% 8%, rgba(255,94,58,.55), transparent 70%)`
+  - 紫：`radial-gradient(600px 420px at 88% 12%, rgba(124,61,255,.5), transparent 70%)`
+  - 青：`radial-gradient(640px 480px at 50% 95%, rgba(0,196,255,.45), transparent 70%)`
+  - 黄：`radial-gradient(480px 360px at 82% 78%, rgba(255,214,0,.5), transparent 70%)`
+
+**毛玻璃（backdrop-filter）**
+
+- 容器（桌面壳 / 手机壳 / 区块容器）：`blur(28px) saturate(180%)`，底 `card`。
+- 手机底部导航：`blur(24px) saturate(200%)`，底 `nav`，顶边 `stroke` 分隔。
+- 桌面侧边栏：`blur(24px) saturate(180%)`，底 `sidebar`，右边 `stroke` 分隔。
+- 任务卡片 / 列表行：`blur(10px)`，底 `card-solid`，描边 `stroke`，阴影 `shadow-sm`；完成项整卡 `opacity .55`。
+- 页面主标题微光：`text-shadow: 0 2px 12px rgba(255,255,255,.4)`（preview 中浅深两套同值）。
+
+**渐变按钮与高亮**
+
+- **快速收集框**（手机收件箱顶部常驻）：`linear-gradient(135deg, accent2, accent)`（浅 `#00E676→#00B478`，深 `#00C4FF→#00E676`）+ 白色文字 + 光晕 `0 10px 26px rgba(0,180,120,.45)` + 高光描边 `1px rgba(255,255,255,.35)`，圆角 16px；语音按钮为框内白色半透明圆形（底 `rgba(255,255,255,.3)` + 内圈描边 `rgba(255,255,255,.4)`）。
+- **侧边栏激活项**（桌面）：`linear-gradient(135deg, primary, primary2)`（浅 `#2456FF→#00C2FF`，深 `#4D7DFF→#00D4FF`）+ 白色文字 + 发光 `0 8px 20px rgba(36,86,255,.5)`，圆角 10px。
+- **复选框**：18×18、圆角 6px；未选：`2px solid primary` + 微光 `0 0 10px rgba(36,86,255,.25)`；选中：`linear-gradient(135deg, accent2, accent)` + 白色勾号 + 光晕 `0 4px 12px rgba(0,180,120,.5)`。
+- **品牌字**（桌面侧边栏顶部「GTD」）：`linear-gradient(135deg, primary, accent)` 渐变文字（前景渐变实现）。
+- **导航激活点**（手机底部导航）：6×6 圆点，`linear-gradient(135deg, primary2, primary)` 底 + `0 0 8px primary` 发光。
+
+**AI 卡片（今日页执行建议）**
+
+- 底：`linear-gradient(135deg, rgba(124,61,255,.35), rgba(212,0,255,.25))`（ai 渐变半透明版，浅深两套同值）；文字白色，理由行 `rgba(255,255,255,.75)`。
+- 投影：`0 12px 32px rgba(124,61,255,.4)`（紫色光晕），描边 `1px rgba(255,255,255,.45)`，`blur(8px)`，圆角 16px。
+- 卡片内按钮：「开始」= accent 渐变 + 白字 + `0 6px 16px rgba(0,180,120,.5)`，圆角 10px；「换一个」= 底 `rgba(255,255,255,.25)` + 半透明白描边 + `blur(6px)`。
+
+**徽标（圆角 8px）**
+
+- **AI 徽标**（「AI 已解析」）：`linear-gradient(135deg, ai2, ai)`（浅 `#D400FF→#7C3DFF`，深 `#FF66E5→#B388FF`）+ 白字 + `0 3px 10px rgba(212,0,255,.35)`。
+- **建议徽标**（前缀「建议：」，如「建议：行动 · 截止 12-02」）：accent 浅底深字——浅色底 `rgba(0,180,120,.16)` / 字 `#00775A`；深色底 `rgba(0,230,118,.2)` / 字 `#6DF7B3`。
+- **待解析徽标**（「待 AI 解析」）：底 `rgba(139,147,181,.18)` + `muted` 字（浅深两套同值）。
+
+**圆角体系**：容器 18px / 卡片、收集框 16px / 列表行 12px / 按钮 10px / 徽标 8px，Flutter 端统一为 token。
+
+#### 7.4.4 Flutter 实现映射（Task 33 `lib/app/theme.dart` 方向）
+
+Task 33（`lib/app/theme.dart` 的 `buildAppTheme()`）**不以 `ColorScheme.fromSeed` 为唯一手段**：按本节 token 用显式色值构建浅 / 深两套 `ThemeData`。
+
+- **双主题构建**：token 常量集中定义（建议 `AppTokens.light` / `AppTokens.dark` 两个 const 集合）；`buildAppTheme(Brightness)` 用 token 手工构造 `ColorScheme`（primary / secondary 取渐变端点色，ai 色经 `ColorSchemeExtension` 挂扩展字段），`useMaterial3: true`；`app.dart` 中 `MaterialApp(theme: 浅色, darkTheme: 深色, themeMode: ThemeMode.system)`。
+- **毛玻璃**：`BackdropFilter` + `ImageFilter.blur` + 半透明色底。CSS `blur(N px)` ≈ Flutter `sigma = N/2`（28px→σ14、24px→σ12、16px→σ8、10px→σ5、8px→σ4）；`saturate(180%)` 用 `ColorFiltered`（`ColorFilter.matrix` 饱和度矩阵 1.8）包裹。
+- **渐变**：组件双色渐变用 `LinearGradient(begin: topLeft, end: bottomRight)`（对应 CSS `135deg`）；光斑背景用 `RadialGradient`（center / radius 按视口相对坐标）。
+- **彩色阴影**：`BoxShadow(color: 带透明度)`——透明度换算规则 `α → round(α×255)` 作色值前两位，如 `rgba(36,86,255,.28)` ≈ `Color(0x472456FF)`；多层阴影用 `List<BoxShadow>`。
+- **光斑背景**：`Stack` 叠加 4 个 `Container(decoration: BoxDecoration(gradient: RadialGradient(...)))` + 最底层 `LinearGradient(160deg, bg1, bg2)` 的 `DecoratedBox`；封装为 `lib/app/` 下的背景组件，供手机 / 桌面两套布局复用。
+- **组件主题挂接**：容器 / 导航 / 卡片 / 输入框统一走 `ThemeData` 组件主题（`CardTheme`、`NavigationBarTheme`、`NavigationRailTheme`、`InputDecorationTheme`、`AppBarTheme`），界面代码不散写色值。
+- **AI 元素样式先定义**：ai 渐变端点、AI 卡片阴影、徽标底等 token 在 M1 即进 `theme.dart`，M2 / M3 启用功能时直接引用，不做二次取色。
+
+#### 7.4.5 落地范围（M1 / M2）
+
+- **M1 即生效**：页面骨架、双主题配色 token、毛玻璃（导航条 / 侧边栏 / 容器 / 卡片）、渐变按钮与激活态、彩色阴影、圆角体系、光斑背景；`theme.dart` 输出浅 / 深两套 `ThemeData`，`app.dart` 挂 `themeMode: ThemeMode.system`。M1 界面不渲染 AI 元素（AI 徽标、AI 卡片），快速收集框不带语音按钮——与 §8.1「AI 模型配置为占位入口」一致。
+- **M2 启用**：AI 建议卡片、AI 徽标（「AI 已解析」「建议：行动 · 截止 12-02」）随 §8.2 启用，直接使用 M1 已定义的样式。
+- **M3 启用**：语音按钮（快速收集框内）按 §8.3 启用，样式沿用 §7.4.3 已定义的语音按钮样式。
+- AI / 语音元素相关样式（ai 渐变、AI 卡片阴影、语音按钮圆形样式）**于 M1 即定义进主题 token**，仅功能启用时间不同。
+
 ---
 
 ## 8. 里程碑划分与验收标准（方案 C 分层渐进）
