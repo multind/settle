@@ -1,0 +1,277 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gtd_app/core/enums.dart';
+import 'package:gtd_app/core/models/task_draft.dart';
+import 'package:gtd_app/data/providers.dart';
+import 'package:gtd_app/data/tables.dart';
+
+/// 项目/情境/标签选项流：由仓库暴露的 watchAll() 转为 StreamProvider
+/// （与 contexts_page/review_page 同一模式；providers.dart 仅提供仓库本身）。
+final _projectsProvider = StreamProvider<List<Project>>(
+  (ref) => ref.watch(projectRepositoryProvider).watchAll(),
+);
+final _contextsProvider = StreamProvider<List<Context>>(
+  (ref) => ref.watch(contextRepositoryProvider).watchAll(),
+);
+final _tagsProvider = StreamProvider<List<Tag>>(
+  (ref) => ref.watch(tagRepositoryProvider).watchAll(),
+);
+
+/// Task 全字段表单（理清向导与编辑对话框复用；验收④：截止日/计划/精力/优先级/
+/// 等待对象/项目/情境/标签）。
+class TaskFormFields extends ConsumerStatefulWidget {
+  const TaskFormFields({
+    super.key,
+    this.initial,
+    this.initialTagIds = const {},
+    this.allowStatusChange = true,
+  });
+
+  /// 编辑既有任务时的初始值；创建时传 null。
+  final TaskDraft? initial;
+  final Set<int> initialTagIds;
+
+  /// 编辑场景禁止改状态（避免误把已完成任务改回等待）。
+  final bool allowStatusChange;
+
+  @override
+  ConsumerState<TaskFormFields> createState() => TaskFormFieldsState();
+}
+
+class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _title;
+  late final TextEditingController _notes;
+  late final TextEditingController _waitingOn;
+  late TaskStatus _status;
+  DateTime? _dueDate;
+  DateTime? _scheduled;
+  EnergyLevel? _energy;
+  PriorityLevel? _priority;
+  int? _projectId;
+  int? _contextId;
+  final Set<int> _tagIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    final d = widget.initial;
+    _title = TextEditingController(text: d?.title ?? '');
+    _notes = TextEditingController(text: d?.notes ?? '');
+    _waitingOn = TextEditingController(text: d?.waitingOn ?? '');
+    _status = d?.status ?? TaskStatus.nextAction;
+    _dueDate = d?.dueDate;
+    _scheduled = d?.scheduled;
+    _energy = d?.energy;
+    _priority = d?.priority;
+    _projectId = d?.projectId;
+    _contextId = d?.contextId;
+    _tagIds.addAll(widget.initialTagIds);
+  }
+
+  @override
+  void didUpdateWidget(TaskFormFields oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!setEquals(oldWidget.initialTagIds, widget.initialTagIds)) {
+      _tagIds
+        ..clear()
+        ..addAll(widget.initialTagIds);
+    }
+  }
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _notes.dispose();
+    _waitingOn.dispose();
+    super.dispose();
+  }
+
+  /// 校验并返回草稿；校验失败返回 null。
+  TaskDraft? validate() {
+    if (!_formKey.currentState!.validate()) return null;
+    return TaskDraft(
+      title: _title.text.trim(),
+      notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+      status: _status,
+      waitingOn: _status == TaskStatus.waiting ? _waitingOn.text.trim() : null,
+      dueDate: _dueDate,
+      scheduled: _scheduled,
+      energy: _energy,
+      priority: _priority,
+      projectId: _projectId,
+      contextId: _contextId,
+      tagIds: Set.of(_tagIds),
+    );
+  }
+
+  Future<void> _pickDate(BuildContext context, {required bool due}) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: due ? (_dueDate ?? DateTime.now()) : (_scheduled ?? DateTime.now()),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+    );
+    if (picked != null) {
+      setState(() {
+        if (due) {
+          _dueDate = picked;
+        } else {
+          _scheduled = picked;
+        }
+      });
+    }
+  }
+
+  String _statusLabel(AppLocalizations l10n, TaskStatus s) => switch (s) {
+        TaskStatus.nextAction => l10n.statusNextAction,
+        TaskStatus.waiting => l10n.statusWaiting,
+        TaskStatus.someday => l10n.statusSomeday,
+        TaskStatus.done => l10n.statusDone,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final projects = ref.watch(_projectsProvider);
+    final contexts = ref.watch(_contextsProvider);
+    final tags = ref.watch(_tagsProvider);
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            key: const Key('task_title_field'),
+            controller: _title,
+            decoration: InputDecoration(labelText: l10n.taskTitle),
+            validator: (v) => (v == null || v.trim().isEmpty) ? l10n.taskTitle : null,
+          ),
+          if (widget.allowStatusChange)
+            DropdownButtonFormField<TaskStatus>(
+              key: const Key('task_status_field'),
+              initialValue: _status,
+              decoration: InputDecoration(labelText: l10n.taskStatus),
+              items: [
+                for (final s in TaskStatus.values)
+                  DropdownMenuItem<TaskStatus>(value: s, child: Text(_statusLabel(l10n, s))),
+              ],
+              onChanged: (v) => setState(() => _status = v ?? TaskStatus.nextAction),
+            ),
+          if (_status == TaskStatus.waiting)
+            TextFormField(
+              key: const Key('task_waiting_on_field'),
+              controller: _waitingOn,
+              decoration: InputDecoration(labelText: l10n.taskWaitingOn),
+              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.waitingOnRequired : null,
+            ),
+          TextFormField(
+            key: const Key('task_notes_field'),
+            controller: _notes,
+            decoration: InputDecoration(labelText: l10n.taskNotes),
+            maxLines: 2,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<EnergyLevel?>(
+                  key: const Key('task_energy_field'),
+                  initialValue: _energy,
+                  decoration: InputDecoration(labelText: l10n.taskEnergy),
+                  items: [
+                    const DropdownMenuItem<EnergyLevel?>(value: null, child: Text('-')),
+                    for (final e in EnergyLevel.values)
+                      DropdownMenuItem<EnergyLevel?>(value: e, child: Text(e.storage)),
+                  ],
+                  onChanged: (v) => setState(() => _energy = v),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<PriorityLevel?>(
+                  key: const Key('task_priority_field'),
+                  initialValue: _priority,
+                  decoration: InputDecoration(labelText: l10n.taskPriority),
+                  items: [
+                    const DropdownMenuItem<PriorityLevel?>(value: null, child: Text('-')),
+                    for (final p in PriorityLevel.values)
+                      DropdownMenuItem<PriorityLevel?>(value: p, child: Text(p.storage)),
+                  ],
+                  onChanged: (v) => setState(() => _priority = v),
+                ),
+              ),
+            ],
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.taskDueDate),
+            trailing: Text(_dueDate == null
+                ? '-'
+                : '${_dueDate!.year}-${_dueDate!.month}-${_dueDate!.day}'),
+            onTap: () => _pickDate(context, due: true),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.taskScheduled),
+            trailing: Text(_scheduled == null
+                ? '-'
+                : '${_scheduled!.year}-${_scheduled!.month}-${_scheduled!.day}'),
+            onTap: () => _pickDate(context, due: false),
+          ),
+          projects.when(
+            data: (list) => DropdownButtonFormField<int?>(
+              key: const Key('task_project_field'),
+              initialValue: _projectId,
+              decoration: InputDecoration(labelText: l10n.taskProject),
+              items: [
+                const DropdownMenuItem<int?>(value: null, child: Text('—')),
+                for (final p in list) DropdownMenuItem<int?>(value: p.id, child: Text(p.name)),
+              ],
+              onChanged: (v) => setState(() => _projectId = v),
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+          contexts.when(
+            data: (list) => DropdownButtonFormField<int?>(
+              key: const Key('task_context_field'),
+              initialValue: _contextId,
+              decoration: InputDecoration(labelText: l10n.taskContext),
+              items: [
+                const DropdownMenuItem<int?>(value: null, child: Text('—')),
+                for (final c in list) DropdownMenuItem<int?>(value: c.id, child: Text(c.name)),
+              ],
+              onChanged: (v) => setState(() => _contextId = v),
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+          tags.when(
+            data: (list) => Wrap(
+              spacing: 8,
+              children: [
+                for (final t in list)
+                  FilterChip(
+                    key: Key('tag_chip_${t.id}'),
+                    label: Text(t.name),
+                    selected: _tagIds.contains(t.id),
+                    onSelected: (sel) => setState(() {
+                      if (sel) {
+                        _tagIds.add(t.id);
+                      } else {
+                        _tagIds.remove(t.id);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
