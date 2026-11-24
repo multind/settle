@@ -377,7 +377,7 @@ Expected: 提交成功。
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -412,7 +412,7 @@ void main() {
 - [ ] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/l10n_smoke_test.dart`
-Expected: FAIL，编译错误 `URI 不存在 package:flutter_gen/gen_l10n/app_localizations.dart`（生成的类还不存在）。
+Expected: FAIL，编译错误 `URI 不存在 package:gtd_app/i18n/l10n/app_localizations.dart`（生成的类还不存在）。
 
 - [ ] **Step 3: 创建 l10n.yaml**
 
@@ -593,7 +593,7 @@ output-localizations-file: app_localizations.dart
 - [ ] **Step 6: 运行测试确认通过**
 
 Run: `flutter test test/widget/l10n_smoke_test.dart`
-Expected: PASS（`flutter test` 会自动触发 gen-l10n，生成 `package:flutter_gen/gen_l10n/app_localizations.dart`）。
+Expected: PASS（`flutter test` 会自动触发 gen-l10n，生成 `package:gtd_app/i18n/l10n/app_localizations.dart`）。
 
 - [ ] **Step 7: Commit**
 
@@ -2764,7 +2764,7 @@ final backupFileGatewayProvider = Provider<BackupFileGateway>(
 ```dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
@@ -2927,7 +2927,7 @@ Expected: FAIL，编译错误（`quick_collect_bar.dart`、`collect_dialog.dart`
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -2998,7 +2998,7 @@ class _QuickCollectBarState extends ConsumerState<QuickCollectBar> {
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -3151,7 +3151,7 @@ Expected: FAIL，编译错误（`inbox_page.dart` 不存在）。
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -3406,7 +3406,7 @@ Expected: FAIL，编译错误（`task_form_fields.dart` 不存在）。
 ```dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/core/models/task_draft.dart';
@@ -3789,7 +3789,7 @@ Expected: FAIL，编译错误（`task_edit_dialog.dart` 不存在）。
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/core/models/task_draft.dart';
@@ -4042,7 +4042,7 @@ Expected: FAIL，编译错误（`clarify_dialog.dart` 不存在）。
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/models/clarify_decision.dart';
 import 'package:gtd_app/core/models/task_draft.dart';
@@ -4254,7 +4254,7 @@ Expected: FAIL，编译错误（`today_page.dart` 不存在）。
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -4435,7 +4435,7 @@ Expected: FAIL，编译错误（`projects_page.dart`、`project_dialog.dart` 不
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
@@ -4523,7 +4523,7 @@ class _ProjectDialogState extends ConsumerState<ProjectDialog> {
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
@@ -4739,7 +4739,7 @@ Expected: FAIL，编译错误（`contexts_page.dart` 不存在）。
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
@@ -4958,7 +4958,7 @@ Expected: FAIL，编译错误（`waiting_page.dart`、`someday_page.dart` 不存
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -5019,7 +5019,7 @@ class _WaitingTile extends ConsumerWidget {
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -5147,7 +5147,7 @@ Expected: FAIL，编译错误（`review_page.dart` 不存在）。
 ```dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
@@ -5444,7 +5444,7 @@ final settingsControllerProvider =
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -5640,7 +5640,7 @@ Expected: FAIL，编译错误（`responsive_shell.dart` 不存在）。
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/features/contexts/contexts_page.dart';
 import 'package:gtd_app/features/inbox/collect_dialog.dart';
@@ -5881,7 +5881,7 @@ ThemeData buildAppTheme() {
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/app/responsive_shell.dart';
 import 'package:gtd_app/app/theme.dart';
