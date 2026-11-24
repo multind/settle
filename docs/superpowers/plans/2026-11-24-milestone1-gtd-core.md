@@ -125,12 +125,12 @@ tool/windows/sqlite3.dll                 # 测试用原生库（下载，gitigno
 **Files:**
 - Commit: `.gitignore`
 
-- [ ] **Step 1: 查看仓库状态**
+- [x] **Step 1: 查看仓库状态**
 
 Run: `git status --short`
 Expected: 输出包含 `?? .gitignore`（未跟踪）。
 
-- [ ] **Step 2: 提交 .gitignore**
+- [x] **Step 2: 提交 .gitignore**
 
 ```powershell
 git add .gitignore
@@ -143,19 +143,19 @@ Expected: 提交成功，`git log --oneline` 显示新提交。
 **Files:**
 - Modify: 系统 PATH（PowerShell 会话级即可；如需持久化见说明）
 
-- [ ] **Step 1: 检查 Flutter 是否已安装**
+- [x] **Step 1: 检查 Flutter 是否已安装**
 
 Run: `flutter --version`
 Expected: 若输出版本号（如 `Flutter 3.x.x`）→ 本任务已完成，跳到 Task 3。若报 `无法将“flutter”项识别为 cmdlet…CommandNotFoundException` → 继续 Step 2。
 
-- [ ] **Step 2: 克隆 Flutter stable 到 C:\flutter**
+- [x] **Step 2: 克隆 Flutter stable 到 C:\flutter**
 
 ```powershell
 git clone -b stable https://github.com/flutter/flutter.git C:\flutter
 ```
 Expected: 输出 `Receiving objects: 100%` 且 `C:\flutter\bin` 存在。
 
-- [ ] **Step 3: 将 flutter 加入当前会话 PATH 并触发首次下载**
+- [x] **Step 3: 将 flutter 加入当前会话 PATH 并触发首次下载**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -164,19 +164,19 @@ flutter --version
 ```
 Expected: `flutter --version` 输出 Dart SDK 版本与 Flutter 版本号（首次运行会自动下载 Dart SDK，等待完成即可）。
 
-- [ ] **Step 4: 验证**
+- [x] **Step 4: 验证**
 
 Run: `where.exe flutter`
 Expected: 输出 `C:\flutter\bin\flutter`。若希望所有新终端可用，追加系统 PATH：`[Environment]::SetEnvironmentVariable("Path", $env:PATH + ";C:\flutter\bin", "User")`（可选，不影响本计划后续任务——每个任务都在当前会话执行）。
 
-- [ ] **Step 5: Commit（无代码变更，本步跳过）** — 环境步骤不产生仓库变更，直接进入 Task 3。
+- [x] **Step 5: Commit（无代码变更，本步跳过）** — 环境步骤不产生仓库变更，直接进入 Task 3。
 
 ### Task 3: flutter doctor 检查并补齐 Windows 桌面与 Android 工具链
 
 **Files:**
 - None（纯环境）
 
-- [ ] **Step 1: 运行 flutter doctor**
+- [x] **Step 1: 运行 flutter doctor**
 
 Run: `flutter doctor`
 Expected: 逐项检查。重点关注：
@@ -187,21 +187,21 @@ Expected: 逐项检查。重点关注：
 
 若以上均打勾 → 本任务完成，进入 Task 4。缺失项按以下分支补齐。
 
-- [ ] **Step 2（若 Visual Studio 缺失）: 用 winget 安装 VS 2022 Build Tools（含 C++ 桌面负载）**
+- [x] **Step 2（若 Visual Studio 缺失）: 用 winget 安装 VS 2022 Build Tools（含 C++ 桌面负载）**
 
 ```powershell
 winget install Microsoft.VisualStudio.2022.BuildTools --silent --accept-package-agreements --accept-source-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --includeRecommended"
 ```
 Expected: 安装完成（此步耗时较长，可能 5–20 分钟）。重新运行 `flutter doctor`，`[√] Visual Studio` 打勾。
 
-- [ ] **Step 3（若 Android toolchain 缺失）: 安装 Android Studio（含 SDK）**
+- [x] **Step 3（若 Android toolchain 缺失）: 安装 Android Studio（含 SDK）**
 
 ```powershell
 winget install Google.AndroidStudio --silent --accept-package-agreements --accept-source-agreements
 ```
 Expected: 安装完成。首次运行 Android Studio 会安装 SDK（也可手动点开一次让它初始化）。
 
-- [ ] **Step 4: 接受 Android 许可证并确认 SDK 路径**
+- [x] **Step 4: 接受 Android 许可证并确认 SDK 路径**
 
 ```powershell
 flutter doctor --android-licenses
@@ -212,7 +212,7 @@ flutter config --android-sdk "$env:LOCALAPPDATA\Android\Sdk"
 ```
 Expected: `flutter doctor` 中 `[√] Android toolchain` 打勾。
 
-- [ ] **Step 5: 最终确认**
+- [x] **Step 5: 最终确认**
 
 Run: `flutter doctor`
 Expected: Windows 桌面与 Android 两条工具链均为 `[√]`。若某平台工具链仍缺失，记录在验收走查清单（Task 35）中作为已知限制，不阻塞其余任务。
@@ -225,7 +225,7 @@ Expected: Windows 桌面与 Android 两条工具链均为 `[√]`。若某平台
 
 说明：`flutter test` 在宿主机 VM 运行，Drift 的 `NativeDatabase.memory()` 需要宿主可加载的 sqlite3.dll；`sqlite3_flutter_libs` 只在 App 运行时生效，对测试无效。故下载官方 dll 并由 `test/test_utils.dart` 显式加载（Task 10 使用）。
 
-- [ ] **Step 1: 修改 .gitignore 忽略该 dll**
+- [x] **Step 1: 修改 .gitignore 忽略该 dll**
 
 ```powershell
 Add-Content -Path .gitignore -Value "`n# 测试用原生库（下载产物）`ntool/windows/"
@@ -238,7 +238,7 @@ Expected: `.gitignore` 末尾新增两行。若上面单行命令因引号问题
 tool/windows/
 ```
 
-- [ ] **Step 2: 下载官方 sqlite3.dll（Windows x64，版本 3.46.1，URL 历史保留可稳定获取）**
+- [x] **Step 2: 下载官方 sqlite3.dll（Windows x64，版本 3.46.1，URL 历史保留可稳定获取）**
 
 ```powershell
 New-Item -ItemType Directory -Force -Path tool\windows | Out-Null
@@ -249,12 +249,12 @@ Remove-Item "$env:TEMP\sqlite-dll.zip", "$env:TEMP\sqlite-dll" -Recurse -Force
 ```
 Expected: `tool\windows\sqlite3.dll` 存在，大小约 1.9 MB。若下载失败（URL 404），到 https://www.sqlite.org/download.html 取当前 Windows x64 dll zip，调整上述 URL 后重跑。
 
-- [ ] **Step 3: 验证 dll 可加载**
+- [x] **Step 3: 验证 dll 可加载**
 
 Run: `Get-Item tool\windows\sqlite3.dll | Select-Object Length`
 Expected: `Length` 输出为 `19xxxxx` 数量级（非 0）。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add .gitignore
@@ -267,36 +267,36 @@ Expected: 提交成功（dll 本身不提交）。
 **Files:**
 - Create: 全部脚手架（`pubspec.yaml`、`analysis_options.yaml`、`android/`、`windows/`、`lib/main.dart` 等）
 
-- [ ] **Step 1: 生成脚手架（当前目录，项目名 gtd_app，仅 android+windows，空模板）**
+- [x] **Step 1: 生成脚手架（当前目录，项目名 gtd_app，仅 android+windows，空模板）**
 
 ```powershell
 flutter create . --project-name gtd_app --org dev.gtd --platforms android,windows --empty
 ```
 Expected: 输出 `All done!`，目录下出现 `android/`、`windows/`、`lib/main.dart`、`pubspec.yaml`。规格文档与计划文件不会被覆盖。
 
-- [ ] **Step 2: 删除可能生成的示例测试（若存在）**
+- [x] **Step 2: 删除可能生成的示例测试（若存在）**
 
 ```powershell
 if (Test-Path test\widget_test.dart) { Remove-Item test\widget_test.dart }
 ```
 Expected: 无输出（或已删除）。
 
-- [ ] **Step 3: 拉取依赖**
+- [x] **Step 3: 拉取依赖**
 
 Run: `flutter pub get`
 Expected: 输出 `Got dependencies!`（无报错）。
 
-- [ ] **Step 4: 首次 Windows 桌面构建验证**
+- [x] **Step 4: 首次 Windows 桌面构建验证**
 
 Run: `flutter build windows --debug`
 Expected: 输出 `Built build\windows\x64\runner\Debug\gtd_app.exe`。若报缺少 Visual Studio 工具链，回到 Task 3 Step 2。
 
-- [ ] **Step 5: 首次 Android 构建验证**
+- [x] **Step 5: 首次 Android 构建验证**
 
 Run: `flutter build apk --debug`
 Expected: 输出 `Built build\app\outputs\flutter-apk\app-debug.apk`。若 Gradle 下载慢属正常，等待完成即可。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add -A
@@ -313,7 +313,7 @@ Expected: 提交成功，`flutter analyze` 无 error（空模板下应为零告�
 **Files:**
 - Modify: `pubspec.yaml`（dependencies / dev_dependencies 段）
 
-- [ ] **Step 1: 覆写 pubspec.yaml 的 dependencies 与 dev_dependencies 段**
+- [x] **Step 1: 覆写 pubspec.yaml 的 dependencies 与 dev_dependencies 段**
 
 把 `pubspec.yaml` 中 `dependencies:` 到文件尾（`flutter:` 段之前）整段替换为：
 
@@ -345,17 +345,17 @@ flutter:
 
 （保留 `name: gtd_app`、`description:`、`publish_to: 'none'`、`version:`、`environment:` 段不动。`generate: true` 启用 gen-l10n 自动生成。）
 
-- [ ] **Step 2: 拉取依赖**
+- [x] **Step 2: 拉取依赖**
 
 Run: `flutter pub get`
 Expected: 输出 `Got dependencies!`，无 version solving 冲突。
 
-- [ ] **Step 3: 验证 secure_storage 依赖可解析（M1 仅接入，不写代码）**
+- [x] **Step 3: 验证 secure_storage 依赖可解析（M1 仅接入，不写代码）**
 
 Run: `flutter pub deps | Select-String "flutter_secure_storage"`
 Expected: 输出含 `flutter_secure_storage` 行（版本号）。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add pubspec.yaml pubspec.lock
@@ -371,7 +371,7 @@ Expected: 提交成功。
 - Create: `lib/i18n/l10n/app_zh.arb`
 - Test: `test/widget/l10n_smoke_test.dart`
 
-- [ ] **Step 1: 写失败测试（引用尚未生成的 AppLocalizations）**
+- [x] **Step 1: 写失败测试（引用尚未生成的 AppLocalizations）**
 
 `test/widget/l10n_smoke_test.dart`：
 
@@ -409,12 +409,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/l10n_smoke_test.dart`
 Expected: FAIL，编译错误 `URI 不存在 package:gtd_app/i18n/l10n/app_localizations.dart`（生成的类还不存在）。
 
-- [ ] **Step 3: 创建 l10n.yaml**
+- [x] **Step 3: 创建 l10n.yaml**
 
 `l10n.yaml`：
 
@@ -424,7 +424,7 @@ template-arb-file: app_en.arb
 output-localizations-file: app_localizations.dart
 ```
 
-- [ ] **Step 4: 创建英文 ARB**
+- [x] **Step 4: 创建英文 ARB**
 
 `lib/i18n/l10n/app_en.arb`：
 
@@ -507,7 +507,7 @@ output-localizations-file: app_localizations.dart
 }
 ```
 
-- [ ] **Step 5: 创建中文 ARB**
+- [x] **Step 5: 创建中文 ARB**
 
 `lib/i18n/l10n/app_zh.arb`：
 
@@ -590,12 +590,12 @@ output-localizations-file: app_localizations.dart
 }
 ```
 
-- [ ] **Step 6: 运行测试确认通过**
+- [x] **Step 6: 运行测试确认通过**
 
 Run: `flutter test test/widget/l10n_smoke_test.dart`
 Expected: PASS（`flutter test` 会自动触发 gen-l10n，生成 `package:gtd_app/i18n/l10n/app_localizations.dart`）。
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add l10n.yaml lib/i18n pubspec.yaml
@@ -611,7 +611,7 @@ Expected: 提交成功。
 - Create: `lib/core/models/clarify_decision.dart`
 - Test: `test/data/enums_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/enums_test.dart`：
 
@@ -671,12 +671,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/enums_test.dart`
 Expected: FAIL，编译错误（`enums.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/core/enums.dart**
+- [x] **Step 3: 创建 lib/core/enums.dart**
 
 ```dart
 import 'dart:ui' show Locale;
@@ -761,7 +761,7 @@ enum LocaleSelection {
 }
 ```
 
-- [ ] **Step 4: 创建 lib/core/models/task_draft.dart**
+- [x] **Step 4: 创建 lib/core/models/task_draft.dart**
 
 ```dart
 import 'package:gtd_app/core/enums.dart';
@@ -796,7 +796,7 @@ class TaskDraft {
 }
 ```
 
-- [ ] **Step 5: 创建 lib/core/models/clarify_decision.dart**
+- [x] **Step 5: 创建 lib/core/models/clarify_decision.dart**
 
 ```dart
 import 'package:gtd_app/core/models/task_draft.dart';
@@ -818,12 +818,12 @@ class ClarifyToProject extends ClarifyDecision {
 class ClarifyDelete extends ClarifyDecision {}
 ```
 
-- [ ] **Step 6: 运行测试确认通过**
+- [x] **Step 6: 运行测试确认通过**
 
 Run: `flutter test test/data/enums_test.dart`
 Expected: PASS（4 组枚举 + 1 组 LocaleSelection 全绿）。
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add lib/core test/data/enums_test.dart
@@ -840,7 +840,7 @@ Expected: 提交成功。
 - Test: `test/test_utils.dart`
 - Test: `test/data/database_test.dart`
 
-- [ ] **Step 1: 写失败测试（表与库尚未生成）**
+- [x] **Step 1: 写失败测试（表与库尚未生成）**
 
 `test/data/database_test.dart`：
 
@@ -897,12 +897,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/database_test.dart`
 Expected: FAIL，编译错误（`test_utils.dart`、`tables.dart` 不存在）。
 
-- [ ] **Step 3: 创建 test/test_utils.dart（Windows 宿主加载 sqlite3.dll + 内存库）**
+- [x] **Step 3: 创建 test/test_utils.dart（Windows 宿主加载 sqlite3.dll + 内存库）**
 
 ```dart
 import 'dart:ffi';
@@ -930,7 +930,7 @@ AppDatabase createTestDatabase() {
 }
 ```
 
-- [ ] **Step 4: 创建 lib/data/migrations/migration_steps.dart（迁移注册表，M1 为空）**
+- [x] **Step 4: 创建 lib/data/migrations/migration_steps.dart（迁移注册表，M1 为空）**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -950,7 +950,7 @@ Future<void> applyMigrations(Migrator m, int from, int to) async {
 }
 ```
 
-- [ ] **Step 5: 创建 lib/data/tables.dart（全部表 + AppDatabase）**
+- [x] **Step 5: 创建 lib/data/tables.dart（全部表 + AppDatabase）**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -1053,7 +1053,7 @@ class AppDatabase extends _$AppDatabase {
 }
 ```
 
-- [ ] **Step 6: 创建 lib/data/app_database.dart（文件连接工厂）**
+- [x] **Step 6: 创建 lib/data/app_database.dart（文件连接工厂）**
 
 ```dart
 import 'dart:io';
@@ -1070,17 +1070,17 @@ Future<AppDatabase> openAppDatabase() async {
 }
 ```
 
-- [ ] **Step 7: 生成 Drift 代码**
+- [x] **Step 7: 生成 Drift 代码**
 
 Run: `dart run build_runner build --delete-conflicting-outputs`
 Expected: 输出 `Succeeded after ...` 且生成 `lib/data/tables.g.dart`。
 
-- [ ] **Step 8: 运行测试确认通过**
+- [x] **Step 8: 运行测试确认通过**
 
 Run: `flutter test test/data/database_test.dart`
 Expected: PASS（5 个测试全绿）。
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```powershell
 git add lib/data test/test_utils.dart test/data/database_test.dart
@@ -1093,7 +1093,7 @@ Expected: 提交成功。
 **Files:**
 - Test: `test/data/migration_test.dart`
 
-- [ ] **Step 1: 写失败测试（验证建库→写数据→关闭→重开→数据仍在）**
+- [x] **Step 1: 写失败测试（验证建库→写数据→关闭→重开→数据仍在）**
 
 `test/data/migration_test.dart`：
 
@@ -1140,21 +1140,21 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/migration_test.dart`
 Expected: 编译失败或 FAIL（`test_utils.dart` 已存在时第一个测试因 sqlite3.dll 或 API 问题报错；若全部通过说明实现已满足，仍保留测试）。
 
-- [ ] **Step 3: 最小实现**
+- [x] **Step 3: 最小实现**
 
 说明：迁移机制（`AppDatabase.migration` 与 `applyMigrations`）已在 Task 9 就位；本任务无新增实现代码，仅验证。若 Step 2 显示测试通过，直接到 Step 4。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/migration_test.dart`
 Expected: PASS（2 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add test/data/migration_test.dart
@@ -1168,7 +1168,7 @@ Expected: 提交成功。
 - Create: `lib/data/repositories/inbox_repository.dart`
 - Test: `test/data/inbox_repository_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/inbox_repository_test.dart`：
 
@@ -1228,12 +1228,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/inbox_repository_test.dart`
 Expected: FAIL，编译错误（`inbox_repository.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/data/repositories/inbox_repository.dart**
+- [x] **Step 3: 实现 lib/data/repositories/inbox_repository.dart**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -1289,12 +1289,12 @@ class InboxRepository {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/inbox_repository_test.dart`
 Expected: PASS（5 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/repositories/inbox_repository.dart test/data/inbox_repository_test.dart
@@ -1308,7 +1308,7 @@ Expected: 提交成功。
 - Create: `lib/data/repositories/project_repository.dart`
 - Test: `test/data/project_repository_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/project_repository_test.dart`：
 
@@ -1377,12 +1377,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/project_repository_test.dart`
 Expected: FAIL，编译错误（`project_repository.dart` 与 `task_repository.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/data/repositories/project_repository.dart**
+- [x] **Step 3: 实现 lib/data/repositories/project_repository.dart**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -1452,7 +1452,7 @@ class ProjectRepository {
 }
 ```
 
-- [ ] **Step 4: 创建 lib/data/repositories/task_repository.dart（Task 12 仅需 create 供级联测试；完整实现见 Task 15）**
+- [x] **Step 4: 创建 lib/data/repositories/task_repository.dart（Task 12 仅需 create 供级联测试；完整实现见 Task 15）**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -1496,12 +1496,12 @@ class TaskRepository {
 }
 ```
 
-- [ ] **Step 5: 运行测试确认通过**
+- [x] **Step 5: 运行测试确认通过**
 
 Run: `flutter test test/data/project_repository_test.dart`
 Expected: PASS（6 个测试全绿）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add lib/data/repositories test/data/project_repository_test.dart
@@ -1515,7 +1515,7 @@ Expected: 提交成功。
 - Create: `lib/data/repositories/context_repository.dart`
 - Test: `test/data/context_repository_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/context_repository_test.dart`：
 
@@ -1572,12 +1572,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/context_repository_test.dart`
 Expected: FAIL，编译错误（`context_repository.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/data/repositories/context_repository.dart**
+- [x] **Step 3: 实现 lib/data/repositories/context_repository.dart**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -1628,12 +1628,12 @@ class ContextRepository {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/context_repository_test.dart`
 Expected: PASS（4 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/repositories/context_repository.dart test/data/context_repository_test.dart
@@ -1647,7 +1647,7 @@ Expected: 提交成功。
 - Create: `lib/data/repositories/tag_repository.dart`
 - Test: `test/data/tag_repository_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/tag_repository_test.dart`：
 
@@ -1704,12 +1704,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/tag_repository_test.dart`
 Expected: FAIL，编译错误（`tag_repository.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/data/repositories/tag_repository.dart**
+- [x] **Step 3: 实现 lib/data/repositories/tag_repository.dart**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -1749,12 +1749,12 @@ class TagRepository {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/tag_repository_test.dart`
 Expected: PASS（4 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/repositories/tag_repository.dart test/data/tag_repository_test.dart
@@ -1768,7 +1768,7 @@ Expected: 提交成功。
 - Modify: `lib/data/repositories/task_repository.dart`（替换为完整版）
 - Test: `test/data/task_repository_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/task_repository_test.dart`：
 
@@ -1909,12 +1909,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/task_repository_test.dart`
 Expected: FAIL，编译错误（`update`/`setStatus`/`watchTags` 等方法尚不存在）。
 
-- [ ] **Step 3: 将 task_repository.dart 整体替换为完整版**
+- [x] **Step 3: 将 task_repository.dart 整体替换为完整版**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -2054,12 +2054,12 @@ class TaskRepository {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/task_repository_test.dart`
 Expected: PASS（7 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/repositories/task_repository.dart test/data/task_repository_test.dart
@@ -2073,7 +2073,7 @@ Expected: 提交成功。
 - Create: `lib/data/repositories/review_repository.dart`
 - Test: `test/data/review_repository_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/review_repository_test.dart`：
 
@@ -2127,12 +2127,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/review_repository_test.dart`
 Expected: FAIL，编译错误（`review_repository.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/data/repositories/review_repository.dart**
+- [x] **Step 3: 实现 lib/data/repositories/review_repository.dart**
 
 ```dart
 import 'package:drift/drift.dart';
@@ -2178,12 +2178,12 @@ class ReviewRepository {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/review_repository_test.dart`
 Expected: PASS（4 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/repositories/review_repository.dart test/data/review_repository_test.dart
@@ -2197,7 +2197,7 @@ Expected: 提交成功。
 - Create: `lib/core/workflow/clarify_service.dart`
 - Test: `test/data/clarify_service_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/clarify_service_test.dart`：
 
@@ -2292,12 +2292,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/clarify_service_test.dart`
 Expected: FAIL，编译错误（`clarify_service.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/core/workflow/clarify_service.dart**
+- [x] **Step 3: 实现 lib/core/workflow/clarify_service.dart**
 
 ```dart
 import 'package:gtd_app/core/models/clarify_decision.dart';
@@ -2333,12 +2333,12 @@ class ClarifyService {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/clarify_service_test.dart`
 Expected: PASS（6 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/core/workflow test/data/clarify_service_test.dart
@@ -2352,7 +2352,7 @@ Expected: 提交成功。
 - Create: `lib/data/export_service.dart`
 - Test: `test/data/export_service_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/data/export_service_test.dart`：
 
@@ -2448,12 +2448,12 @@ int pIdFrom(Map<String, dynamic> map) {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/export_service_test.dart`
 Expected: FAIL，编译错误（`export_service.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/data/export_service.dart**
+- [x] **Step 3: 实现 lib/data/export_service.dart**
 
 ```dart
 import 'dart:convert';
@@ -2595,12 +2595,12 @@ class ExportService {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/export_service_test.dart`
 Expected: PASS（3 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/data/export_service.dart test/data/export_service_test.dart
