@@ -1,3 +1,4 @@
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,11 +51,16 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           body: isWide
               ? Row(
                   children: [
-                    NavigationRail(
-                      selectedIndex: _index,
-                      onDestinationSelected: (i) => setState(() => _index = i),
-                      labelType: NavigationRailLabelType.all,
-                      destinations: _railDestinations(l10n),
+                    _Glass(
+                      sigma: 12, // blur(24px) → σ12
+                      saturation: 1.8,
+                      child: NavigationRail(
+                        selectedIndex: _index,
+                        onDestinationSelected: (i) =>
+                            setState(() => _index = i),
+                        labelType: NavigationRailLabelType.all,
+                        destinations: _railDestinations(l10n),
+                      ),
                     ),
                     const VerticalDivider(width: 1),
                     Expanded(child: _pages[_index]),
@@ -63,11 +69,15 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
               : _pages[_index],
           bottomNavigationBar: isWide
               ? null
-              : NavigationBar(
-                  selectedIndex: _narrowIndices.indexOf(_index),
-                  onDestinationSelected: (i) =>
-                      setState(() => _index = _narrowIndices[i]),
-                  destinations: _barDestinations(l10n),
+              : _Glass(
+                  sigma: 12, // blur(24px) → σ12
+                  saturation: 2.0, // 规格：手机底部导航 saturate(200%)
+                  child: NavigationBar(
+                    selectedIndex: _narrowIndices.indexOf(_index),
+                    onDestinationSelected: (i) =>
+                        setState(() => _index = _narrowIndices[i]),
+                    destinations: _barDestinations(l10n),
+                  ),
                 ),
           floatingActionButton: _index != 0
               ? FloatingActionButton(
@@ -147,4 +157,46 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           label: l10n.navSettings,
         ),
       ];
+}
+
+/// 毛玻璃容器（规格 §7.4.3）：`BackdropFilter`（CSS `blur(Npx)` ≈ `sigma=N/2`）+
+/// `ColorFiltered`（CSS `saturate(S)` 饱和度矩阵）。仅包裹导航条 / 侧边栏，
+/// 不拦截交互。
+class _Glass extends StatelessWidget {
+  const _Glass({
+    required this.sigma,
+    required this.saturation,
+    required this.child,
+  });
+
+  final double sigma;
+  final double saturation;
+  final Widget child;
+
+  static const ColorFilter _saturate180 = ColorFilter.matrix(<double>[
+    1.6296, -0.572, -0.0576, 0, 0, //
+    -0.1704, 1.228, -0.0576, 0, 0, //
+    -0.1704, -0.572, 1.7424, 0, 0, //
+    0, 0, 0, 1, 0,
+  ]);
+
+  static const ColorFilter _saturate200 = ColorFilter.matrix(<double>[
+    1.787, -0.715, -0.072, 0, 0, //
+    -0.213, 1.285, -0.072, 0, 0, //
+    -0.213, -0.715, 1.928, 0, 0, //
+    0, 0, 0, 1, 0,
+  ]);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+        child: ColorFiltered(
+          colorFilter: saturation >= 2.0 ? _saturate200 : _saturate180,
+          child: child,
+        ),
+      ),
+    );
+  }
 }
