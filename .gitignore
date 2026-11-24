@@ -1,0 +1,33 @@
+# GTD 项目 — 忽略文件
+
+# Superpowers 视觉伴游数据
+.superpowers/
+
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/FlutterGeneratedPluginSwiftPackage
+**/ios/Flutter/ephemeral/
+**/android/.gradle/
+**/android/local.properties
+**/android/app/.cxx/
+**/windows/flutter/ephemeral/
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
+
+# 系统
+Thumbs.db
+.DS_Store
+
+# 密钥与环境变量
+.env
+*.key
