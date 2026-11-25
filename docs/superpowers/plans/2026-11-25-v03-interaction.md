@@ -19,7 +19,7 @@
 - Modify: 今日/随时/即将/等待/将来也许/日志 六页（换用公共组件）
 - Modify: l10n（已选 N 项等文案）
 
-- [ ] **Step 1: 组件骨架**
+- [x] **Step 1: 组件骨架**
 
 `TaskListView`（ConsumerStatefulWidget）参数：`tasks`、`reorderEnabled`、
 `selectionEnabled`、`focusEnabled`、`onAction`（批量操作回调，Task 2 接）、
@@ -33,12 +33,12 @@
 
 互斥：重排模式不触发长按多选；多选模式禁用拖动。
 
-- [ ] **Step 2: 焦点行（桌面）**
+- [x] **Step 2: 焦点行（桌面）**
 
 `focusEnabled` 时维护 `_focusIndex`：行可获焦（`FocusNode`/`InkWell` focus 高亮），
 供快捷键 Enter/Delete 操作（Task 4 接线）。
 
-- [ ] **Step 3: 六视图接入**
+- [x] **Step 3: 六视图接入**
 
 - 今日/随时/等待/将来也许：`reorderEnabled`（今日/随时 ✅，等待/将来也许按 spec
   可选——**今日/随时开、等待/将来也许关**）、`selectionEnabled ✅`、`focusEnabled ✅`
@@ -50,12 +50,12 @@
 替换各页既有 `_TaskTile` 私有行（保留 Key 约定 `task_tile_$id`/`task_done_$id`，
 测试兼容）。
 
-- [ ] **Step 4: 测试**
+- [x] **Step 4: 测试**
 
 `task_list_view_test.dart`：普通渲染；长按进选择模式 + 点选切换；退出；重排
 `onReorder` 触发 `reorder()` 落库（断言 sortOrder 持久化）；重排/多选互斥。
 
-- [ ] **Step 5: analyze + 测试**
+- [x] **Step 5: analyze + 测试**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -65,7 +65,7 @@ flutter test test/widget/task_list_view_test.dart 2>&1 | Select-Object -Last 1
 
 Expected: 0 error；`All tests passed!`。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```powershell
 git add lib/features/task/task_list_view.dart lib/features lib/i18n test/widget/task_list_view_test.dart
