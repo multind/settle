@@ -34,6 +34,7 @@ class _Host extends ConsumerWidget {
     this.groupKey,
     this.buildDateHeader,
     this.actions = _defaultActions,
+    this.dragToDateEnabled = false,
   });
 
   final StreamProvider<List<Task>> provider;
@@ -43,6 +44,7 @@ class _Host extends ConsumerWidget {
   final Comparable Function(Task task)? groupKey;
   final Widget Function(BuildContext context, Comparable key)? buildDateHeader;
   final List<TaskListAction> actions;
+  final bool dragToDateEnabled;
 
   static const List<TaskListAction> _defaultActions = [
     TaskListAction.complete,
@@ -65,6 +67,7 @@ class _Host extends ConsumerWidget {
         groupKey: groupKey,
         buildDateHeader: buildDateHeader,
         actions: actions,
+        dragToDateEnabled: dragToDateEnabled,
       ),
     );
   }
@@ -211,6 +214,23 @@ void main() {
     await tester.pump();
     expect(find.byKey(const Key('task_selection_bar')), findsOneWidget);
     expect(find.byType(ReorderableListView), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('选择模式禁用拖到日期 Draggable：长按进选择后无 Draggable', (tester) async {
+    final env = await TestEnv.create();
+    await insertTask(env, 'Task A', 'next_action');
+    await insertTask(env, 'Task B', 'next_action');
+    await tester
+        .pumpWidget(env.wrap(_Host(_anytimeProvider, dragToDateEnabled: true)));
+    await tester.pump();
+    // 普通态：每行包 Draggable<int>（拖到日期源）。
+    expect(find.byType(Draggable<int>), findsNWidgets(2));
+    // 长按进选择（reorderEnabled 默认关 → 长按 = 多选）；选择模式优先：Draggable 禁用。
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    expect(find.byKey(const Key('task_selection_bar')), findsOneWidget);
+    expect(find.byType(Draggable<int>), findsNothing);
     await env.db.close();
   });
 

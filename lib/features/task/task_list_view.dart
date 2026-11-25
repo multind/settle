@@ -50,6 +50,10 @@ enum TaskSortMode { standard, reverseChronological }
 ///   （立即拖，超 slop 即接受）同场竞技——长按先到 = 组内重排，快拖先到 =
 ///   拖到日期；重排拖拽走 SliverReorderableList 的 `_DragInfo`（非 Draggable
 ///   的 `_DragAvatar`），不会触发日期头 DragTarget；
+///   **显式产品决策（spec §4 已批准「快拖=拖到日期」，桌面为主目标平台）**：
+///   触屏上从任务行起手的纵向拖动 = 拖到日期，行上列表滚动让位（仅由日期头/
+///   两侧 padding/滚轮/触屏板手势承担）；如需恢复行上滚动，改用 delay 启动
+///   Draggable（LongPressDraggable）并重审「快拖=拖日期」语义；
 /// - 多选模式（[selectionMode]）优先：Draggable 与重排监听一并禁用。
 class TaskListView extends ConsumerStatefulWidget {
   const TaskListView({
@@ -443,20 +447,29 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     );
   }
 
-  /// 拖到日期（Task 3）的拖拽 feedback：行卡片副本（GlassContainer + 标准行），
-  /// 不挂 Focus/KeyedSubtree（feedback 浮在 Overlay 上，忽略指针事件）。
+  /// 行水平内缩 2×12px（与 [_buildRow] 的 Padding(horizontal: 12) 同口径）：
+  /// feedback 悬浮宽度 = 屏宽 - 内缩，与列表行等宽。
+  static const double _rowHorizontalInset = 24;
+
+  /// 拖到日期（Task 3）的拖拽 feedback：行卡片副本（GlassContainer + **纯视觉**
+  /// tile，无任何回调/按钮）。不挂 Focus/KeyedSubtree（feedback 浮在 Overlay 上，
+  /// 且 Draggable 已设 ignoringFeedbackPointer，杜绝未来改 false 时误触完成钮）。
   Widget _buildRowFeedback(int index) {
     final t = _items[index];
-    final l10n = AppLocalizations.of(context)!;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
-    final tile = widget.rowVariant == TaskRowVariant.logbook
-        ? _buildLogbookTile(t, l10n, tokens, false)
-        : _buildStandardTile(t, l10n, tokens, false, null);
+    final tile = ListTile(
+      title: Text(t.title),
+      subtitle: widget.subtitleBuilder?.call(context, t),
+      leading: GlassCheckbox(
+        value: widget.rowVariant == TaskRowVariant.logbook,
+        onChanged: null,
+      ),
+    );
     return Material(
       color: Colors.transparent,
       child: SizedBox(
-        width: MediaQuery.sizeOf(context).width - 24,
+        width: MediaQuery.sizeOf(context).width - _rowHorizontalInset,
         child: GlassContainer(
           color: tokens.cardSolid,
           blur: 5,

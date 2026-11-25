@@ -60,8 +60,10 @@ class UpcomingPage extends ConsumerWidget {
                 today: today,
                 tasks: rows,
                 onDrop: (taskId) {
-                  // 落点日期头只渲染未来日（watchUpcoming > 今日末），目标恒 > today；
-                  // 若未来渲染出「≤ 今日」头部（语义兜底），按 spec §4 落入今日。
+                  // invariant：落点日期头只渲染未来日（watchUpcoming 要求
+                  // scheduled/dueDate > 今日末），故 day > today 恒成立，下方
+                  // isBefore 分支**不可达**——语义兜底防后人误删：若未来渲染出
+                  // 「≤ 今日」头部，按 spec §4 落入今日（setScheduled(today)）。
                   final target = day.isBefore(today) ? today : day;
                   ref.read(taskRepositoryProvider).setScheduled(taskId, target);
                 },
@@ -112,11 +114,15 @@ class _DateHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    // 拖拽中逐次悬停查表 O(1)：快照行 id → Task。
+    final byId = <int, Task>{for (final t in tasks) t.id: t};
     return DragTarget<int>(
       key: Key('upcoming_date_drop_${day.year}_${day.month}_${day.day}'),
       onWillAcceptWithDetails: (details) {
-        final task = _taskById(details.data);
-        if (task == null) return false;
+        final task = byId[details.data];
+        // 拖拽中 stream 回填可能使快照暂时查不到被拖行：**放行**（setScheduled
+        // 按 id 幂等，不存在该 id 时为空更新），避免合法 drop 被陈旧快照拒绝。
+        if (task == null) return true;
         // 不合法目标：拖回任务当前所在组（同日期）不接受；
         // 目标日 ≤ 今日的头部本视图不渲染，若出现则由 onDrop 落今日兜底。
         return UpcomingPage._effectiveDay(task) != day;
@@ -153,13 +159,6 @@ class _DateHeader extends StatelessWidget {
         );
       },
     );
-  }
-
-  Task? _taskById(int taskId) {
-    for (final t in tasks) {
-      if (t.id == taskId) return t;
-    }
-    return null;
   }
 
   String _headerText(AppLocalizations l10n) {

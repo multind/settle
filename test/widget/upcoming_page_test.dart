@@ -300,4 +300,24 @@ void main() {
     expect(titles, ['任务B', '任务A']);
     await env.db.close();
   });
+
+  testWidgets('触屏行上纵向快拖 = 拖到日期（显式取舍，滚动让位）：未落日期头则不落库',
+      (tester) async {
+    final env = await TestEnv.create();
+    final day = futureDayMs(3);
+    final a = await insertTask(env, '任务A', 'next_action', scheduled: day);
+    final b = await insertTask(env, '任务B', 'next_action', scheduled: day);
+    await pumpPage(tester, env);
+    // 从任务行起手的快速纵向拖动（形似滚动）被 Draggable 判定为拖日期，列表滚动
+    // 让位（仅日期头/两侧 padding/滚轮/触屏板承担；取舍见 TaskListView 类注释）。
+    // 本用例固定现状：落点不在任何日期头上 → 不落库（scheduled 不变）。
+    await tester.drag(find.text('任务A'), const Offset(0, 120));
+    await tester.pumpAndSettle();
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b])))
+        .get();
+    expect(rows.map((r) => r.scheduled).toList(), [day, day]);
+    expect(find.text('任务A'), findsOneWidget);
+    await env.db.close();
+  });
 }
