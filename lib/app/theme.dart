@@ -302,8 +302,8 @@ ThemeData buildAppTheme(Brightness brightness) {
     colorScheme: scheme,
     // 纯色背景由主题 token 提供（Things 3 极简纯底，无光斑/渐变）。
     scaffoldBackgroundColor: tokens.bg1,
-    // Windows 中文 UI 族字形（"将"字等正常渲染）。
-    fontFamily: 'Microsoft YaHei UI',
+    // Windows 中文用思源黑体（Skia 渲染优于雅黑）。
+    fontFamily: 'Noto Sans SC',
     extensions: [extension],
 
     // —— 组件主题挂接（§7.4.4 末条：界面代码不散写色值）——
