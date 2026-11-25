@@ -11,6 +11,10 @@ import 'package:gtd_app/data/tables.dart';
 ///
 /// 时钟与 [TaskRepository] 一致：构造注入可选 `now`（测试注入固定时刻），
 /// 轮询边界用注入时钟；缺省 `DateTime.now`。
+///
+/// 生命周期幂等契约：`start()` 可重复调用（已启动/已 dispose 均 no-op）；
+/// `dispose()` 可重复调用（仅首次生效，二次调用 no-op，不会对已关闭的
+/// controller 重复 close）。dispose 后再 start 不会重建轮询。
 class ReminderService {
   ReminderService(
     this._repo, {
@@ -36,11 +40,15 @@ class ReminderService {
   final StreamController<List<Task>> _controller =
       StreamController<List<Task>>.broadcast();
 
+  /// 已释放标记：dispose 后 start/再次 dispose 均 no-op（防跨生命周期复用）。
+  bool _disposed = false;
+
   /// 新命中任务流（每轮有新命中时 emit 一次 List<Task>）。
   Stream<List<Task>> get reminders => _controller.stream;
 
-  /// 启动轮询（幂等：已启动则忽略）。
+  /// 启动轮询（幂等：已启动则忽略；已 dispose 则 no-op）。
   void start() {
+    if (_disposed) return;
     _timer ??= Timer.periodic(pollInterval, (_) => _poll());
   }
 
@@ -61,10 +69,14 @@ class ReminderService {
     _lastPollMs = now;
   }
 
-  /// 取消轮询并释放流（幂等）。
+  /// 取消轮询并释放流（幂等：重复调用 no-op）。
   void dispose() {
+    if (_disposed) return;
+    _disposed = true;
     _timer?.cancel();
     _timer = null;
-    _controller.close();
+    if (!_controller.isClosed) {
+      _controller.close();
+    }
   }
 }

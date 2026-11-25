@@ -190,7 +190,8 @@ void main() {
     expect(find.text('Reminder: 第二个提醒'), findsNothing);
     expect(find.byType(TaskEditDialog), findsOneWidget);
     expect(find.text('Edit task'), findsOneWidget);
-    // 关掉对话框，下一轮（60s）同任务已去重 → 不再弹。
+    // 关掉对话框，下一轮（60s）窗口已越过该 reminderAt → 不再弹
+    // （notifiedIds 去重仅作冗余保险）。
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 30));
