@@ -157,7 +157,9 @@ class TaskRepository {
   Future<void> complete(int id) async {
     await _db.transaction(() async {
       final task = await byId(id);
-      if (task == null) return;
+      // 幂等守卫：任务不存在或已是 done 时直接返回——不克隆、不重复写，
+      // 避免对已 done 的重复任务再次 complete 生成多余副本（双击/重试防护）。
+      if (task == null || task.status == TaskStatus.done.storage) return;
       // 原任务写 done + completedAt=now（复用 setStatus，含离开 waiting 清 waitingOn）。
       await setStatus(id, TaskStatus.done);
       final rule = RepeatRule.parse(task.repeatRule);
