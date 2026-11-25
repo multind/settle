@@ -20,30 +20,30 @@
 - Modify: `test/widget/task_form_fields_test.dart`
 - Modify: l10n（重复/清除/提醒等文案）
 
-- [ ] **Step 1: 时间选择器升级（due/scheduled）**
+- [x] **Step 1: 时间选择器升级（due/scheduled）**
 
 `_pickDate` 改为链式：`showDatePicker` → `showTimePicker`（默认 09:00；已有日期时
 保留原时间）。展示 `yyyy-MM-dd HH:mm`（`intl` DateFormat 或手工 pad）。
 行尾加「清除」`IconButton`（Key `clear_due`/`clear_scheduled`），置 null。
 
-- [ ] **Step 2: 重复下拉**
+- [x] **Step 2: 重复下拉**
 
 新增一行下拉「重复」（Key `task_repeat_field`）：无(null)/每日(daily)/每周(weekly)/
 每月(monthly)/每 N 天(every)。选「每 N 天」时出现 `TextFormField`（Key
 `task_repeat_interval`，1-365 正整数校验），值合成为 `every:N`。初始值来自
 `initial.repeatRule`（反解析回下拉态）。
 
-- [ ] **Step 3: 提醒选择**
+- [x] **Step 3: 提醒选择**
 
 新增一行「提醒」（Key `task_reminder_field`）：date+time 选择（复用 Step 1 的
 链式逻辑）+ 清除按钮（Key `clear_reminder`）。存 `reminderAt`。
 
-- [ ] **Step 4: validate 输出新字段**
+- [x] **Step 4: validate 输出新字段**
 
 `TaskDraft(repeatRule: ..., reminderAt: ...)`；`task_edit_dialog.dart` 的
 `_initialDraft()` 补 `repeatRule`/`reminderAt` 回填。
 
-- [ ] **Step 5: task_form_fields_test 更新**
+- [x] **Step 5: task_form_fields_test 更新**
 
 - date+time 选择流程（选日期后弹时间选择）
 - 清除按钮 → 字段清空
@@ -51,7 +51,7 @@
 - 提醒选择/清除
 - 既有断言（截止日/计划/精力/优先级等）保持
 
-- [ ] **Step 6: analyze + 测试**
+- [x] **Step 6: analyze + 测试**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -61,7 +61,7 @@ flutter test test/widget/task_form_fields_test.dart 2>&1 | Select-Object -Last 1
 
 Expected: 0 error；`All tests passed!`。
 
-- [ ] **Step 7: 提交**
+- [x] **Step 7: 提交**
 
 ```powershell
 git add lib/features/task test/widget/task_form_fields_test.dart lib/i18n
