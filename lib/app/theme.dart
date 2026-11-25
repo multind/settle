@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// 质感拟物双主题 token（规格 §7.4.2）。
+/// Things 3 化双主题 token（v0.2 视觉规范）。
 ///
-/// 数值唯一来源：`preview-ui-v3.html`（CSS 变量，浅色 `:root` / 深色 `body.dark`）。
-/// 透明度换算规则：CSS `rgba(r,g,b,α)` → Dart `Color(0xAA RRGGBB)`，`AA = round(α×255)`。
-/// 渐变应用方向：`primary→primary2`、`accent2→accent`、`ai2→ai`（`LinearGradient` begin
-/// topLeft end bottomRight，对应 CSS `135deg`）。
+/// 纯底无装饰：浅=纯白底/深=纯黑底，主色 Things 蓝（浅 #3D7CFB / 深 #4D8CFF），
+/// 阴影/渐变/玻璃元素已全部移除，靠 hairline 分隔与留白组织界面。
 abstract final class AppTokens {
   static const AppTokenSet light = AppTokenSet(
     // —— 主色（Things 3 蓝）——
