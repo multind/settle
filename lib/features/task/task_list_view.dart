@@ -22,8 +22,12 @@ enum TaskSortMode { standard, reverseChronological }
 /// 六视图统一任务列表组件（v0.3 交互层，收敛各页私有 `_TaskTile`）。
 ///
 /// 三态互斥：
-/// - **重排**（[reorderEnabled]）：`ReorderableListView`，`onReorder` 后
-///   `repository.reorder(orderedIds)` 落库 sortOrder；重排模式不触发长按多选。
+/// - **重排**（[reorderEnabled]）：`ReorderableListView` + `onReorderItem`
+///   （v3.41 起 `newIndex` 已折算为「移除后」列表插入位，不再手工 -1），
+///   落库 `repository.reorder(orderedIds)`；触屏 = 整行长按延迟拖拽，
+///   桌面 = 行内拖拽手柄；组头（[buildDateHeader] 渲染）无手柄、不可拖。
+///   分组存在（[groupKey]）时只允许组内重排：跨组拖动 no-op 弹回。
+///   重排模式不触发长按多选。
 /// - **多选**（[selectionEnabled]）：长按行进入；行前 `GlassCheckbox` 勾选
 ///   （点选切换）；顶栏「已选 N 项」+ 操作按钮 + 退出 X；多选模式禁用拖动。
 /// - **焦点**（[focusEnabled]）：行可获焦并高亮（桌面），供快捷键（Task 4）接线。
@@ -231,10 +235,20 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     final children = <Widget>[];
     final positions = <int>[];
     Comparable? lastGroup;
+    var childIndex = 0;
+    // 桌面平台（Windows/macOS/Linux）：行内拖拽手柄（ReorderableDragStartListener
+    // 按下即拖，仅包手柄图标，不劫持整行点击/完成钮）；触屏：整行长按延迟拖拽。
+    final isDesktop = switch (Theme.of(context).platform) {
+      TargetPlatform.windows ||
+      TargetPlatform.macOS ||
+      TargetPlatform.linux => true,
+      _ => false,
+    };
     for (var i = 0; i < _items.length; i++) {
       final t = _items[i];
       final group = widget.groupKey?.call(t);
       if (group != null && (lastGroup == null || group.compareTo(lastGroup) != 0)) {
+        // 组头：KeyedSubtree 占位，绝不挂拖拽监听（Task 3 会在上面放 DragTarget）。
         children.add(KeyedSubtree(
           key: ValueKey('task_header_$group'),
           child: widget.buildDateHeader?.call(context, group) ??
@@ -242,9 +256,22 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         ));
         positions.add(-1);
         lastGroup = group;
+        childIndex++;
       }
-      children.add(_buildRow(i));
+      final draggable = widget.reorderEnabled && !_selectionMode;
+      if (draggable && isDesktop) {
+        children.add(_buildRow(i, dragIndex: childIndex));
+      } else if (draggable) {
+        children.add(ReorderableDelayedDragStartListener(
+          key: Key('task_drag_${t.id}'),
+          index: childIndex,
+          child: _buildRow(i),
+        ));
+      } else {
+        children.add(_buildRow(i));
+      }
       positions.add(i);
+      childIndex++;
     }
     _childPositions = positions;
 
@@ -255,7 +282,9 @@ class TaskListViewState extends ConsumerState<TaskListView> {
           )
         : ReorderableListView(
             padding: const EdgeInsets.symmetric(vertical: 4),
-            onReorder: _onReorder,
+            // 关闭默认手柄：组头不能被包上手柄图标（桌面默认会给每个 child 加）。
+            buildDefaultDragHandles: false,
+            onReorderItem: _onReorder,
             children: children,
           );
     return Column(
@@ -266,29 +295,39 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     );
   }
 
-  /// 重排：ReorderableListView 的 onReorder 索引语义——oldIndex < newIndex 时
-  /// newIndex 需 -1（移除自身后）；组头无拖拽手柄，索引换算经 `_childPositions`。
+  /// 重排落点：`onReorderItem` 已把 `newIndex` 折算为「移除后」列表插入位
+  /// （reduced child-space；旧 `onReorder` 需手动 -1，v3.41 起弃用）。
+  /// 组头是 child 空间占位（`_childPositions` 记 -1），换算回 `_items` 索引。
+  /// 分组存在时只允许组内重排：目标插入位落在他组则忽略（no-op 弹回，
+  /// 不写库，避免 sortOrder 跨组污染与 stream 回填后的闪烁回跳）。
   void _onReorder(int oldIndex, int newIndex) {
-    if (newIndex > oldIndex) newIndex -= 1;
+    if (_items.isEmpty) return;
     final positions = _childPositions;
     if (oldIndex < 0 || oldIndex >= positions.length) return;
     final srcItem = positions[oldIndex];
     if (srcItem < 0) return; // 组头不可拖。
-    // 目标槽位：child 空间 newIndex 之前的非组头数量 = `_items` 目标索引。
     var destItem = 0;
     for (var i = 0; i < newIndex && i < positions.length; i++) {
       if (positions[i] != -1) destItem++;
     }
-    // newIndex 已按经典语义折算为「移除后」列表的插入位（reduced-list space），
-    // destItem 计数即 reduced-list 中的非组头数量，直接作为 _items 插入位。
+    if (widget.groupKey != null) {
+      final srcGroup = widget.groupKey!(_items[srcItem]);
+      // 目标插入位归属：插在最前 → 首个任务组；否则 → 左邻任务组
+      // （插入紧随左邻、归入左邻的连续组段；左邻永不为被拖行自身）。
+      final destGroup = destItem == 0
+          ? widget.groupKey!(_items[0])
+          : widget.groupKey!(
+              _items[destItem - 1 < srcItem ? destItem - 1 : destItem]);
+      if (srcGroup.compareTo(destGroup) != 0) return; // 跨组 → no-op。
+    }
     setState(() {
       final moved = _items.removeAt(srcItem);
-      _items.insert(destItem, moved);
+      _items.insert(destItem.clamp(0, _items.length), moved);
     });
     ref.read(taskRepositoryProvider).reorder(_items.map((t) => t.id).toList());
   }
 
-  Widget _buildRow(int index) {
+  Widget _buildRow(int index, {int? dragIndex}) {
     final t = _items[index];
     final focused = widget.focusEnabled && !_selectionMode && index == _focusIndex;
     final selected = _selected.contains(t.id);
@@ -298,7 +337,7 @@ class TaskListViewState extends ConsumerState<TaskListView> {
 
     final ListTile tile = widget.rowVariant == TaskRowVariant.logbook
         ? _buildLogbookTile(t, l10n, tokens, selected)
-        : _buildStandardTile(t, l10n, tokens, selected);
+        : _buildStandardTile(t, l10n, tokens, selected, dragIndex);
 
     Widget row = GlassContainer(
       color: focused ? tokens.selectedBg : tokens.cardSolid,
@@ -337,7 +376,8 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   }
 
   ListTile _buildStandardTile(
-      Task t, AppLocalizations l10n, AppTokenSet tokens, bool selected) {
+      Task t, AppLocalizations l10n, AppTokenSet tokens, bool selected,
+      int? dragIndex) {
     if (_selectionMode) {
       return ListTile(
         key: Key('task_tile_${t.id}'),
@@ -361,6 +401,17 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         onPressed: () => ref.read(taskRepositoryProvider).complete(t.id),
         icon: const GlassCheckbox(value: false, onChanged: null),
       ),
+      // 桌面重排行：行内拖拽手柄（仅任务行；组头无手柄）。
+      trailing: dragIndex == null
+          ? null
+          : ReorderableDragStartListener(
+              key: Key('task_handle_${t.id}'),
+              index: dragIndex,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Icon(Icons.drag_handle, size: 20, color: tokens.muted),
+              ),
+            ),
       onTap: () => showDialog<void>(
         context: context,
         builder: (_) => TaskEditDialog(task: t),

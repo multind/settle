@@ -17,22 +17,23 @@ final _doneProvider = StreamProvider<List<Task>>(
     (ref) => ref.watch(taskRepositoryProvider).watchDone());
 
 /// 测试宿主：watch 指定 provider 并把数据喂给 TaskListView（默认英文 locale）。
+/// 多选/焦点恒为 true（所有用例都依赖选择可用）；重排按用例开关。
 class _Host extends ConsumerWidget {
-  _Host(
+  const _Host(
     this.provider, {
     this.reorderEnabled = false,
-    this.selectionEnabled = true,
-    this.focusEnabled = true,
     this.sortMode = TaskSortMode.standard,
     this.rowVariant = TaskRowVariant.standard,
+    this.groupKey,
+    this.buildDateHeader,
   });
 
   final StreamProvider<List<Task>> provider;
   final bool reorderEnabled;
-  final bool selectionEnabled;
-  final bool focusEnabled;
   final TaskSortMode sortMode;
   final TaskRowVariant rowVariant;
+  final Comparable Function(Task task)? groupKey;
+  final Widget Function(BuildContext context, Comparable key)? buildDateHeader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,10 +42,12 @@ class _Host extends ConsumerWidget {
       body: TaskListView(
         tasks: tasks,
         reorderEnabled: reorderEnabled,
-        selectionEnabled: selectionEnabled,
-        focusEnabled: focusEnabled,
+        selectionEnabled: true,
+        focusEnabled: true,
         sortMode: sortMode,
         rowVariant: rowVariant,
+        groupKey: groupKey,
+        buildDateHeader: buildDateHeader,
         actions: const [
           TaskListAction.complete,
           TaskListAction.delete,
@@ -55,6 +58,11 @@ class _Host extends ConsumerWidget {
     );
   }
 }
+
+/// 分组测试用宿主参数：按标题首字母分两组（'A*' → 0，其余 → 1）。
+Comparable _groupOf(Task t) => t.title.startsWith('A') ? 0 : 1;
+
+Widget _groupHeader(BuildContext context, Comparable key) => Text('Group $key');
 
 void main() {
   Future<int> insertTask(TestEnv env, String title, String status,
@@ -215,6 +223,119 @@ void main() {
     )));
     await tester.pump();
     expect(tileTitles(tester), ['新任务', '旧任务']);
+    await env.db.close();
+  });
+
+  testWidgets('带组头同组重排：组内拖动落库正确（sortOrder 持久化）', (tester) async {
+    final env = await TestEnv.create();
+    final a1 = await insertTask(env, 'A1', 'next_action');
+    final a2 = await insertTask(env, 'A2', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(
+      _anytimeProvider,
+      reorderEnabled: true,
+      groupKey: _groupOf,
+      buildDateHeader: _groupHeader,
+    )));
+    await tester.pump();
+    expect(find.text('Group 0'), findsOneWidget);
+    // 拖 A1 到 A2 之下（同组，跨组头不存在，组内滑动）。
+    final gesture =
+        await tester.startGesture(tester.getCenter(find.text('A1')));
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await gesture.moveBy(const Offset(0, 150));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // 落库断言：sortOrder 0 = A2，1 = A1。
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a1, a2]))
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+        .get();
+    expect(rows.map((r) => r.id).toList(), [a2, a1]);
+    expect(tileTitles(tester), ['A2', 'A1']);
+    await env.db.close();
+  });
+
+  testWidgets('跨组拖动被拒绝：no-op 弹回，reorder() 不落库', (tester) async {
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'A1', 'next_action', sortOrder: 5);
+    final b = await insertTask(env, 'B1', 'next_action', sortOrder: 9);
+    await tester.pumpWidget(env.wrap(_Host(
+      _anytimeProvider,
+      reorderEnabled: true,
+      groupKey: _groupOf,
+      buildDateHeader: _groupHeader,
+    )));
+    await tester.pump();
+    expect(tileTitles(tester), ['A1', 'B1']);
+    // 拖 A1（组 0）到 B1（组 1）之下 → 跨组 → 忽略。
+    final gesture =
+        await tester.startGesture(tester.getCenter(find.text('A1')));
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await gesture.moveBy(const Offset(0, 300));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // sortOrder 保持原值（reorder() 未被调用）；视图顺序未变。
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b]))
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get();
+    expect({for (final r in rows) r.id: r.sortOrder}, {a: 5, b: 9});
+    expect(tileTitles(tester), ['A1', 'B1']);
+    await env.db.close();
+  });
+
+  testWidgets('组头无拖拽监听且拖动组头不产生变化', (tester) async {
+    final env = await TestEnv.create();
+    await insertTask(env, 'A1', 'next_action');
+    await insertTask(env, 'B1', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(
+      _anytimeProvider,
+      reorderEnabled: true,
+      groupKey: _groupOf,
+      buildDateHeader: _groupHeader,
+    )));
+    await tester.pump();
+    // 组头不被任何拖拽监听包裹（Delayed 是 DragStart 的子类，byType 一并命中；
+    // 行会被包，组头不会）。
+    expect(
+      find.ancestor(
+        of: find.byKey(const ValueKey('task_header_0')),
+        matching: find.byType(ReorderableDragStartListener),
+      ),
+      findsNothing,
+    );
+    // 拖动组头：无监听 → 无重排、无落库。
+    final before = await (env.db.select(env.db.tasks)
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get();
+    final gesture =
+        await tester.startGesture(tester.getCenter(find.text('Group 0')));
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await gesture.moveBy(const Offset(0, 200));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    final after = await (env.db.select(env.db.tasks)
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get();
+    expect(after.map((r) => r.title).toList(), before.map((r) => r.title).toList());
+    expect(tileTitles(tester), ['A1', 'B1']);
+    await env.db.close();
+  });
+
+  testWidgets('onAction 未接线：选择栏动作按钮置灰禁用', (tester) async {
+    final env = await TestEnv.create();
+    await insertTask(env, 'Task A', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    final completeBtn = tester.widget<IconButton>(
+      find.byKey(const Key('task_selection_action_complete')),
+    );
+    expect(completeBtn.onPressed, isNull);
     await env.db.close();
   });
 }

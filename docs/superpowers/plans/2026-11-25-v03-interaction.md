@@ -72,6 +72,11 @@ git add lib/features/task/task_list_view.dart lib/features lib/i18n test/widget/
 git commit -m "feat(ui): TaskListView 公共组件（重排/多选/焦点）接入六视图"
 ```
 
+> **自审登记（产品决策）**：排序收敛为「优先级 → sortOrder → id 升序（终局 tiebreak）」
+> 改变了今日视图既有展示顺序（原 views spec 为「优先级 → 生效日期」）。跨优先级
+> 排序由统一比较器决定，重排仅持久化 sortOrder、在同一优先级段内生效。此决策已
+> 由 spec 合规审查确认，后续如需恢复「生效日期」次级排序请在 views spec 内修订。
+
 ---
 
 ### Task 2: 批量操作动作
