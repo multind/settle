@@ -8,8 +8,8 @@ import 'package:gtd_app/data/providers.dart';
 
 /// 全局快速收集对话框（shell FAB 复用，任意界面 1 步发起收集，规格 §7.3）。
 ///
-/// 视觉：`Dialog` 透明底 + `GlassContainer`（blur σ12 / saturate 1.8 / stroke 描边 /
-/// 彩色阴影，圆角 18），提交按钮为 `GradientButton`（accent2→accent 渐变 + 光晕）。
+/// 视觉（Things 3）：`GlassContainer` 为纯底描边容器（`cardSolid` 底 + `stroke`
+/// 描边，圆角 8），提交按钮为 `GradientButton` 实色主按钮（primary 底 + 白字）。
 class CollectDialog extends ConsumerStatefulWidget {
   const CollectDialog({super.key});
 

@@ -79,6 +79,7 @@ abstract final class AppTokens {
   static const double radiusRow = 8;
   static const double radiusButton = 6;
   static const double radiusBadge = 8;
+  static const double radiusField = 8;
 }
 
 /// 单套主题 token 集合：由 [AppTokens.light] / [AppTokens.dark] 两个 const 实例承载。

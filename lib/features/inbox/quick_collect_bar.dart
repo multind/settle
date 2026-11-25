@@ -7,8 +7,8 @@ import 'package:gtd_app/data/providers.dart';
 
 /// 收件箱顶部常驻快速收集框（规格 §7.1：只要求"写一句话"）。
 ///
-/// 视觉（preview `.quickbar`）：accent2→accent 渐变底 + 白色提示文字 +
-/// 白色半透明圆钮（M1 无语音按钮，圆钮即"+"提交）+ 绿色光晕 + 高光描边 + 圆角 16。
+/// 视觉（Things 3 输入框）：`field` 纯底填充 + `stroke` 细描边 + 圆角 8，
+/// 文字/hint 用 `text`/`muted`（不再白色），提交钮为实色 primary 圆形"+"按钮。
 class QuickCollectBar extends ConsumerStatefulWidget {
   const QuickCollectBar({super.key});
 
@@ -40,28 +40,15 @@ class _QuickCollectBarState extends ConsumerState<QuickCollectBar> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final ext = Theme.of(context).extension<ColorSchemeExtension>();
-    // accent 不在 extension 中，取 ColorScheme.secondary（app 主题下 = tokens.accent）。
-    final accent2 = ext?.accent2 ?? const Color(0xFF00B478);
-    final accent = Theme.of(context).colorScheme.secondary;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [accent2, accent],
-          ),
-          borderRadius: BorderRadius.circular(AppTokens.radiusCard),
-          border: Border.all(color: const Color(0x59FFFFFF)), // rgba(255,255,255,.35)
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x7300B478), // rgba(0,180,120,.45)
-              blurRadius: 26,
-              offset: Offset(0, 10),
-            ),
-          ],
+          color: tokens.field,
+          borderRadius: BorderRadius.circular(AppTokens.radiusField),
+          border: Border.all(color: tokens.stroke),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -71,17 +58,14 @@ class _QuickCollectBarState extends ConsumerState<QuickCollectBar> {
                 child: TextField(
                   key: const Key('quick_collect_field'),
                   controller: _controller,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                  style: TextStyle(
+                    color: tokens.text,
+                    fontWeight: FontWeight.w500,
                   ),
-                  cursorColor: Colors.white,
+                  cursorColor: tokens.primary,
                   decoration: InputDecoration(
                     hintText: l10n.quickCollectHint,
-                    hintStyle: const TextStyle(
-                      color: Color(0xB3FFFFFF), // 白色 70%
-                      fontWeight: FontWeight.w600,
-                    ),
+                    hintStyle: TextStyle(color: tokens.muted),
                     border: InputBorder.none,
                     isDense: true,
                   ),
@@ -89,19 +73,17 @@ class _QuickCollectBarState extends ConsumerState<QuickCollectBar> {
                 ),
               ),
               const SizedBox(width: 8),
-              // 白色半透明圆钮（preview `.mic`，M1 无语音按钮，圆钮即"+"提交）
               IconButton(
                 key: const Key('quick_collect_button'),
                 onPressed: _collect,
                 tooltip: l10n.collectAction,
                 icon: const Icon(Icons.add, color: Colors.white),
                 style: IconButton.styleFrom(
-                  backgroundColor: const Color(0x4DFFFFFF), // rgba(255,255,255,.3)
+                  backgroundColor: tokens.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(36, 36),
                   padding: EdgeInsets.zero,
                   shape: const CircleBorder(),
-                  side: const BorderSide(color: Color(0x66FFFFFF)), // inset 高光
                 ),
               ),
             ],
