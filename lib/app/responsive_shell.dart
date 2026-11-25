@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gtd_app/features/anytime/anytime_page.dart';
 import 'package:gtd_app/features/contexts/contexts_page.dart';
 import 'package:gtd_app/features/inbox/collect_dialog.dart';
 import 'package:gtd_app/features/inbox/inbox_page.dart';
+import 'package:gtd_app/features/logbook/logbook_page.dart';
 import 'package:gtd_app/features/projects/projects_page.dart';
 import 'package:gtd_app/features/review/review_page.dart';
 import 'package:gtd_app/features/settings/settings_page.dart';
 import 'package:gtd_app/features/someday/someday_page.dart';
 import 'package:gtd_app/features/today/today_page.dart';
+import 'package:gtd_app/features/upcoming/upcoming_page.dart';
 import 'package:gtd_app/features/waiting/waiting_page.dart';
 
-/// 响应式外壳（规格 §7.1）：LayoutBuilder 600px 断点。
-/// 宽屏：NavigationRail（8 项：收件箱/今日/项目/情境/等待/将来也许/回顾/设置）；
-/// 窄屏：底部 NavigationBar（5 项：收件箱/今日/项目/回顾/设置）。
+/// 响应式外壳（规格 §2）：LayoutBuilder 600px 断点。
+/// 宽屏：自定义可滚动分组侧边栏（11 项三组：时间/组织/系统，替换 NavigationRail）；
+/// 窄屏：底部 NavigationBar 5 项（收件箱/今日/即将/随时/更多）+「更多」抽屉。
 class ResponsiveShell extends ConsumerStatefulWidget {
   const ResponsiveShell({super.key});
 
@@ -27,19 +30,28 @@ class ResponsiveShell extends ConsumerStatefulWidget {
 class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   int _index = 0;
 
+  /// 底部栏当前高亮位（0..4）：仅直接点按的 4 项更新；
+  /// 经「更多」抽屉切页时保持原高亮（NavigationBar 不允许 selectedIndex < 0）。
+  int _narrowIndex = 0;
+
+  /// 全局视图索引表（规格 §2.1）：唯一事实源，
+  /// 侧边栏 / 底部 / 「更多」抽屉三处渲染共用此顺序。
   static const List<Widget> _pages = [
-    InboxPage(),
-    TodayPage(),
-    ProjectsPage(),
-    ContextsPage(),
-    WaitingPage(),
-    SomedayPage(),
-    ReviewPage(),
-    SettingsPage(),
+    InboxPage(), // 0 收件箱
+    TodayPage(), // 1 今日
+    UpcomingPage(), // 2 即将（占位，Task 4 填充）
+    AnytimePage(), // 3 随时（占位，Task 3 填充）
+    SomedayPage(), // 4 将来也许
+    ProjectsPage(), // 5 项目
+    ContextsPage(), // 6 情境
+    WaitingPage(), // 7 等待
+    LogbookPage(), // 8 日志（占位，Task 5 填充）
+    ReviewPage(), // 9 回顾
+    SettingsPage(), // 10 设置
   ];
 
-  // 窄屏 5 项对应的 _pages 下标：收件箱/今日/项目/回顾/设置
-  static const List<int> _narrowIndices = [0, 1, 2, 6, 7];
+  /// 窄屏底部 5 项对应 _pages 下标：收件箱/今日/即将/随时 + 「更多」（弹抽屉）。
+  static const List<int> _narrowIndices = [0, 1, 2, 3];
 
   @override
   Widget build(BuildContext context) {
@@ -53,24 +65,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           body: isWide
               ? Row(
                   children: [
-                    // 纯底侧边栏：sidebar 不透明底色 + 右侧 1px stroke 分隔
-                    // （替代 VerticalDivider，preview `.sidebar`）。
-                    Container(
-                      decoration: BoxDecoration(
-                        color: tokens.sidebar,
-                        border: Border(
-                          right: BorderSide(color: tokens.stroke, width: 1),
-                        ),
-                      ),
-                      child: NavigationRail(
-                        selectedIndex: _index,
-                        onDestinationSelected: (i) =>
-                            setState(() => _index = i),
-                        labelType: NavigationRailLabelType.all,
-                        leading: const _BrandMark(),
-                        destinations: _railDestinations(l10n),
-                      ),
-                    ),
+                    _buildSidebar(context, l10n, tokens),
                     Expanded(child: _pages[_index]),
                   ],
                 )
@@ -85,13 +80,13 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
                     ),
                   ),
                   child: NavigationBar(
-                    selectedIndex: _narrowIndices.indexOf(_index),
+                    selectedIndex: _narrowIndex,
                     onDestinationSelected: (i) =>
-                        setState(() => _index = _narrowIndices[i]),
+                        _onNarrowSelected(context, l10n, i),
                     destinations: _barDestinations(l10n),
                   ),
                 ),
-          floatingActionButton: _index != 0 && !const {2, 3, 6}.contains(_index)
+          floatingActionButton: !const {0, 5, 6, 9}.contains(_index)
               ? FloatingActionButton(
                   key: const Key('global_collect_fab'),
                   tooltip: l10n.collectAction,
@@ -107,39 +102,149 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     );
   }
 
-  List<NavigationRailDestination> _railDestinations(AppLocalizations l10n) => [
-        NavigationRailDestination(
-          icon: const Icon(Icons.inbox_outlined),
-          label: Text(l10n.navInbox),
+  /// 宽屏分组侧边栏（规格 §2.2）：纯底 + 右侧 1px hairline，可滚动（ListView）。
+  Widget _buildSidebar(
+      BuildContext context, AppLocalizations l10n, AppTokenSet tokens) {
+    return Container(
+      width: 232,
+      decoration: BoxDecoration(
+        color: tokens.sidebar,
+        border: Border(
+          right: BorderSide(color: tokens.stroke, width: 1),
         ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.today),
-          label: Text(l10n.navToday),
+      ),
+      child: ListView(
+        key: const Key('custom_sidebar'),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        children: [
+          const _BrandMark(),
+          _navItem(tokens, 0, Icons.inbox_outlined, l10n.navInbox),
+          _groupTitle(tokens, const Key('nav_group_time'), l10n.navGroupTime),
+          _navItem(tokens, 1, Icons.today, l10n.navToday),
+          _navItem(tokens, 2, Icons.event_outlined, l10n.navUpcoming),
+          _navItem(tokens, 3, Icons.all_inclusive_outlined, l10n.navAnytime),
+          _navItem(tokens, 4, Icons.nights_stay_outlined, l10n.navSomeday),
+          _groupTitle(
+              tokens, const Key('nav_group_organize'), l10n.navGroupOrganize),
+          _navItem(tokens, 5, Icons.folder_outlined, l10n.navProjects),
+          _navItem(tokens, 6, Icons.place_outlined, l10n.navContexts),
+          _navItem(tokens, 7, Icons.hourglass_empty, l10n.navWaiting),
+          _groupTitle(
+              tokens, const Key('nav_group_system'), l10n.navGroupSystem),
+          _navItem(tokens, 8, Icons.book_outlined, l10n.navLogbook),
+          _navItem(tokens, 9, Icons.history, l10n.navReview),
+          _navItem(tokens, 10, Icons.settings_outlined, l10n.navSettings),
+        ],
+      ),
+    );
+  }
+
+  /// 侧边栏单项（规格 §2.2）：InkWell 切换 `_index`；
+  /// 选中态复用 v0.2 语义（selectedBg 圆角底 + primary 图标/文字）。
+  Widget _navItem(AppTokenSet tokens, int index, IconData icon, String label) {
+    final selected = _index == index;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+      child: InkWell(
+        key: Key('nav_item_$index'),
+        onTap: () => setState(() => _index = index),
+        borderRadius: BorderRadius.circular(AppTokens.radiusButton),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? tokens.selectedBg : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppTokens.radiusButton),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: selected ? tokens.primary : tokens.muted,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  color: selected ? tokens.primary : tokens.muted,
+                ),
+              ),
+            ],
+          ),
         ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.folder_outlined),
-          label: Text(l10n.navProjects),
+      ),
+    );
+  }
+
+  /// 侧边栏组标题（规格 §2.2）：muted 12px 小字。
+  Widget _groupTitle(AppTokenSet tokens, Key key, String title) {
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.fromLTRB(16, 14, 12, 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: tokens.muted,
         ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.place_outlined),
-          label: Text(l10n.navContexts),
+      ),
+    );
+  }
+
+  /// 窄屏底部项选中（规格 §2.3）：前 4 项直接切页；最后「更多」弹抽屉。
+  void _onNarrowSelected(BuildContext context, AppLocalizations l10n, int i) {
+    if (i >= _narrowIndices.length) {
+      _showMoreSheet(context, l10n);
+    } else {
+      setState(() {
+        _narrowIndex = i;
+        _index = _narrowIndices[i];
+      });
+    }
+  }
+
+  /// 「更多」抽屉（规格 §2.3）：项目/情境/等待/日志/回顾/设置，点选切页并关 sheet。
+  void _showMoreSheet(BuildContext context, AppLocalizations l10n) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: tokens.cardSolid,
+      showDragHandle: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppTokens.radiusContainer)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (index, icon, label) in _moreItems(l10n))
+              ListTile(
+                key: Key('nav_more_item_$index'),
+                leading: Icon(icon, size: 20),
+                title: Text(label),
+                onTap: () {
+                  setState(() => _index = index);
+                  Navigator.pop(sheetContext);
+                },
+              ),
+          ],
         ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.hourglass_empty),
-          label: Text(l10n.navWaiting),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.nights_stay_outlined),
-          label: Text(l10n.navSomeday),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.history),
-          label: Text(l10n.navReview),
-        ),
-        NavigationRailDestination(
-          icon: const Icon(Icons.settings_outlined),
-          label: Text(l10n.navSettings),
-        ),
+      ),
+    );
+  }
+
+  List<(int, IconData, String)> _moreItems(AppLocalizations l10n) => [
+        (5, Icons.folder_outlined, l10n.navProjects),
+        (6, Icons.place_outlined, l10n.navContexts),
+        (7, Icons.hourglass_empty, l10n.navWaiting),
+        (8, Icons.book_outlined, l10n.navLogbook),
+        (9, Icons.history, l10n.navReview),
+        (10, Icons.settings_outlined, l10n.navSettings),
       ];
 
   List<NavigationDestination> _barDestinations(AppLocalizations l10n) => [
@@ -154,19 +259,19 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           label: l10n.navToday,
         ),
         NavigationDestination(
-          icon: const Icon(Icons.folder_outlined),
-          selectedIcon: const Icon(Icons.folder),
-          label: l10n.navProjects,
+          icon: const Icon(Icons.event_outlined),
+          selectedIcon: const Icon(Icons.event),
+          label: l10n.navUpcoming,
         ),
         NavigationDestination(
-          icon: const Icon(Icons.history_outlined),
-          selectedIcon: const Icon(Icons.history),
-          label: l10n.navReview,
+          icon: const Icon(Icons.all_inclusive_outlined),
+          selectedIcon: const Icon(Icons.all_inclusive),
+          label: l10n.navAnytime,
         ),
         NavigationDestination(
-          icon: const Icon(Icons.settings_outlined),
-          selectedIcon: const Icon(Icons.settings),
-          label: l10n.navSettings,
+          icon: const Icon(Icons.more_horiz),
+          selectedIcon: const Icon(Icons.more_horiz),
+          label: l10n.navMore,
         ),
       ];
 }

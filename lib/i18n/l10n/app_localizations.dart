@@ -140,6 +140,48 @@ abstract class AppLocalizations {
   /// **'Someday'**
   String get navSomeday;
 
+  /// No description provided for @navUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get navUpcoming;
+
+  /// No description provided for @navAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Anytime'**
+  String get navAnytime;
+
+  /// No description provided for @navLogbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Logbook'**
+  String get navLogbook;
+
+  /// No description provided for @navMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get navMore;
+
+  /// No description provided for @navGroupTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get navGroupTime;
+
+  /// No description provided for @navGroupOrganize.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize'**
+  String get navGroupOrganize;
+
+  /// No description provided for @navGroupSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get navGroupSystem;
+
   /// No description provided for @navReview.
   ///
   /// In en, this message translates to:

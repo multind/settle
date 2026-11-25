@@ -31,6 +31,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSomeday => 'Someday';
 
   @override
+  String get navUpcoming => 'Upcoming';
+
+  @override
+  String get navAnytime => 'Anytime';
+
+  @override
+  String get navLogbook => 'Logbook';
+
+  @override
+  String get navMore => 'More';
+
+  @override
+  String get navGroupTime => 'Time';
+
+  @override
+  String get navGroupOrganize => 'Organize';
+
+  @override
+  String get navGroupSystem => 'System';
+
+  @override
   String get navReview => 'Review';
 
   @override

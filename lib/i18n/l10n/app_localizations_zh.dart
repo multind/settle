@@ -31,6 +31,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navSomeday => '将来也许';
 
   @override
+  String get navUpcoming => '即将';
+
+  @override
+  String get navAnytime => '随时';
+
+  @override
+  String get navLogbook => '日志';
+
+  @override
+  String get navMore => '更多';
+
+  @override
+  String get navGroupTime => '时间';
+
+  @override
+  String get navGroupOrganize => '组织';
+
+  @override
+  String get navGroupSystem => '系统';
+
+  @override
   String get navReview => '回顾';
 
   @override

@@ -30,6 +30,9 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(_app(env));
     await tester.pumpAndSettle();
+    // v0.3 起「回顾」不在底部 5 项内，经「更多」抽屉进入
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
     await tester.pumpAndSettle();
     expect(find.text('Nothing here yet.'), findsOneWidget);
