@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,11 +16,15 @@ abstract class BackupFileGateway {
 class FilePickerBackupGateway implements BackupFileGateway {
   @override
   Future<String?> saveBackup(String json) async {
-    return FilePicker.platform.saveFile(
+    final bytes = Uint8List.fromList(utf8.encode(json));
+    final path = await FilePicker.platform.saveFile(
       dialogTitle: 'Export GTD backup',
       fileName: 'gtd_backup_${DateTime.now().millisecondsSinceEpoch}.json',
-      bytes: Uint8List.fromList(utf8.encode(json)),
+      bytes: bytes, // 保留：Android/iOS 平台由插件写入
     );
+    if (path == null) return null; // 用户取消
+    await File(path).writeAsBytes(bytes); // 桌面平台真正落盘
+    return path;
   }
 
   @override
