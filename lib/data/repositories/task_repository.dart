@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:gtd_app/core/enums.dart';
+import 'package:gtd_app/core/models/repeat_rule.dart';
 import 'package:gtd_app/core/models/task_draft.dart';
 import 'package:gtd_app/data/tables.dart';
 
@@ -73,8 +74,19 @@ class TaskRepository {
       (_db.select(_db.tasks)..where((t) => t.id.equals(id))).getSingleOrNull();
 
   Future<Task> create(TaskDraft draft) async {
-    final now = DateTime.now().millisecondsSinceEpoch;
     _assertWaitingOn(draft);
+    final id = await _insertTask(draft);
+    // 回填 sortOrder = id（与旧 id 序等价）；仅 create 保留该回填。
+    await (_db.update(_db.tasks)..where((t) => t.id.equals(id)))
+        .write(TasksCompanion(sortOrder: Value(id)));
+    return (await byId(id))!;
+  }
+
+  /// 插入 + 绑标签的内部助手（create 与 complete 的重复副本共用）。
+  /// 返回新任务 id；不负责 sortOrder 回填——create 单独回填 = id，
+  /// 重复副本在 complete 事务内设为 max+1。
+  Future<int> _insertTask(TaskDraft draft) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
     final id = await _db.into(_db.tasks).insert(TasksCompanion.insert(
       title: draft.title,
       notes: Value(draft.notes),
@@ -91,13 +103,10 @@ class TaskRepository {
       createdAt: now,
       updatedAt: now,
     ));
-    // 回填 sortOrder = id（与旧 id 序等价）。
-    await (_db.update(_db.tasks)..where((t) => t.id.equals(id)))
-        .write(TasksCompanion(sortOrder: Value(id)));
     for (final tagId in draft.tagIds) {
       await _db.into(_db.taskTags).insert(TaskTagsCompanion.insert(taskId: id, tagId: tagId));
     }
-    return (await byId(id))!;
+    return id;
   }
 
   Future<void> update(int id, TaskDraft draft) async {
@@ -139,7 +148,53 @@ class TaskRepository {
     ));
   }
 
-  Future<void> complete(int id) => setStatus(id, TaskStatus.done);
+  /// 完成：事务内原任务 → done + completedAt=now；若带重复规则（§4.4），
+  /// 同一事务内克隆新副本：title/notes/project/context/tags/energy/priority
+  /// 原值，status=nextAction，scheduled/dueDate/reminderAt 各按规则推进
+  /// （有则推，无则 null），repeatRule 保留，waitingOn=null，
+  /// sortOrder = MAX(sortOrder)+1（落到列表末尾）。
+  /// 无重复规则时行为与 setStatus(id, done) 完全一致。
+  Future<void> complete(int id) async {
+    await _db.transaction(() async {
+      final task = await byId(id);
+      if (task == null) return;
+      // 原任务写 done + completedAt=now（复用 setStatus，含离开 waiting 清 waitingOn）。
+      await setStatus(id, TaskStatus.done);
+      final rule = RepeatRule.parse(task.repeatRule);
+      if (rule == null) return;
+      // 事务内直接查 taskTags 取标签 id 列表。
+      final tagIds = (await (_db.select(_db.taskTags)..where((t) => t.taskId.equals(id))).get())
+          .map((r) => r.tagId)
+          .toSet();
+      final clone = TaskDraft(
+        title: task.title,
+        notes: task.notes,
+        status: TaskStatus.nextAction,
+        scheduled: task.scheduled == null
+            ? null
+            : rule.nextDate(DateTime.fromMillisecondsSinceEpoch(task.scheduled!)),
+        dueDate: task.dueDate == null
+            ? null
+            : rule.nextDate(DateTime.fromMillisecondsSinceEpoch(task.dueDate!)),
+        energy: EnergyLevel.fromStorageOrNull(task.energy),
+        priority: PriorityLevel.fromStorageOrNull(task.priority),
+        projectId: task.projectId,
+        contextId: task.contextId,
+        repeatRule: task.repeatRule,
+        reminderAt: task.reminderAt == null
+            ? null
+            : rule.nextDate(DateTime.fromMillisecondsSinceEpoch(task.reminderAt!)),
+        tagIds: tagIds,
+      );
+      final newId = await _insertTask(clone);
+      // 新副本 sortOrder = 当前最大 sortOrder + 1（事务内先查 max 再 UPDATE）。
+      final maxExpr = _db.tasks.sortOrder.max();
+      final maxRow = await (_db.selectOnly(_db.tasks)..addColumns([maxExpr])).getSingle();
+      final maxSortOrder = maxRow.read(maxExpr) ?? 0;
+      await (_db.update(_db.tasks)..where((t) => t.id.equals(newId)))
+          .write(TasksCompanion(sortOrder: Value(maxSortOrder + 1)));
+    });
+  }
 
   Future<void> reopen(int id) => setStatus(id, TaskStatus.nextAction);
 
