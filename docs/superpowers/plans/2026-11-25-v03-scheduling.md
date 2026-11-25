@@ -78,7 +78,7 @@ git commit -m "feat(schedule): 截止/开始时间粒度 + 重复规则 + 提醒
 - Create: `test/widget/reminder_service_test.dart`
 - Modify: l10n（提醒/打开/知道了文案）
 
-- [ ] **Step 1: 建服务**
+- [x] **Step 1: 建服务**
 
 `ReminderService`（纯 Dart，构造注入 `TaskRepository`）：
 - `Timer.periodic(30s)`；每轮查 `reminderAt != null && reminderAt <= now &&
@@ -88,19 +88,19 @@ git commit -m "feat(schedule): 截止/开始时间粒度 + 重复规则 + 提醒
 - 内存 `Set<int> notifiedIds` 去重（同会话同任务只提醒一次）
 - 暴露 `Stream<List<Task>> reminders` 或回调，供 UI 消费
 
-- [ ] **Step 2: shell 挂载**
+- [x] **Step 2: shell 挂载**
 
 `ResponsiveShell` 的 State 持有服务实例（`initState` 启动、`dispose` 取消）；
 监听提醒流 → `ScaffoldMessenger.showMaterialBanner`（或 SnackBar）：
 「提醒：任务标题」+ [打开]（弹 `TaskEditDialog`）/ [知道了]（`hideCurrentMaterialBanner`
 并标记已通知）。多条同时命中：串行展示或合并一条汇总。
 
-- [ ] **Step 3: 测试**
+- [x] **Step 3: 测试**
 
 `reminder_service_test.dart`：`FakeAsync` 推进 → 到点触发；同会话不重复；done
 任务不触发；`reminderAt` 在窗口外不触发。
 
-- [ ] **Step 4: analyze + 测试**
+- [x] **Step 4: analyze + 测试**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -110,7 +110,7 @@ flutter test test/widget/reminder_service_test.dart 2>&1 | Select-Object -Last 1
 
 Expected: 0 error；`All tests passed!`。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```powershell
 git add lib/features/task/reminder_service.dart lib/app/responsive_shell.dart test/widget/reminder_service_test.dart lib/i18n
