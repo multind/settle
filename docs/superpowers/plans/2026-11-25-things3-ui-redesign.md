@@ -293,7 +293,7 @@ git commit -m "refactor(theme): Things 3 化 token 与组件主题（删渐变/�
 **Files:**
 - Modify: `lib/app/glass.dart`
 
-- [ ] **Step 1: GlassContainer 去模糊/饱和度/彩色阴影**
+- [x] **Step 1: GlassContainer 去模糊/饱和度/彩色阴影** ✅ 8d8b408（child 外包 transparency Material，官方修复 ListTile 墨迹断言）
 
 将 `GlassContainer` 类（第 52-127 行）的 build 方法替换为纯描边容器（构造参数**全部保留**，忽略 blur/saturate）：
 
@@ -316,7 +316,7 @@ git commit -m "refactor(theme): Things 3 化 token 与组件主题（删渐变/�
 
 （`blur`/`saturate` 字段保留声明不再使用——页面传参继续有效，视觉为纯底描边。）
 
-- [ ] **Step 2: GradientButton 改实色 primary**
+- [x] **Step 2: GradientButton 改实色 primary** ✅ 8d8b408
 
 将 `GradientButton` build（第 162-216 行）替换为实色按钮（构造参数保留，忽略 gradient/glow）：
 
@@ -354,7 +354,7 @@ git commit -m "refactor(theme): Things 3 化 token 与组件主题（删渐变/�
   }
 ```
 
-- [ ] **Step 3: GlassCheckbox 改实心圆勾**
+- [x] **Step 3: GlassCheckbox 改实心圆勾** ✅ 8d8b408
 
 将 `GlassCheckbox` build（第 234-278 行）替换为 Things 3 风格（选中=primary 实心圆+白✓、未选=描边圆）：
 
@@ -385,7 +385,7 @@ git commit -m "refactor(theme): Things 3 化 token 与组件主题（删渐变/�
   }
 ```
 
-- [ ] **Step 4: 清理文件头注释与未用代码**
+- [x] **Step 4: 清理文件头注释与未用代码** ✅ 8d8b408（删 dart:ui import/饱和度矩阵/_saturationFilter；theme.dart 头注释修正）
 
 删除第 15-42 行（饱和度矩阵常量与 `_saturationFilter`）以及 `import 'dart:ui' show ImageFilter;`（第 1 行），文件头注释改为：
 
@@ -397,7 +397,7 @@ git commit -m "refactor(theme): Things 3 化 token 与组件主题（删渐变/�
 /// 不再使用 blur / saturate / 渐变 / 彩色阴影（质感拟物元素已移除）。
 ```
 
-- [ ] **Step 5: analyze + 关键测试**
+- [x] **Step 5: analyze + 关键测试** ✅ 8d8b408（0 error；关键 9/9 + 全量 96/96）
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -407,7 +407,7 @@ flutter test test/widget/quick_collect_test.dart test/widget/inbox_page_test.dar
 
 Expected: analyze 0 error；测试全绿（组件签名未变，页面零改动）。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```powershell
 git add lib/app/glass.dart
