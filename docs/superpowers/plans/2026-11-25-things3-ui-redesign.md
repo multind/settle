@@ -17,7 +17,7 @@
 **Files:**
 - Modify: `lib/app/theme.dart`
 
-- [ ] **Step 1: 重写 AppTokens.light**
+- [x] **Step 1: 重写 AppTokens.light** ✅ 42c0451
 
 将 `lib/app/theme.dart` 第 10-54 行（`light` 常量体）替换为：
 
@@ -56,7 +56,7 @@
   );
 ```
 
-- [ ] **Step 2: 重写 AppTokens.dark**
+- [x] **Step 2: 重写 AppTokens.dark** ✅ 42c0451
 
 将第 56-92 行（`dark` 常量体）替换为：
 
@@ -95,7 +95,7 @@
   );
 ```
 
-- [ ] **Step 3: 圆角体系收小**
+- [x] **Step 3: 圆角体系收小** ✅ 42c0451
 
 将第 94-100 行替换为：
 
@@ -108,7 +108,7 @@
   static const double radiusBadge = 8;
 ```
 
-- [ ] **Step 4: 组件主题 Things 3 化（buildAppTheme）**
+- [x] **Step 4: 组件主题 Things 3 化（buildAppTheme）** ✅ 42c0451
 
 逐块替换 `buildAppTheme`（第 271-513 行）中的组件主题：
 
@@ -260,7 +260,7 @@
     scaffoldBackgroundColor: tokens.bg,
 ```
 
-- [ ] **Step 5: AppTokenSet 新增 selectedBg 字段**
+- [x] **Step 5: AppTokenSet 新增 selectedBg 字段** ✅ 42c0451
 
 在 `AppTokenSet`（第 103-153 行）中新增字段。构造参数在 `card` 之后插入 `required this.selectedBg,`，字段声明在 `final Color card;` 之后插入 `final Color selectedBg;`。并在 `light`/`dark` 常量体中（`cardSolid` 行后）各插入：
 
@@ -270,7 +270,7 @@
 
 （深色为 `selectedBg: Color(0xFF1C1C1E),`）
 
-- [ ] **Step 6: analyze**
+- [x] **Step 6: analyze** ✅ 42c0451（0 error）
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -279,7 +279,7 @@ flutter analyze lib/app/theme.dart
 
 Expected: 0 error（SDK 级 material.dart 弃用 info 除外）。
 
-- [ ] **Step 7: 提交**
+- [x] **Step 7: 提交** ✅ 42c0451（工作区干净）
 
 ```powershell
 git add lib/app/theme.dart
