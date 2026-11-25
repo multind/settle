@@ -1,11 +1,16 @@
 import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtd_app/data/providers.dart';
+import 'package:gtd_app/data/repositories/task_repository.dart';
 import 'package:gtd_app/data/tables.dart';
 import 'package:gtd_app/features/upcoming/upcoming_page.dart';
 import 'widget_utils.dart';
 
 void main() {
+  /// 固定时钟：页面头文案与数据层「今日末」边界共用同一时刻，
+  /// 彻底消除 now 依赖与跨午夜竞态（与 TaskRepository 时钟注入同款口径）。
+  final DateTime fixedNow = DateTime(2026, 11, 25, 10, 0);
   Future<int> insertTask(TestEnv env, String title, String status,
       {String? priority, int? dueDate, int? scheduled, int? sortOrder}) async {
     return env.db.into(env.db.tasks).insert(TasksCompanion.insert(
@@ -20,19 +25,31 @@ void main() {
     ));
   }
 
-  /// 今日 12:00 的 ms epoch（「今日内」任务用）。
+  /// 今日 12:00 的 ms epoch（「今日内」任务用，基于 [fixedNow]）。
   int someDateMs() {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, 12).millisecondsSinceEpoch;
+    return DateTime(fixedNow.year, fixedNow.month, fixedNow.day, 12)
+        .millisecondsSinceEpoch;
   }
 
-  /// 今日 + [offset] 天 12:00 的 DateTime（未来日期任务用，组头 Key 与文案随其计算）。
+  /// [fixedNow] + [offset] 天 12:00 的 DateTime（未来日期任务用，组头 Key 与文案随其计算）。
   DateTime futureDay(int offset) {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day + offset, 12);
+    return DateTime(fixedNow.year, fixedNow.month, fixedNow.day + offset, 12);
   }
 
   int futureDayMs(int offset) => futureDay(offset).millisecondsSinceEpoch;
+
+  /// 组装并 pump 即将页：页面时钟与数据层时钟（watchUpcoming「今日末」边界）
+  /// 均注入 [fixedNow]，用例内日期全部基于同一时钟推导。
+  Future<void> pumpPage(WidgetTester tester, TestEnv env) async {
+    await tester.pumpWidget(env.wrap(
+      UpcomingPage(now: () => fixedNow),
+      extraOverrides: [
+        taskRepositoryProvider.overrideWithValue(
+            TaskRepository(env.db, now: () => fixedNow)),
+      ],
+    ));
+    await tester.pump();
+  }
 
   testWidgets('scheduled 未来按日分组（两个不同日期 → 两组，组头 Key/文本）', (tester) async {
     final env = await TestEnv.create();
@@ -42,8 +59,7 @@ void main() {
         scheduled: d3.millisecondsSinceEpoch);
     await insertTask(env, '十天后任务', 'next_action',
         scheduled: d10.millisecondsSinceEpoch);
-    await tester.pumpWidget(env.wrap(const UpcomingPage()));
-    await tester.pump();
+    await pumpPage(tester, env);
     expect(find.text('三天后任务'), findsOneWidget);
     expect(find.text('十天后任务'), findsOneWidget);
     final key3 = Key('upcoming_date_header_${d3.year}_${d3.month}_${d3.day}');
@@ -63,8 +79,7 @@ void main() {
     final d5 = futureDay(5);
     await insertTask(env, '截止任务', 'next_action',
         dueDate: d5.millisecondsSinceEpoch);
-    await tester.pumpWidget(env.wrap(const UpcomingPage()));
-    await tester.pump();
+    await pumpPage(tester, env);
     expect(find.text('截止任务'), findsOneWidget);
     expect(
         find.byKey(Key('upcoming_date_header_${d5.year}_${d5.month}_${d5.day}')),
@@ -79,8 +94,7 @@ void main() {
     await insertTask(env, '双日期任务', 'next_action',
         scheduled: d3.millisecondsSinceEpoch,
         dueDate: d10.millisecondsSinceEpoch);
-    await tester.pumpWidget(env.wrap(const UpcomingPage()));
-    await tester.pump();
+    await pumpPage(tester, env);
     expect(find.text('双日期任务'), findsOneWidget);
     expect(
         find.byKey(Key('upcoming_date_header_${d3.year}_${d3.month}_${d3.day}')),
@@ -96,8 +110,7 @@ void main() {
     final env = await TestEnv.create();
     await insertTask(env, '明日任务', 'next_action', scheduled: futureDayMs(1));
     await insertTask(env, '后日任务', 'next_action', scheduled: futureDayMs(2));
-    await tester.pumpWidget(env.wrap(const UpcomingPage()));
-    await tester.pump();
+    await pumpPage(tester, env);
     expect(find.text('Tomorrow'), findsOneWidget);
     expect(find.text('Day after tomorrow'), findsOneWidget);
     await env.db.close();
@@ -105,12 +118,11 @@ void main() {
 
   testWidgets('今天/过去日期任务不出现', (tester) async {
     final env = await TestEnv.create();
-    final now = DateTime.now();
-    final todayStartMs = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+    final todayStartMs =
+        DateTime(fixedNow.year, fixedNow.month, fixedNow.day).millisecondsSinceEpoch;
     await insertTask(env, '今日任务', 'next_action', scheduled: someDateMs());
     await insertTask(env, '昨日任务', 'next_action', dueDate: todayStartMs - 1);
-    await tester.pumpWidget(env.wrap(const UpcomingPage()));
-    await tester.pump();
+    await pumpPage(tester, env);
     expect(find.text('今日任务'), findsNothing);
     expect(find.text('昨日任务'), findsNothing);
     expect(find.text('No upcoming tasks.'), findsOneWidget);
@@ -128,8 +140,7 @@ void main() {
         priority: 'medium', sortOrder: 2, scheduled: day);
     await insertTask(env, '同级后', 'next_action', sortOrder: 20, scheduled: day);
     await insertTask(env, '同级前', 'next_action', sortOrder: 10, scheduled: day);
-    await tester.pumpWidget(env.wrap(const UpcomingPage()));
-    await tester.pump();
+    await pumpPage(tester, env);
     final titles = tester
         .widgetList<ListTile>(find.byType(ListTile))
         .map((t) => (t.title as Text).data)
@@ -140,8 +151,7 @@ void main() {
 
   testWidgets('空态文案', (tester) async {
     final env = await TestEnv.create();
-    await tester.pumpWidget(env.wrap(const UpcomingPage()));
-    await tester.pump();
+    await pumpPage(tester, env);
     expect(find.text('No upcoming tasks.'), findsOneWidget);
     await env.db.close();
   });
