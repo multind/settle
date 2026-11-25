@@ -30,14 +30,14 @@ class SpotBackground extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // 红 at 12% 8% ≈ 520×380：rgba(255,94,58,.55)
+                // 红 at 12% 8% ≈ 520×380：rgba(255,94,58,.55)（波1 提到 α0.6-0.7 档）
                 _spot(
                   w,
                   h,
                   const Alignment(-0.76, -0.84),
                   520,
                   380,
-                  const Color(0x8CFF5E3A),
+                  const Color(0xA8FF5E3A),
                 ),
                 // 紫 at 88% 12% ≈ 600×420：rgba(124,61,255,.50)
                 _spot(
@@ -46,7 +46,7 @@ class SpotBackground extends StatelessWidget {
                   const Alignment(0.76, -0.76),
                   600,
                   420,
-                  const Color(0x807C3DFF),
+                  const Color(0x997C3DFF),
                 ),
                 // 青 at 50% 95% ≈ 640×480：rgba(0,196,255,.45)
                 _spot(
@@ -55,7 +55,7 @@ class SpotBackground extends StatelessWidget {
                   const Alignment(0.0, 0.9),
                   640,
                   480,
-                  const Color(0x7300C4FF),
+                  const Color(0x8C00C4FF),
                 ),
                 // 黄 at 82% 78% ≈ 480×360：rgba(255,214,0,.50)
                 _spot(
@@ -64,7 +64,7 @@ class SpotBackground extends StatelessWidget {
                   const Alignment(0.64, 0.56),
                   480,
                   360,
-                  const Color(0x80FFD600),
+                  const Color(0x99FFD600),
                 ),
               ],
             ),

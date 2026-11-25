@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/features/contexts/contexts_page.dart';
@@ -44,6 +45,8 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= ResponsiveShell.breakpoint;
@@ -51,18 +54,24 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           body: isWide
               ? Row(
                   children: [
+                    // 玻璃侧边栏：blur(24px) → σ12，saturate(180%)，sidebar 半透明底 +
+                    // 右侧 1px stroke 分隔（替代 VerticalDivider，preview `.sidebar`）。
                     _Glass(
-                      sigma: 12, // blur(24px) → σ12
+                      sigma: 12,
                       saturation: 1.8,
+                      color: tokens.sidebar,
+                      border: Border(
+                        right: BorderSide(color: tokens.stroke, width: 1),
+                      ),
                       child: NavigationRail(
                         selectedIndex: _index,
                         onDestinationSelected: (i) =>
                             setState(() => _index = i),
                         labelType: NavigationRailLabelType.all,
+                        leading: const _BrandMark(),
                         destinations: _railDestinations(l10n),
                       ),
                     ),
-                    const VerticalDivider(width: 1),
                     Expanded(child: _pages[_index]),
                   ],
                 )
@@ -72,6 +81,10 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
               : _Glass(
                   sigma: 12, // blur(24px) → σ12
                   saturation: 2.0, // 规格：手机底部导航 saturate(200%)
+                  color: tokens.nav,
+                  border: Border(
+                    top: BorderSide(color: tokens.stroke, width: 1),
+                  ),
                   child: NavigationBar(
                     selectedIndex: _narrowIndices.indexOf(_index),
                     onDestinationSelected: (i) =>
@@ -161,17 +174,22 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 
 /// 毛玻璃容器（规格 §7.4.3）：`BackdropFilter`（CSS `blur(Npx)` ≈ `sigma=N/2`）+
 /// `ColorFiltered`（CSS `saturate(S)` 饱和度矩阵）。仅包裹导航条 / 侧边栏，
-/// 不拦截交互。
+/// 不拦截交互。`color` 提供半透明玻璃底（`sidebar` / `nav`），`border`
+/// 提供 1px stroke 分隔线（替代 VerticalDivider）。
 class _Glass extends StatelessWidget {
   const _Glass({
     required this.sigma,
     required this.saturation,
     required this.child,
+    this.color,
+    this.border,
   });
 
   final double sigma;
   final double saturation;
   final Widget child;
+  final Color? color;
+  final Border? border;
 
   static const ColorFilter _saturate180 = ColorFilter.matrix(<double>[
     1.6296, -0.572, -0.0576, 0, 0, //
@@ -194,7 +212,42 @@ class _Glass extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
         child: ColorFiltered(
           colorFilter: saturation >= 2.0 ? _saturate200 : _saturate180,
-          child: child,
+          child: Container(
+            decoration: BoxDecoration(color: color, border: border),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 品牌字「GTD」（preview `.brand`）：`linear-gradient(135deg, primary, accent)`
+/// 渐变文字，Flutter 用 `ShaderMask` 实现（gradient 只作用于字形 alpha）。
+class _BrandMark extends StatelessWidget {
+  const _BrandMark();
+
+  @override
+  Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+      child: ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (bounds) => LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [tokens.primary, tokens.accent],
+        ).createShader(bounds),
+        child: const Text(
+          'GTD',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+            color: Colors.white, // 颜色由 ShaderMask 替换，此处仅提供 alpha
+          ),
         ),
       ),
     );

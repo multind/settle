@@ -323,7 +323,8 @@ ThemeData buildAppTheme(Brightness brightness) {
     cardTheme: CardThemeData(
       color: tokens.cardSolid,
       surfaceTintColor: Colors.transparent,
-      elevation: 2,
+      // 阴影交给单层 shadowSm 主色近似（多层彩色阴影无法用 CardTheme 表达）。
+      elevation: 0,
       shadowColor: tokens.shadowSmColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusCard),
@@ -332,7 +333,8 @@ ThemeData buildAppTheme(Brightness brightness) {
       clipBehavior: Clip.antiAlias,
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: tokens.nav,
+      // 玻璃底由 shell 的 BackdropFilter 提供，导航条自身透明（§7.4.3 `.bottombar`）。
+      backgroundColor: Colors.transparent,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       indicatorColor: tokens.primary,
@@ -349,16 +351,19 @@ ThemeData buildAppTheme(Brightness brightness) {
         if (states.contains(WidgetState.selected)) {
           return TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: tokens.text,
+            fontWeight: FontWeight.w700,
+            color: tokens.primary,
           );
         }
         return TextStyle(fontSize: 12, color: tokens.muted);
       }),
     ),
     navigationRailTheme: NavigationRailThemeData(
-      backgroundColor: tokens.sidebar,
+      // 玻璃底由 shell 的 BackdropFilter 提供，侧边栏自身透明（§7.4.3 `.sidebar`）。
+      backgroundColor: Colors.transparent,
       elevation: 0,
+      // 激活项表达：primary 色 indicator 圆角 + 白色图标 + 发光 label
+      // （preview `.sideitem.active` 渐变胶囊的 Flutter 近似，见波 1 shell）。
       indicatorColor: tokens.primary,
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusButton),
@@ -367,8 +372,11 @@ ThemeData buildAppTheme(Brightness brightness) {
       unselectedIconTheme: IconThemeData(color: tokens.muted),
       selectedLabelTextStyle: const TextStyle(
         fontSize: 12,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: Colors.white,
+        shadows: [
+          Shadow(color: Color(0x66FFFFFF), blurRadius: 10, offset: Offset(0, 0)),
+        ],
       ),
       unselectedLabelTextStyle: TextStyle(fontSize: 12, color: tokens.muted),
     ),
@@ -394,12 +402,22 @@ ThemeData buildAppTheme(Brightness brightness) {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: tokens.card,
+      backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       foregroundColor: tokens.text,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
+      // 大号粗体标题 + 微光 text-shadow（对应 preview `h2`）。
+      titleTextStyle: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.3,
+        color: tokens.text,
+        shadows: const [
+          Shadow(color: Color(0x66FFFFFF), blurRadius: 12, offset: Offset(0, 2)),
+        ],
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: ButtonStyle(
@@ -451,17 +469,22 @@ ThemeData buildAppTheme(Brightness brightness) {
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: tokens.text,
-      contentTextStyle: TextStyle(color: isLight ? Colors.white : tokens.bg1),
+      backgroundColor: tokens.cardSolid,
+      contentTextStyle: TextStyle(color: tokens.text),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTokens.radiusCard),
+        borderRadius: BorderRadius.circular(AppTokens.radiusRow),
       ),
     ),
     dialogTheme: DialogThemeData(
-      backgroundColor: tokens.cardSolid,
+      // 半透明玻璃底：模糊由波 2 在 dialog 内容用 GlassContainer 提供，
+      // 阴影用 shadow 主色单层近似（§7.4.3 `.mockup` box-shadow）。
+      backgroundColor: tokens.card,
       surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shadowColor: tokens.shadow.first.color,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTokens.radiusCard),
+        borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
+        side: BorderSide(color: tokens.stroke),
       ),
     ),
     dividerTheme: DividerThemeData(color: tokens.stroke),
