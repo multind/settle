@@ -129,7 +129,9 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(env.wrap(const ResponsiveShell()));
     await tester.pump();
-    // 先 Tab 建立 shell 内焦点（侧边栏首项），按键才能冒泡到 shell 层快捷键。
+    // M-6 前提：桌面启动时无默认焦点节点，快捷键事件需从 shell 子树内的
+    // 焦点节点冒泡至此——先 Tab 聚焦侧边栏首项建立焦点（真实桌面用户点按
+    // 任一控件后即满足此前提；启动后不聚焦时快捷键不响应属预期行为）。
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
@@ -146,9 +148,10 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(env.wrap(const ResponsiveShell()));
     await tester.pump();
-    // Ctrl+2 → 侧边栏第 2 项 = 今日（index 1）。
+    // M-6 前提：同 N 用例，先 Tab 建立 shell 内焦点（侧边栏首项）。
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
+    // Ctrl+2 → 侧边栏第 2 项 = 今日（index 1）。
     await sendCtrlKey(tester, LogicalKeyboardKey.digit2);
     await tester.pumpAndSettle();
     expect(find.byType(TodayPage), findsOneWidget);
@@ -156,6 +159,23 @@ void main() {
     await sendCtrlKey(tester, LogicalKeyboardKey.digit5);
     await tester.pumpAndSettle();
     expect(find.byType(SomedayPage), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('移动端（非桌面）：N 不触发收集对话框（快捷键仅桌面启用，M-3）',
+      (tester) async {
+    // 不调 useDesktop()：widget 测试默认 Android/触屏，shell 不包裹
+    // Shortcuts/Actions——若有人误删桌面门控，本用例即红。
+    final env = await TestEnv.create();
+    await tester.binding.setSurfaceSize(const Size(1000, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(const ResponsiveShell()));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('collect_dialog_field')), findsNothing);
     await env.db.close();
   });
 

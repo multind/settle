@@ -178,10 +178,12 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     if (!_shortcutsEnabled) return shell;
     final Map<ShortcutActivator, Intent> shortcuts = {
       const SingleActivator(LogicalKeyboardKey.keyN): const _CollectIntent(),
+      // Ctrl/Cmd+0 → 回顾：索引由规范表派生（_digitKeys 9 项之后的首项，
+      // 即 _navSpecs[9] = 回顾），与下方 1..9 派生循环共用同一事实源。
       const SingleActivator(LogicalKeyboardKey.digit0, control: true):
-          const _SwitchViewIntent(9),
+          _SwitchViewIntent(_navSpecs[_digitKeys.length].index),
       const SingleActivator(LogicalKeyboardKey.digit0, meta: true):
-          const _SwitchViewIntent(9),
+          _SwitchViewIntent(_navSpecs[_digitKeys.length].index),
     };
     // Ctrl/Cmd+n → 侧边栏第 n 项（_navSpecs 项序即全局索引序，n-1 = 索引）。
     for (var n = 0; n < _digitKeys.length; n++) {
@@ -634,6 +636,10 @@ class _SwitchViewIntent extends Intent {
 /// 带 isEnabled 门控的 CallbackAction：文本输入焦点时禁用全局快捷键。
 /// Shortcuts.handleKeypress 在 isEnabled=false 时返回 ignored，按键继续
 /// 冒泡到 EditableText 正常输入（规格 §5 不拦截约束）。
+///
+/// **M-2 登记**：与 `task_list_view.dart` 的 `_ListShortcutAction` 是同一
+/// 门控模式的 6 行重复。抽共享类需跨 `lib/app` ↔ `lib/features/task` 新建
+/// 文件（layer 归属未定），超出本 Task 范围，留待收尾清单（Task 5）评估。
 class _ShellAction<T extends Intent> extends CallbackAction<T> {
   _ShellAction({required super.onInvoke, this.enabled});
 

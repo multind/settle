@@ -234,20 +234,43 @@ class TaskListViewState extends ConsumerState<TaskListView> {
 
   Set<int> get selectedIds => Set.unmodifiable(_selected);
 
-  /// 焦点移动（列表内循环）；请求新焦点行的键盘焦点。
+  /// 焦点移动（列表内循环）。Dart `%` 为欧几里得模（除数正时结果恒非负），
+  /// 负 delta 天然回绕到列表末尾，无需 `< 0` 分支。
+  /// 新焦点行若在视口外，帧后先滚动到可见区再请求键盘焦点（I-1 修复：
+  /// `ListView` 对屏外行惰性构建，直接 `requestFocus` 是 no-op，会让
+  /// Enter/Delete 落到用户看不见的任务上）。
   void moveFocus(int delta) {
     if (!widget.focusEnabled || _items.isEmpty) return;
-    setState(() {
-      _focusIndex = (_focusIndex + delta) % _items.length;
-      if (_focusIndex < 0) _focusIndex = _items.length - 1;
-    });
-    _focusNodes[_items[_focusIndex].id]?.requestFocus();
+    final next = (_focusIndex + delta) % _items.length;
+    setState(() => _focusIndex = next);
+    _revealAndFocusRow(next);
   }
 
   void focusRow(int index) {
     if (!widget.focusEnabled || _items.isEmpty) return;
-    setState(() => _focusIndex = index.clamp(0, _items.length - 1));
-    _focusNodes[_items[_focusIndex].id]?.requestFocus();
+    final target = index.clamp(0, _items.length - 1);
+    setState(() => _focusIndex = target);
+    _revealAndFocusRow(target);
+  }
+
+  /// 帧后把 `index` 行滚动进视口（纵向居中）并请求键盘焦点。
+  /// 行元素未挂载（超出缓存区，如 `focusRow` 传入远端索引）时跳过滚动、
+  /// 仅请求焦点（moveFocus 的相邻目标恒在缓存区内，此为防御分支）。
+  void _revealAndFocusRow(int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || index >= _items.length) return;
+      final node = _focusNodes[_items[index].id];
+      final ctx = node?.context;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOutCubic,
+        );
+      }
+      node?.requestFocus();
+    });
   }
 
   void exitSelection() {
@@ -858,6 +881,10 @@ class _DeleteFocusedIntent extends Intent {
 
 /// 带 isEnabled 门控的 CallbackAction：仅焦点行获焦（且非选择模式）时生效，
 /// 避免拦截行内控件（完成钮/恢复钮等）自身的 Enter 激活等既有行为。
+///
+/// **M-2 登记**：与 `responsive_shell.dart` 的 `_ShellAction` 是同一门控
+/// 模式的 6 行重复。抽共享类需跨 `lib/app` ↔ `lib/features/task` 新建文件
+/// （layer 归属未定），超出本 Task 范围，留待收尾清单（Task 5）统一评估。
 class _ListShortcutAction<T extends Intent> extends CallbackAction<T> {
   _ListShortcutAction({required super.onInvoke, this.enabled});
 

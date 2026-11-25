@@ -728,4 +728,122 @@ void main() {
     expect(find.text('Task A'), findsNothing);
     await env.db.close();
   });
+
+  testWidgets('长列表 J 推进：焦点行滚动跟随可见，Enter 作用于可见焦点行（I-1）',
+      (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    final ids = <int>[];
+    for (var i = 0; i < 30; i++) {
+      ids.add(await insertTask(env, 'Task $i', 'next_action'));
+    }
+    // 视口 600px：30 行 >> 可见行数，J 推进必然越过屏外行。
+    await tester.binding.setSurfaceSize(const Size(800, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    const target = 25;
+    state.focusRow(0);
+    await tester.pump();
+    for (var i = 0; i < target; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+      await tester.pumpAndSettle(); // 等 ensureVisible 滚动动画结束。
+    }
+    expect(state.focusIndex, target);
+    // a) 焦点行高亮在可见区（视口内）——屏外行不会被误聚焦。
+    final listRect = tester.getRect(find.byType(ListView));
+    final rowRect = tester.getRect(find.byKey(Key('task_focus_${ids[target]}')));
+    expect(rowRect.top, greaterThanOrEqualTo(listRect.top));
+    expect(rowRect.bottom, lessThanOrEqualTo(listRect.bottom));
+    // b) Enter 完成 = 当前可见焦点行；屏外首行不被误完成。
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    final done = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.equals(ids[target])))
+        .getSingle();
+    expect(done.status, 'done');
+    final first = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.equals(ids[0])))
+        .getSingle();
+    expect(first.status, 'next_action');
+    await env.db.close();
+  });
+
+  testWidgets('移动端（非桌面）：J 不移动焦点（快捷键仅桌面启用，M-3）',
+      (tester) async {
+    // 不调 useDesktop()：widget 测试默认 Android/触屏，列表快捷键不包裹。
+    final env = await TestEnv.create();
+    await insertTask(env, 'Task A', 'next_action');
+    await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    // 焦点行包装与平台无关（focusEnabled 即有），仅快捷键被门控在桌面外。
+    state.focusRow(0);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pump();
+    expect(state.focusIndex, 0);
+    await env.db.close();
+  });
+
+  testWidgets('选择模式阻断列表快捷键：J 不移动、Delete 不弹确认框（M-7）',
+      (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    await insertTask(env, 'Task A', 'next_action');
+    await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    state.focusRow(0);
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    expect(find.byKey(const Key('task_selection_bar')), findsOneWidget);
+    // J 被 `_canMoveRowFocus` 门控拦截。
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pump();
+    expect(state.focusIndex, 0);
+    // Delete 被 `_canOperateRow` 门控拦截（不弹确认对话框）。
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('logbook_confirm_delete')), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('行内控件获焦阻断列表快捷键：Enter 不完成焦点任务（M-7）',
+      (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    final b = await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    // 焦点在第 2 行（Task B），Shift+Tab 回退到第 1 行（Task A）的行内控件
+    // （完成钮/行 InkWell），使 focusedTask（B）与获焦控件（A 的行内控件）
+    // 分离——若门控缺失，Enter 会经快捷键完成看不见/错误的 B。
+    state.focusRow(1);
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    // 前置断言：primary focus 已离开焦点行节点（落在行内控件上）。
+    expect(
+      FocusManager.instance.primaryFocus?.debugLabel,
+      isNot(startsWith('task_focus_')),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    // 门控生效：B（focusedTask）必须仍为 next_action；行内控件自身的 Enter
+    // 激活只会作用于它自己的任务（A，完成钮）或打开编辑框（行 InkWell）。
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b])))
+        .get();
+    expect(rows.singleWhere((r) => r.id == b).status, 'next_action');
+    await env.db.close();
+  });
 }
