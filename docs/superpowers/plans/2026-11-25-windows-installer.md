@@ -18,7 +18,7 @@
 - Modify: `pubspec.yaml:4`
 - Test: 全量 `flutter test`（96/96 基线）
 
-- [ ] **Step 1: 修改版本号**
+- [x] **Step 1: 修改版本号**
 
 将 `pubspec.yaml` 第 4 行 `version: 0.1.0+1` 改为 `version: 0.1.1+2`。
 
@@ -26,7 +26,7 @@
 version: 0.1.1+2
 ```
 
-- [ ] **Step 2: 全量回归**
+- [x] **Step 2: 全量回归**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -35,7 +35,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: `All tests passed!`（96/96 全绿，版本号变更不影响测试）。
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```powershell
 git add pubspec.yaml
@@ -49,7 +49,7 @@ git commit -m "build(version): 0.1.1+2（Windows 首个发布版）"
 **Files:**
 - 产物（gitignore 已忽略 build/）：`build\windows\x64\runner\Release\`
 
-- [ ] **Step 1: 执行 release 构建**
+- [x] **Step 1: 执行 release 构建**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -59,7 +59,7 @@ flutter build windows --release
 
 Expected: `Built build\windows\x64\runner\Release\gtd_app.exe`。
 
-- [ ] **Step 2: 产物完整性确认**
+- [x] **Step 2: 产物完整性确认**
 
 ```powershell
 Get-ChildItem build\windows\x64\runner\Release | Where-Object { $_.Name -match 'plugin' } | Select-Object Name
@@ -72,7 +72,7 @@ Expected: 插件 DLL（flutter_secure_storage_windows_plugin.dll、sqlite3_flutt
 
 ### Task 3: 安装 Inno Setup 6（一次性的打包机工具）
 
-- [ ] **Step 1: 下载并静默安装**
+- [x] **Step 1: 下载并静默安装**
 
 ```powershell
 $env:HTTP_PROXY="http://127.0.0.1:10808"; $env:HTTPS_PROXY="http://127.0.0.1:10808"
@@ -82,7 +82,7 @@ Start-Process -FilePath "$env:TEMP\innosetup.exe" -ArgumentList "/VERYSILENT","/
 
 Expected: 无报错，安装完成。
 
-- [ ] **Step 2: 验证编译器就位**
+- [x] **Step 2: 验证编译器就位**
 
 ```powershell
 Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
@@ -90,7 +90,7 @@ Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 
 Expected: `True`。若未安装到默认路径，记录实际路径并用于后续命令。
 
-- [ ] **Step 3: 清理安装包**
+- [x] **Step 3: 清理安装包**
 
 ```powershell
 Remove-Item "$env:TEMP\innosetup.exe" -ErrorAction SilentlyContinue
@@ -104,7 +104,7 @@ Remove-Item "$env:TEMP\innosetup.exe" -ErrorAction SilentlyContinue
 - Create: `windows/installer/setup.iss`
 - 产物（需确认 dist/ 忽略）：`dist\gtd_app-setup-0.1.1.exe`
 
-- [ ] **Step 1: 创建 setup.iss**
+- [x] **Step 1: 创建 setup.iss**
 
 创建 `windows/installer/setup.iss`，内容如下（完整可直接编译）：
 
@@ -151,7 +151,7 @@ Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 Filename: "{app}\{#MyAppExeName}"; Description: "立即运行 {#MyAppName}"; Flags: nowait postinstall skipifsilent
 ```
 
-- [ ] **Step 2: 编译安装包**
+- [x] **Step 2: 编译安装包**
 
 ```powershell
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "D:\Project\gtd-project\windows\installer\setup.iss"
@@ -159,7 +159,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "立即运行 {#MyAppName}"; Fla
 
 Expected: 输出 `Successfully compiled setup file` 且产物 `D:\Project\gtd-project\dist\gtd_app-setup-0.1.1.exe` 存在。若 ISCC 路径不同，用 Step 3 记录的实际路径。
 
-- [ ] **Step 3: 确认产物**
+- [x] **Step 3: 确认产物**
 
 ```powershell
 Get-Item D:\Project\gtd-project\dist\gtd_app-setup-0.1.1.exe | Select-Object Length, LastWriteTime
@@ -167,7 +167,7 @@ Get-Item D:\Project\gtd-project\dist\gtd_app-setup-0.1.1.exe | Select-Object Len
 
 Expected: 文件存在（体积约 60-120MB，含 Flutter 引擎与 assets）。
 
-- [ ] **Step 4: 提交脚本（产物不入库）**
+- [x] **Step 4: 提交脚本（产物不入库）**
 
 先向 `.gitignore` 追加 `dist/`：
 
@@ -188,7 +188,7 @@ git commit -m "build(installer): Inno Setup 打包脚本与 dist 忽略规则"
 **Files:**
 - 无（纯流程验证）
 
-- [ ] **Step 1: 静默安装到临时目录**
+- [x] **Step 1: 静默安装到临时目录**
 
 ```powershell
 $installer = "D:\Project\gtd-project\dist\gtd_app-setup-0.1.1.exe"
@@ -200,7 +200,7 @@ Get-ChildItem $tmp | Select-Object Name
 
 Expected: `gtd_app.exe` 及插件 DLL、data 目录均在 `$tmp` 下。
 
-- [ ] **Step 2: 启动冒烟**
+- [x] **Step 2: 启动冒烟**
 
 ```powershell
 $p = Start-Process -FilePath "$tmp\gtd_app.exe" -PassThru
@@ -212,7 +212,7 @@ Stop-Process -Id $p.Id -Force
 
 Expected: `Alive=True Title=gtd_app`（25 秒无崩溃、窗口正常）。
 
-- [ ] **Step 3: 卸载验证**
+- [x] **Step 3: 卸载验证**
 
 ```powershell
 $uninstaller = Get-ChildItem $tmp -Filter "unins*.exe" | Select-Object -First 1 -ExpandProperty FullName
@@ -222,7 +222,7 @@ Test-Path $tmp
 
 Expected: `False`（安装目录已清空，卸载入口存在并可用）。
 
-- [ ] **Step 4: 默认路径安装复核（快捷方式 + 卸载注册表）**
+- [x] **Step 4: 默认路径安装复核（快捷方式 + 卸载注册表）**
 
 ```powershell
 Start-Process -FilePath "D:\Project\gtd-project\dist\gtd_app-setup-0.1.1.exe" -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES" -Wait
@@ -234,7 +234,7 @@ Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\gtd_
 
 Expected: `$env:ProgramFiles\gtd_app\gtd_app.exe` 存在；开始菜单快捷方式存在（ProgramData 或 APPDATA 其一命中）；卸载注册表项 DisplayName=gtd_app、DisplayVersion=0.1.1。
 
-- [ ] **Step 5: 清理测试安装**
+- [x] **Step 5: 清理测试安装**
 
 ```powershell
 Start-Process -FilePath "$env:ProgramFiles\gtd_app\unins000.exe" -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES" -Wait
@@ -251,7 +251,7 @@ Expected: `False`。
 - Create: `docs/release/windows.md`
 - 全量回归确认
 
-- [ ] **Step 1: 编写发布文档**
+- [x] **Step 1: 编写发布文档**
 
 创建 `docs/release/windows.md`：
 
@@ -283,7 +283,7 @@ Expected: `False`。
   不删除用户数据）。
 ```
 
-- [ ] **Step 2: 最终回归**
+- [x] **Step 2: 最终回归**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -292,14 +292,14 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: `All tests passed!`（96/96）。
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```powershell
 git add docs/release/windows.md
 git commit -m "docs(release): Windows 发布说明（产物/步骤/SmartScreen 与数据说明）"
 ```
 
-- [ ] **Step 4: 最终状态检查**
+- [x] **Step 4: 最终状态检查**
 
 ```powershell
 git status --short
