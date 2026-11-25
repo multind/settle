@@ -54,6 +54,10 @@ class Tasks extends Table {
   IntColumn get contextId => integer().nullable().references(Contexts, #id)();
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
+  IntColumn get completedAt => integer().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  TextColumn get repeatRule => text().nullable()();
+  IntColumn get reminderAt => integer().nullable()();
 }
 
 class TaskTags extends Table {
@@ -77,7 +81,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

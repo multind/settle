@@ -8,8 +8,8 @@ void main() {
   setUp(() => db = createTestDatabase());
   tearDown(() => db.close());
 
-  test('schemaVersion 为 1（迁移机制基线）', () {
-    expect(db.schemaVersion, 1);
+  test('schemaVersion 为 2（迁移机制基线）', () {
+    expect(db.schemaVersion, 2);
   });
 
   test('首次创建自动播种三个默认情境', () async {

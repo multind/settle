@@ -1337,6 +1337,51 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<int> completedAt = GeneratedColumn<int>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _repeatRuleMeta = const VerificationMeta(
+    'repeatRule',
+  );
+  @override
+  late final GeneratedColumn<String> repeatRule = GeneratedColumn<String>(
+    'repeat_rule',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reminderAtMeta = const VerificationMeta(
+    'reminderAt',
+  );
+  @override
+  late final GeneratedColumn<int> reminderAt = GeneratedColumn<int>(
+    'reminder_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1352,6 +1397,10 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     contextId,
     createdAt,
     updatedAt,
+    completedAt,
+    sortOrder,
+    repeatRule,
+    reminderAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1448,6 +1497,33 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('repeat_rule')) {
+      context.handle(
+        _repeatRuleMeta,
+        repeatRule.isAcceptableOrUnknown(data['repeat_rule']!, _repeatRuleMeta),
+      );
+    }
+    if (data.containsKey('reminder_at')) {
+      context.handle(
+        _reminderAtMeta,
+        reminderAt.isAcceptableOrUnknown(data['reminder_at']!, _reminderAtMeta),
+      );
+    }
     return context;
   }
 
@@ -1509,6 +1585,22 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.int,
         data['${effectivePrefix}updated_at'],
       )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}completed_at'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      repeatRule: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}repeat_rule'],
+      ),
+      reminderAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_at'],
+      ),
     );
   }
 
@@ -1532,6 +1624,10 @@ class Task extends DataClass implements Insertable<Task> {
   final int? contextId;
   final int createdAt;
   final int updatedAt;
+  final int? completedAt;
+  final int sortOrder;
+  final String? repeatRule;
+  final int? reminderAt;
   const Task({
     required this.id,
     required this.title,
@@ -1546,6 +1642,10 @@ class Task extends DataClass implements Insertable<Task> {
     this.contextId,
     required this.createdAt,
     required this.updatedAt,
+    this.completedAt,
+    required this.sortOrder,
+    this.repeatRule,
+    this.reminderAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1579,6 +1679,16 @@ class Task extends DataClass implements Insertable<Task> {
     }
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<int>(completedAt);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    if (!nullToAbsent || repeatRule != null) {
+      map['repeat_rule'] = Variable<String>(repeatRule);
+    }
+    if (!nullToAbsent || reminderAt != null) {
+      map['reminder_at'] = Variable<int>(reminderAt);
+    }
     return map;
   }
 
@@ -1613,6 +1723,16 @@ class Task extends DataClass implements Insertable<Task> {
           : Value(contextId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+      sortOrder: Value(sortOrder),
+      repeatRule: repeatRule == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repeatRule),
+      reminderAt: reminderAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reminderAt),
     );
   }
 
@@ -1635,6 +1755,10 @@ class Task extends DataClass implements Insertable<Task> {
       contextId: serializer.fromJson<int?>(json['contextId']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      completedAt: serializer.fromJson<int?>(json['completedAt']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      repeatRule: serializer.fromJson<String?>(json['repeatRule']),
+      reminderAt: serializer.fromJson<int?>(json['reminderAt']),
     );
   }
   @override
@@ -1654,6 +1778,10 @@ class Task extends DataClass implements Insertable<Task> {
       'contextId': serializer.toJson<int?>(contextId),
       'createdAt': serializer.toJson<int>(createdAt),
       'updatedAt': serializer.toJson<int>(updatedAt),
+      'completedAt': serializer.toJson<int?>(completedAt),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'repeatRule': serializer.toJson<String?>(repeatRule),
+      'reminderAt': serializer.toJson<int?>(reminderAt),
     };
   }
 
@@ -1671,6 +1799,10 @@ class Task extends DataClass implements Insertable<Task> {
     Value<int?> contextId = const Value.absent(),
     int? createdAt,
     int? updatedAt,
+    Value<int?> completedAt = const Value.absent(),
+    int? sortOrder,
+    Value<String?> repeatRule = const Value.absent(),
+    Value<int?> reminderAt = const Value.absent(),
   }) => Task(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -1685,6 +1817,10 @@ class Task extends DataClass implements Insertable<Task> {
     contextId: contextId.present ? contextId.value : this.contextId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    sortOrder: sortOrder ?? this.sortOrder,
+    repeatRule: repeatRule.present ? repeatRule.value : this.repeatRule,
+    reminderAt: reminderAt.present ? reminderAt.value : this.reminderAt,
   );
   Task copyWithCompanion(TasksCompanion data) {
     return Task(
@@ -1701,6 +1837,16 @@ class Task extends DataClass implements Insertable<Task> {
       contextId: data.contextId.present ? data.contextId.value : this.contextId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      repeatRule: data.repeatRule.present
+          ? data.repeatRule.value
+          : this.repeatRule,
+      reminderAt: data.reminderAt.present
+          ? data.reminderAt.value
+          : this.reminderAt,
     );
   }
 
@@ -1719,7 +1865,11 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('projectId: $projectId, ')
           ..write('contextId: $contextId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('repeatRule: $repeatRule, ')
+          ..write('reminderAt: $reminderAt')
           ..write(')'))
         .toString();
   }
@@ -1739,6 +1889,10 @@ class Task extends DataClass implements Insertable<Task> {
     contextId,
     createdAt,
     updatedAt,
+    completedAt,
+    sortOrder,
+    repeatRule,
+    reminderAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1756,7 +1910,11 @@ class Task extends DataClass implements Insertable<Task> {
           other.projectId == this.projectId &&
           other.contextId == this.contextId &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.completedAt == this.completedAt &&
+          other.sortOrder == this.sortOrder &&
+          other.repeatRule == this.repeatRule &&
+          other.reminderAt == this.reminderAt);
 }
 
 class TasksCompanion extends UpdateCompanion<Task> {
@@ -1773,6 +1931,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<int?> contextId;
   final Value<int> createdAt;
   final Value<int> updatedAt;
+  final Value<int?> completedAt;
+  final Value<int> sortOrder;
+  final Value<String?> repeatRule;
+  final Value<int?> reminderAt;
   const TasksCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -1787,6 +1949,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.contextId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.repeatRule = const Value.absent(),
+    this.reminderAt = const Value.absent(),
   });
   TasksCompanion.insert({
     this.id = const Value.absent(),
@@ -1802,6 +1968,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.contextId = const Value.absent(),
     required int createdAt,
     required int updatedAt,
+    this.completedAt = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.repeatRule = const Value.absent(),
+    this.reminderAt = const Value.absent(),
   }) : title = Value(title),
        status = Value(status),
        createdAt = Value(createdAt),
@@ -1820,6 +1990,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<int>? contextId,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
+    Expression<int>? completedAt,
+    Expression<int>? sortOrder,
+    Expression<String>? repeatRule,
+    Expression<int>? reminderAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1835,6 +2009,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (contextId != null) 'context_id': contextId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (repeatRule != null) 'repeat_rule': repeatRule,
+      if (reminderAt != null) 'reminder_at': reminderAt,
     });
   }
 
@@ -1852,6 +2030,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<int?>? contextId,
     Value<int>? createdAt,
     Value<int>? updatedAt,
+    Value<int?>? completedAt,
+    Value<int>? sortOrder,
+    Value<String?>? repeatRule,
+    Value<int?>? reminderAt,
   }) {
     return TasksCompanion(
       id: id ?? this.id,
@@ -1867,6 +2049,10 @@ class TasksCompanion extends UpdateCompanion<Task> {
       contextId: contextId ?? this.contextId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      completedAt: completedAt ?? this.completedAt,
+      sortOrder: sortOrder ?? this.sortOrder,
+      repeatRule: repeatRule ?? this.repeatRule,
+      reminderAt: reminderAt ?? this.reminderAt,
     );
   }
 
@@ -1912,6 +2098,18 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<int>(updatedAt.value);
     }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<int>(completedAt.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (repeatRule.present) {
+      map['repeat_rule'] = Variable<String>(repeatRule.value);
+    }
+    if (reminderAt.present) {
+      map['reminder_at'] = Variable<int>(reminderAt.value);
+    }
     return map;
   }
 
@@ -1930,7 +2128,11 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('projectId: $projectId, ')
           ..write('contextId: $contextId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('repeatRule: $repeatRule, ')
+          ..write('reminderAt: $reminderAt')
           ..write(')'))
         .toString();
   }
@@ -3677,6 +3879,10 @@ typedef $$TasksTableCreateCompanionBuilder = TasksCompanion Function({
   Value<int?> contextId,
   required int createdAt,
   required int updatedAt,
+  Value<int?> completedAt,
+  Value<int> sortOrder,
+  Value<String?> repeatRule,
+  Value<int?> reminderAt,
 });
 typedef $$TasksTableUpdateCompanionBuilder = TasksCompanion Function({
   Value<int> id,
@@ -3692,6 +3898,10 @@ typedef $$TasksTableUpdateCompanionBuilder = TasksCompanion Function({
   Value<int?> contextId,
   Value<int> createdAt,
   Value<int> updatedAt,
+  Value<int?> completedAt,
+  Value<int> sortOrder,
+  Value<String?> repeatRule,
+  Value<int?> reminderAt,
 });
 
 final class $$TasksTableReferences
@@ -3812,6 +4022,26 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<int> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get repeatRule => $composableBuilder(
+    column: $table.repeatRule,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reminderAt => $composableBuilder(
+    column: $table.reminderAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3951,6 +4181,26 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get repeatRule => $composableBuilder(
+    column: $table.repeatRule,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reminderAt => $composableBuilder(
+    column: $table.reminderAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ProjectsTableOrderingComposer get projectId {
     final $$ProjectsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4039,6 +4289,24 @@ class $$TasksTableAnnotationComposer
 
   GeneratedColumn<int> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get repeatRule => $composableBuilder(
+    column: $table.repeatRule,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reminderAt => $composableBuilder(
+    column: $table.reminderAt,
+    builder: (column) => column,
+  );
 
   $$ProjectsTableAnnotationComposer get projectId {
     final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
@@ -4157,6 +4425,10 @@ class $$TasksTableTableManager
                 Value<int?> contextId = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
+                Value<int?> completedAt = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String?> repeatRule = const Value.absent(),
+                Value<int?> reminderAt = const Value.absent(),
               }) => TasksCompanion(
                 id: id,
                 title: title,
@@ -4171,6 +4443,10 @@ class $$TasksTableTableManager
                 contextId: contextId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                completedAt: completedAt,
+                sortOrder: sortOrder,
+                repeatRule: repeatRule,
+                reminderAt: reminderAt,
               ),
           createCompanionCallback:
               ({
@@ -4187,6 +4463,10 @@ class $$TasksTableTableManager
                 Value<int?> contextId = const Value.absent(),
                 required int createdAt,
                 required int updatedAt,
+                Value<int?> completedAt = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String?> repeatRule = const Value.absent(),
+                Value<int?> reminderAt = const Value.absent(),
               }) => TasksCompanion.insert(
                 id: id,
                 title: title,
@@ -4201,6 +4481,10 @@ class $$TasksTableTableManager
                 contextId: contextId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                completedAt: completedAt,
+                sortOrder: sortOrder,
+                repeatRule: repeatRule,
+                reminderAt: reminderAt,
               ),
           withReferenceMapper: (p0) => p0
               .map(
