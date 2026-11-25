@@ -88,5 +88,6 @@
       }
     }
   },
-  "todayEmpty": "今日无安排"
+  "todayEmpty": "今日无安排",
+  "anytimeEmpty": "没有随时可做的任务"
 }

@@ -256,4 +256,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get todayEmpty => '今日无安排';
+
+  @override
+  String get anytimeEmpty => '没有随时可做的任务';
 }

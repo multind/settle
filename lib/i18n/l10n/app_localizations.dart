@@ -589,6 +589,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing scheduled today.'**
   String get todayEmpty;
+
+  /// No description provided for @anytimeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks anytime.'**
+  String get anytimeEmpty;
 }
 
 class _AppLocalizationsDelegate

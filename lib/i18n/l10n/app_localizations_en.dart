@@ -256,4 +256,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todayEmpty => 'Nothing scheduled today.';
+
+  @override
+  String get anytimeEmpty => 'No tasks anytime.';
 }

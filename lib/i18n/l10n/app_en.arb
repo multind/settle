@@ -88,5 +88,6 @@
       }
     }
   },
-  "todayEmpty": "Nothing scheduled today."
+  "todayEmpty": "Nothing scheduled today.",
+  "anytimeEmpty": "No tasks anytime."
 }
