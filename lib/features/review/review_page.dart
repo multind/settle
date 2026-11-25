@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/glass.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -33,6 +35,7 @@ class ReviewPage extends ConsumerWidget {
         data: (rows) => rows.isEmpty
             ? Center(child: Text(l10n.emptyTasks))
             : ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: rows.length,
                 itemBuilder: (context, i) => _ReviewTile(review: rows[i]),
               ),
@@ -63,10 +66,23 @@ class _ReviewTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stats = _statsLabel();
-    return ListTile(
-      title: Text(_dateLabel()),
-      subtitle: Text(review.summary ?? '-'),
-      trailing: stats == null ? null : Text(stats),
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: GlassContainer(
+        color: tokens.cardSolid,
+        blur: 5,
+        saturate: 1.0,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusRow),
+        shadow: tokens.shadowSm,
+        child: ListTile(
+          title: Text(_dateLabel()),
+          subtitle: Text(review.summary ?? '-'),
+          trailing: stats == null ? null : Text(stats),
+        ),
+      ),
     );
   }
 }
@@ -112,51 +128,89 @@ class _ReviewDialogState extends ConsumerState<_ReviewDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.newReview),
-      content: SingleChildScrollView(
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      child: GlassContainer(
+        color: tokens.card,
+        blur: 12,
+        saturate: 1.8,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
+        shadow: tokens.shadow,
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              key: const Key('review_summary_field'),
-              controller: _summary,
-              maxLines: 3,
-              decoration: InputDecoration(labelText: l10n.reviewSummary),
+            Text(
+              l10n.newReview,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 8),
-            TextField(
-              key: const Key('review_done_field'),
-              controller: _done,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.reviewDone),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      key: const Key('review_summary_field'),
+                      controller: _summary,
+                      maxLines: 3,
+                      decoration: InputDecoration(labelText: l10n.reviewSummary),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      key: const Key('review_done_field'),
+                      controller: _done,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(labelText: l10n.reviewDone),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      key: const Key('review_new_field'),
+                      controller: _new,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(labelText: l10n.reviewNew),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      key: const Key('review_stalled_field'),
+                      controller: _stalled,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(labelText: l10n.reviewStalled),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            TextField(
-              key: const Key('review_new_field'),
-              controller: _new,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.reviewNew),
-            ),
-            TextField(
-              key: const Key('review_stalled_field'),
-              controller: _stalled,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.reviewStalled),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.cancel),
+                ),
+                const SizedBox(width: 12),
+                GradientButton(
+                  key: const Key('review_save'),
+                  onPressed: _save,
+                  minimumSize: const Size(72, 40),
+                  child: Text(l10n.saveReview),
+                ),
+              ],
             ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          key: const Key('review_save'),
-          onPressed: _save,
-          child: Text(l10n.saveReview),
-        ),
-      ],
     );
   }
 }

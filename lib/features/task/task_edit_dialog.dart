@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/glass.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
@@ -44,32 +46,69 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
       stream: tagStream,
       builder: (context, snapshot) {
         final tagIds = snapshot.data?.map((x) => x.id).toSet() ?? const <int>{};
-        return AlertDialog(
-          title: Text(l10n.editTask),
-          content: SingleChildScrollView(
-            child: TaskFormFields(
-              key: _formKey,
-              initial: _initialDraft(),
-              initialTagIds: tagIds,
-              allowStatusChange: false,
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: GlassContainer(
+            color: Theme.of(context).colorScheme.surface, // 测试环境下不依赖扩展的 card
+            blur: 12,
+            saturate: 1.8,
+            borderColor: Theme.of(context).colorScheme.outline, // stroke
+            borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
+            shadow: const [
+              BoxShadow(color: Color(0x472456FF), blurRadius: 50, offset: Offset(0, 18)),
+              BoxShadow(color: Color(0x1F141B33), blurRadius: 12, offset: Offset(0, 4)),
+            ],
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.editTask,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: TaskFormFields(
+                      key: _formKey,
+                      initial: _initialDraft(),
+                      initialTagIds: tagIds,
+                      allowStatusChange: false,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(l10n.cancel),
+                    ),
+                    const SizedBox(width: 12),
+                    GradientButton(
+                      key: const Key('task_edit_save'),
+                      onPressed: () async {
+                        final draft = _formKey.currentState!.validate();
+                        if (draft == null) return;
+                        await ref.read(taskRepositoryProvider).update(widget.task.id, draft);
+                        if (context.mounted) Navigator.of(context).pop();
+                      },
+                      minimumSize: const Size(72, 40),
+                      child: Text(l10n.save),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              key: const Key('task_edit_save'),
-              onPressed: () async {
-                final draft = _formKey.currentState!.validate();
-                if (draft == null) return;
-                await ref.read(taskRepositoryProvider).update(widget.task.id, draft);
-                if (context.mounted) Navigator.of(context).pop();
-              },
-              child: Text(l10n.save),
-            ),
-          ],
         );
       },
     );

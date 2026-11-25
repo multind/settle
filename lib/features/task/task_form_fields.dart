@@ -142,6 +142,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
       key: _formKey,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextFormField(
             key: const Key('task_title_field'),
@@ -149,7 +150,8 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
             decoration: InputDecoration(labelText: l10n.taskTitle),
             validator: (v) => (v == null || v.trim().isEmpty) ? l10n.taskTitle : null,
           ),
-          if (widget.allowStatusChange)
+          if (widget.allowStatusChange) ...[
+            const SizedBox(height: 4),
             DropdownButtonFormField<TaskStatus>(
               key: const Key('task_status_field'),
               initialValue: _status,
@@ -160,19 +162,24 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
               ],
               onChanged: (v) => setState(() => _status = v ?? TaskStatus.nextAction),
             ),
-          if (_status == TaskStatus.waiting)
+          ],
+          if (_status == TaskStatus.waiting) ...[
+            const SizedBox(height: 4),
             TextFormField(
               key: const Key('task_waiting_on_field'),
               controller: _waitingOn,
               decoration: InputDecoration(labelText: l10n.taskWaitingOn),
               validator: (v) => (v == null || v.trim().isEmpty) ? l10n.waitingOnRequired : null,
             ),
+          ],
+          const SizedBox(height: 4),
           TextFormField(
             key: const Key('task_notes_field'),
             controller: _notes,
             decoration: InputDecoration(labelText: l10n.taskNotes),
             maxLines: 2,
           ),
+          const SizedBox(height: 4),
           Row(
             children: [
               Expanded(
@@ -204,22 +211,42 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
               ),
             ],
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.taskDueDate),
-            trailing: Text(_dueDate == null
-                ? '-'
-                : '${_dueDate!.year}-${_dueDate!.month}-${_dueDate!.day}'),
-            onTap: () => _pickDate(context, due: true),
+          const SizedBox(height: 4),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  title: Text(l10n.taskDueDate),
+                  trailing: Text(_dueDate == null
+                      ? '-'
+                      : '${_dueDate!.year}-${_dueDate!.month}-${_dueDate!.day}'),
+                  onTap: () => _pickDate(context, due: true),
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                ListTile(
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  title: Text(l10n.taskScheduled),
+                  trailing: Text(_scheduled == null
+                      ? '-'
+                      : '${_scheduled!.year}-${_scheduled!.month}-${_scheduled!.day}'),
+                  onTap: () => _pickDate(context, due: false),
+                ),
+              ],
+            ),
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.taskScheduled),
-            trailing: Text(_scheduled == null
-                ? '-'
-                : '${_scheduled!.year}-${_scheduled!.month}-${_scheduled!.day}'),
-            onTap: () => _pickDate(context, due: false),
-          ),
+          const SizedBox(height: 4),
           projects.when(
             data: (list) => DropdownButtonFormField<int?>(
               key: const Key('task_project_field'),
@@ -234,6 +261,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
+          const SizedBox(height: 4),
           contexts.when(
             data: (list) => DropdownButtonFormField<int?>(
               key: const Key('task_context_field'),
@@ -248,9 +276,11 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
+          const SizedBox(height: 8),
           tags.when(
             data: (list) => Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: [
                 for (final t in list)
                   FilterChip(

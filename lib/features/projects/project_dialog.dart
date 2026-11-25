@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/glass.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -49,35 +51,64 @@ class _ProjectDialogState extends ConsumerState<ProjectDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(widget.project == null ? l10n.newProject : l10n.editProject),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            key: const Key('project_name_field'),
-            controller: _name,
-            decoration: InputDecoration(labelText: l10n.projectName),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            key: const Key('project_goal_field'),
-            controller: _goal,
-            decoration: InputDecoration(labelText: l10n.projectGoal),
-          ),
-        ],
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      child: GlassContainer(
+        color: tokens.card,
+        blur: 12,
+        saturate: 1.8,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
+        shadow: tokens.shadow,
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.project == null ? l10n.newProject : l10n.editProject,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              key: const Key('project_name_field'),
+              controller: _name,
+              decoration: InputDecoration(labelText: l10n.projectName),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('project_goal_field'),
+              controller: _goal,
+              decoration: InputDecoration(labelText: l10n.projectGoal),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.cancel),
+                ),
+                const SizedBox(width: 12),
+                GradientButton(
+                  key: const Key('project_save'),
+                  onPressed: _save,
+                  minimumSize: const Size(72, 40),
+                  child: Text(l10n.save),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          key: const Key('project_save'),
-          onPressed: _save,
-          child: Text(l10n.save),
-        ),
-      ],
     );
   }
 }

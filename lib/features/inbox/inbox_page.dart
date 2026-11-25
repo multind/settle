@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/glass.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
@@ -30,6 +32,7 @@ class InboxPage extends ConsumerWidget {
               data: (rows) => rows.isEmpty
                   ? Center(child: Text(l10n.emptyInbox))
                   : ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       itemCount: rows.length,
                       itemBuilder: (context, i) => _InboxTile(item: rows[i]),
                     ),
@@ -57,16 +60,28 @@ class _InboxTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final isPending = item.status == InboxStatus.pending.storage;
-    return ListTile(
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    final tile = ListTile(
       title: Text(item.rawText),
       subtitle: Wrap(
         spacing: 8,
+        runSpacing: 4,
         children: [
           Chip(label: Text(_sourceLabel(l10n)), visualDensity: VisualDensity.compact),
           Chip(
             label: Text(isPending ? l10n.statusPending : l10n.statusClarified),
             visualDensity: VisualDensity.compact,
-            backgroundColor: isPending ? Colors.amber.shade100 : Colors.green.shade100,
+            backgroundColor: isPending
+                ? const Color(0x33FFB74D) // 琥珀玻璃底（Pending）
+                : const Color(0x3300B478), // 绿玻璃底（Clarified）
+            labelStyle: TextStyle(
+              color: isPending
+                  ? const Color(0xFF8A5A00)
+                  : (isLight ? const Color(0xFF00775A) : const Color(0xFF6DF7B3)),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -74,14 +89,17 @@ class _InboxTile extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (isPending)
-            TextButton(
+            GradientButton(
               key: Key('clarify_${item.id}'),
               onPressed: () => showDialog<void>(
                 context: context,
                 builder: (_) => ClarifyDialog(item: item),
               ),
+              radius: AppTokens.radiusButton,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: Text(l10n.clarify),
             ),
+          const SizedBox(width: 4),
           IconButton(
             key: Key('delete_inbox_${item.id}'),
             icon: const Icon(Icons.delete_outline),
@@ -91,6 +109,20 @@ class _InboxTile extends ConsumerWidget {
         ],
       ),
     );
+    final card = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: GlassContainer(
+        color: tokens.cardSolid,
+        blur: 5,
+        saturate: 1.0,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusCard),
+        shadow: tokens.shadowSm,
+        child: tile,
+      ),
+    );
+    // 完成项（已澄清）整体 55% 不透明度（预览 `.task.done`）。
+    return isPending ? card : Opacity(opacity: 0.55, child: card);
   }
 
   Future<void> _confirmDelete(

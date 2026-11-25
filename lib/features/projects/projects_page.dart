@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/glass.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -36,6 +38,7 @@ class ProjectsPage extends ConsumerWidget {
         data: (list) => list.isEmpty
             ? Center(child: Text(l10n.emptyTasks))
             : ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: list.length,
                 itemBuilder: (context, i) => _ProjectCard(project: list[i]),
               ),
@@ -52,69 +55,95 @@ class _ProjectCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final tasks = ref.watch(_projectTasksProvider(project.id));
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: Column(
-        children: [
-          ListTile(
-            key: Key('project_card_${project.id}'),
-            title: Text(project.name),
-            subtitle: project.goal == null ? null : Text(project.goal!),
-            leading: Icon(
-              project.status == 'done' ? Icons.task_alt : Icons.folder,
-              color: project.status == 'done' ? Colors.green : null,
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  key: Key('edit_project_${project.id}'),
-                  icon: const Icon(Icons.edit_outlined),
-                  tooltip: l10n.editProject,
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => ProjectDialog(project: project),
-                  ),
-                ),
-                IconButton(
-                  key: Key('delete_project_${project.id}'),
-                  icon: const Icon(Icons.delete_outline),
-                  tooltip: l10n.delete,
-                  onPressed: () => _confirmDelete(context, ref, l10n),
-                ),
-              ],
-            ),
-          ),
-          ...tasks.when(
-            data: (rows) => rows.isEmpty
-                ? [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(l10n.emptyTasks),
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: GlassContainer(
+        color: tokens.card,
+        blur: 12,
+        saturate: 1.8,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusCard),
+        shadow: tokens.shadow,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              key: Key('project_card_${project.id}'),
+              title: Text(project.name),
+              subtitle: project.goal == null ? null : Text(project.goal!),
+              leading: Icon(
+                project.status == 'done' ? Icons.task_alt : Icons.folder,
+                color: project.status == 'done' ? Colors.green : null,
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    key: Key('edit_project_${project.id}'),
+                    icon: const Icon(Icons.edit_outlined),
+                    tooltip: l10n.editProject,
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => ProjectDialog(project: project),
                     ),
-                  ]
-                : [for (final t in rows) _taskTile(context, ref, l10n, t)],
-            loading: () => const [],
-            error: (_, __) => const [],
-          ),
-        ],
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    key: Key('delete_project_${project.id}'),
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: l10n.delete,
+                    onPressed: () => _confirmDelete(context, ref, l10n),
+                  ),
+                ],
+              ),
+            ),
+            ...tasks.when(
+              data: (rows) => rows.isEmpty
+                  ? [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(l10n.emptyTasks),
+                      ),
+                    ]
+                  : [for (final t in rows) _taskTile(context, ref, l10n, t)],
+              loading: () => const [],
+              error: (_, __) => const [],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _taskTile(
       BuildContext context, WidgetRef ref, AppLocalizations l10n, Task t) {
-    return ListTile(
-      dense: true,
-      title: Text(t.title),
-      trailing: IconButton(
-        icon: const Icon(Icons.check_circle_outline),
-        tooltip: l10n.markDone,
-        onPressed: () => ref.read(taskRepositoryProvider).complete(t.id),
-      ),
-      onTap: () => showDialog<void>(
-        context: context,
-        builder: (_) => TaskEditDialog(task: t),
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 10),
+      child: GlassContainer(
+        color: tokens.cardSolid,
+        blur: 5,
+        saturate: 1.0,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusRow),
+        shadow: tokens.shadowSm,
+        child: ListTile(
+          dense: true,
+          title: Text(t.title),
+          trailing: IconButton(
+            tooltip: l10n.markDone,
+            onPressed: () => ref.read(taskRepositoryProvider).complete(t.id),
+            icon: const GlassCheckbox(value: false, onChanged: null),
+          ),
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (_) => TaskEditDialog(task: t),
+          ),
+        ),
       ),
     );
   }

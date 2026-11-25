@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/glass.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -34,6 +36,7 @@ class ContextsPage extends ConsumerWidget {
         data: (list) => list.isEmpty
             ? Center(child: Text(l10n.emptyTasks))
             : ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: list.length,
                 itemBuilder: (context, i) => _ContextTile(context: list[i]),
               ),
@@ -49,14 +52,27 @@ class _ContextTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    return ListTile(
-      leading: const Icon(Icons.place),
-      title: Text(this.context.name),
-      trailing: IconButton(
-        key: Key('delete_context_${this.context.id}'),
-        icon: const Icon(Icons.delete_outline),
-        tooltip: l10n.delete,
-        onPressed: () => _confirmDelete(context, ref, l10n),
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: GlassContainer(
+        color: tokens.cardSolid,
+        blur: 5,
+        saturate: 1.0,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusRow),
+        shadow: tokens.shadowSm,
+        child: ListTile(
+          leading: const Icon(Icons.place),
+          title: Text(this.context.name),
+          trailing: IconButton(
+            key: Key('delete_context_${this.context.id}'),
+            icon: const Icon(Icons.delete_outline),
+            tooltip: l10n.delete,
+            onPressed: () => _confirmDelete(context, ref, l10n),
+          ),
+        ),
       ),
     );
   }
@@ -113,25 +129,59 @@ class _ContextDialogState extends ConsumerState<_ContextDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.add),
-      content: TextField(
-        key: const Key('context_name_field'),
-        controller: _name,
-        autofocus: true,
-        decoration: InputDecoration(labelText: l10n.taskContext),
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      child: GlassContainer(
+        color: tokens.card,
+        blur: 12,
+        saturate: 1.8,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
+        shadow: tokens.shadow,
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.add,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              key: const Key('context_name_field'),
+              controller: _name,
+              autofocus: true,
+              decoration: InputDecoration(labelText: l10n.taskContext),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.cancel),
+                ),
+                const SizedBox(width: 12),
+                GradientButton(
+                  key: const Key('context_save'),
+                  onPressed: _save,
+                  minimumSize: const Size(72, 40),
+                  child: Text(l10n.save),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          key: const Key('context_save'),
-          onPressed: _save,
-          child: Text(l10n.save),
-        ),
-      ],
     );
   }
 }

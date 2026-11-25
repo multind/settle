@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gtd_app/app/glass.dart';
+import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/core/enums.dart';
@@ -34,6 +36,7 @@ class TodayPage extends ConsumerWidget {
             });
           if (sorted.isEmpty) return Center(child: Text(l10n.emptyTasks));
           return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 4),
             itemCount: sorted.length,
             itemBuilder: (context, i) => _TaskTile(task: sorted[i]),
           );
@@ -57,23 +60,39 @@ class _TaskTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    return ListTile(
-      key: Key('task_tile_${task.id}'),
-      title: Text(task.title),
-      subtitle: task.dueDate == null
-          ? null
-          : Text(DateTime.fromMillisecondsSinceEpoch(task.dueDate!)
-              .toString()
-              .substring(0, 10)),
-      leading: IconButton(
-        key: Key('task_done_${task.id}'),
-        icon: const Icon(Icons.check_circle_outline),
-        tooltip: l10n.markDone,
-        onPressed: () => ref.read(taskRepositoryProvider).complete(task.id),
-      ),
-      onTap: () => showDialog<void>(
-        context: context,
-        builder: (_) => TaskEditDialog(task: task),
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: GlassContainer(
+        color: tokens.cardSolid,
+        blur: 5,
+        saturate: 1.0,
+        borderColor: tokens.stroke,
+        borderRadius: BorderRadius.circular(AppTokens.radiusRow),
+        shadow: tokens.shadowSm,
+        child: ListTile(
+          key: Key('task_tile_${task.id}'),
+          title: Text(task.title),
+          subtitle: task.dueDate == null
+              ? null
+              : Text(
+                  DateTime.fromMillisecondsSinceEpoch(task.dueDate!)
+                      .toString()
+                      .substring(0, 10),
+                  style: TextStyle(color: tokens.muted, fontSize: 12),
+                ),
+          leading: IconButton(
+            key: Key('task_done_${task.id}'),
+            tooltip: l10n.markDone,
+            onPressed: () => ref.read(taskRepositoryProvider).complete(task.id),
+            icon: const GlassCheckbox(value: false, onChanged: null),
+          ),
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (_) => TaskEditDialog(task: task),
+          ),
+        ),
       ),
     );
   }
