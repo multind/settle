@@ -109,6 +109,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clarify => '理清';
 
   @override
+  String get clearDate => '清除';
+
+  @override
   String get emptyInbox => '收件箱是空的，在上方写下第一条想法。';
 
   @override
@@ -194,6 +197,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reopen => '重新打开';
+
+  @override
+  String get reminder => '提醒';
+
+  @override
+  String get repeat => '重复';
+
+  @override
+  String get repeatDaily => '每日';
+
+  @override
+  String get repeatEveryN => '每 N 天';
+
+  @override
+  String get repeatIntervalInvalid => '请输入 1-365 之间的整数';
+
+  @override
+  String get repeatMonthly => '每月';
+
+  @override
+  String get repeatNone => '无';
+
+  @override
+  String get repeatWeekly => '每周';
 
   @override
   String get reviewSummary => '总结';

@@ -109,6 +109,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clarify => 'Clarify';
 
   @override
+  String get clearDate => 'Clear';
+
+  @override
   String get emptyInbox => 'Inbox is empty. Capture your first thought above.';
 
   @override
@@ -194,6 +197,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reopen => 'Reopen';
+
+  @override
+  String get reminder => 'Reminder';
+
+  @override
+  String get repeat => 'Repeat';
+
+  @override
+  String get repeatDaily => 'Daily';
+
+  @override
+  String get repeatEveryN => 'Every N days';
+
+  @override
+  String get repeatIntervalInvalid => 'Enter an integer from 1 to 365';
+
+  @override
+  String get repeatMonthly => 'Monthly';
+
+  @override
+  String get repeatNone => 'None';
+
+  @override
+  String get repeatWeekly => 'Weekly';
 
   @override
   String get reviewSummary => 'Summary';

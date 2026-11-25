@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'Clarify'**
   String get clarify;
 
+  /// No description provided for @clearDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearDate;
+
   /// No description provided for @emptyInbox.
   ///
   /// In en, this message translates to:
@@ -469,6 +475,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reopen'**
   String get reopen;
+
+  /// No description provided for @reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get reminder;
+
+  /// No description provided for @repeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get repeat;
+
+  /// No description provided for @repeatDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get repeatDaily;
+
+  /// No description provided for @repeatEveryN.
+  ///
+  /// In en, this message translates to:
+  /// **'Every N days'**
+  String get repeatEveryN;
+
+  /// No description provided for @repeatIntervalInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an integer from 1 to 365'**
+  String get repeatIntervalInvalid;
+
+  /// No description provided for @repeatMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get repeatMonthly;
+
+  /// No description provided for @repeatNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get repeatNone;
+
+  /// No description provided for @repeatWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get repeatWeekly;
 
   /// No description provided for @reviewSummary.
   ///

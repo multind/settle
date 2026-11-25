@@ -48,6 +48,9 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
   late TaskStatus _status;
   DateTime? _dueDate;
   DateTime? _scheduled;
+  DateTime? _reminderAt;
+  String? _repeatKind;
+  late final TextEditingController _repeatInterval;
   EnergyLevel? _energy;
   PriorityLevel? _priority;
   int? _projectId;
@@ -61,14 +64,34 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
     _title = TextEditingController(text: d?.title ?? '');
     _notes = TextEditingController(text: d?.notes ?? '');
     _waitingOn = TextEditingController(text: d?.waitingOn ?? '');
+    _repeatInterval = TextEditingController();
     _status = d?.status ?? TaskStatus.nextAction;
     _dueDate = d?.dueDate;
     _scheduled = d?.scheduled;
+    _reminderAt = d?.reminderAt;
     _energy = d?.energy;
     _priority = d?.priority;
     _projectId = d?.projectId;
     _contextId = d?.contextId;
+    _repeatKind = _decodeRepeatKind(d?.repeatRule, _repeatInterval);
     _tagIds.addAll(widget.initialTagIds);
+  }
+
+  /// 反解析存储 repeatRule 回下拉态：null→无；daily/weekly/monthly→对应项；
+  /// every:N→'every' 并把 N 值回填进 [interval] 控制器。
+  String? _decodeRepeatKind(String? rule, TextEditingController interval) {
+    switch (rule) {
+      case 'daily':
+      case 'weekly':
+      case 'monthly':
+        return rule;
+      default:
+        if (rule != null && rule.startsWith('every:')) {
+          interval.text = rule.substring('every:'.length);
+          return 'every';
+        }
+        return null;
+    }
   }
 
   @override
@@ -86,6 +109,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
     _title.dispose();
     _notes.dispose();
     _waitingOn.dispose();
+    _repeatInterval.dispose();
     super.dispose();
   }
 
@@ -99,6 +123,8 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
       waitingOn: _status == TaskStatus.waiting ? _waitingOn.text.trim() : null,
       dueDate: _dueDate,
       scheduled: _scheduled,
+      repeatRule: _computedRepeatRule(),
+      reminderAt: _reminderAt,
       energy: _energy,
       priority: _priority,
       projectId: _projectId,
@@ -107,22 +133,81 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
     );
   }
 
-  Future<void> _pickDate(BuildContext context, {required bool due}) async {
-    final picked = await showDatePicker(
+  /// 下拉态 → 存储值：daily/weekly/monthly 原样；every:N 合成；无 → null。
+  String? _computedRepeatRule() {
+    switch (_repeatKind) {
+      case 'daily':
+      case 'weekly':
+      case 'monthly':
+        return _repeatKind;
+      case 'every':
+        // 校验器已拦非法 N（1-365），此处防御性兜底。
+        final n = int.tryParse(_repeatInterval.text.trim());
+        return n == null ? null : 'every:$n';
+      default:
+        return null;
+    }
+  }
+
+  /// 链式选择日期+时间：先 showDatePicker 再 showTimePicker。
+  /// 无既有值时时间默认 09:00；有既有值时保留原时分。
+  Future<void> _pickDateTime(DateTime? current, void Function(DateTime) apply) async {
+    final date = await showDatePicker(
       context: context,
-      initialDate: due ? (_dueDate ?? DateTime.now()) : (_scheduled ?? DateTime.now()),
+      initialDate: current ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2035),
     );
-    if (picked != null) {
-      setState(() {
-        if (due) {
-          _dueDate = picked;
-        } else {
-          _scheduled = picked;
-        }
-      });
-    }
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: current == null
+          ? const TimeOfDay(hour: 9, minute: 0)
+          : TimeOfDay.fromDateTime(current),
+    );
+    if (time == null || !mounted) return;
+    apply(DateTime(date.year, date.month, date.day, time.hour, time.minute));
+  }
+
+  /// 展示 `yyyy-MM-dd HH:mm`（手工补零，不依赖 intl DateFormat）。
+  String _fmtDateTime(DateTime d) =>
+      '${d.year}-${_p2(d.month)}-${_p2(d.day)} ${_p2(d.hour)}:${_p2(d.minute)}';
+
+  String _p2(int n) => n.toString().padLeft(2, '0');
+
+  Widget _dateTimeTile({
+    Key? tileKey,
+    required String label,
+    required DateTime? value,
+    required Key clearKey,
+    required VoidCallback onClear,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      key: tileKey,
+      dense: true,
+      visualDensity: VisualDensity.compact,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(label),
+      trailing: value == null
+          ? const Text('-')
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_fmtDateTime(value)),
+                IconButton(
+                  key: clearKey,
+                  icon: const Icon(Icons.close, size: 16),
+                  tooltip: AppLocalizations.of(context)!.clearDate,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: onClear,
+                ),
+              ],
+            ),
+      onTap: onTap,
+    );
   }
 
   String _statusLabel(AppLocalizations l10n, TaskStatus s) => switch (s) {
@@ -222,30 +307,64 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: VisualDensity.compact,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  title: Text(l10n.taskDueDate),
-                  trailing: Text(_dueDate == null
-                      ? '-'
-                      : '${_dueDate!.year}-${_dueDate!.month}-${_dueDate!.day}'),
-                  onTap: () => _pickDate(context, due: true),
+                _dateTimeTile(
+                  label: l10n.taskDueDate,
+                  value: _dueDate,
+                  clearKey: const Key('clear_due'),
+                  onClear: () => setState(() => _dueDate = null),
+                  onTap: () =>
+                      _pickDateTime(_dueDate, (v) => setState(() => _dueDate = v)),
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
-                ListTile(
-                  dense: true,
-                  visualDensity: VisualDensity.compact,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  title: Text(l10n.taskScheduled),
-                  trailing: Text(_scheduled == null
-                      ? '-'
-                      : '${_scheduled!.year}-${_scheduled!.month}-${_scheduled!.day}'),
-                  onTap: () => _pickDate(context, due: false),
+                _dateTimeTile(
+                  label: l10n.taskScheduled,
+                  value: _scheduled,
+                  clearKey: const Key('clear_scheduled'),
+                  onClear: () => setState(() => _scheduled = null),
+                  onTap: () =>
+                      _pickDateTime(_scheduled, (v) => setState(() => _scheduled = v)),
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _dateTimeTile(
+                  tileKey: const Key('task_reminder_field'),
+                  label: l10n.reminder,
+                  value: _reminderAt,
+                  clearKey: const Key('clear_reminder'),
+                  onClear: () => setState(() => _reminderAt = null),
+                  onTap: () =>
+                      _pickDateTime(_reminderAt, (v) => setState(() => _reminderAt = v)),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 4),
+          DropdownButtonFormField<String?>(
+            key: const Key('task_repeat_field'),
+            initialValue: _repeatKind,
+            decoration: InputDecoration(labelText: l10n.repeat),
+            items: [
+              DropdownMenuItem<String?>(value: null, child: Text(l10n.repeatNone)),
+              DropdownMenuItem<String?>(value: 'daily', child: Text(l10n.repeatDaily)),
+              DropdownMenuItem<String?>(value: 'weekly', child: Text(l10n.repeatWeekly)),
+              DropdownMenuItem<String?>(value: 'monthly', child: Text(l10n.repeatMonthly)),
+              DropdownMenuItem<String?>(value: 'every', child: Text(l10n.repeatEveryN)),
+            ],
+            onChanged: (v) => setState(() => _repeatKind = v),
+          ),
+          if (_repeatKind == 'every') ...[
+            const SizedBox(height: 4),
+            TextFormField(
+              key: const Key('task_repeat_interval'),
+              controller: _repeatInterval,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: l10n.repeatEveryN),
+              validator: (v) {
+                final n = int.tryParse((v ?? '').trim());
+                if (n == null || n < 1 || n > 365) return l10n.repeatIntervalInvalid;
+                return null;
+              },
+            ),
+          ],
           const SizedBox(height: 4),
           projects.when(
             data: (list) => DropdownButtonFormField<int?>(

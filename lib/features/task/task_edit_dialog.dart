@@ -35,6 +35,8 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
       priority: PriorityLevel.fromStorageOrNull(t.priority),
       projectId: t.projectId,
       contextId: t.contextId,
+      repeatRule: t.repeatRule,
+      reminderAt: t.reminderAt == null ? null : DateTime.fromMillisecondsSinceEpoch(t.reminderAt!),
     );
   }
 
