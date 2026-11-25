@@ -129,7 +129,7 @@ git commit -m "feat(ui): 多选批量操作（完成/删除/设日期/移动/恢
 - Modify: `lib/features/upcoming/upcoming_page.dart`
 - Modify: `test/widget/upcoming_page_test.dart`
 
-- [ ] **Step 1: Draggable + DragTarget**
+- [x] **Step 1: Draggable + DragTarget**
 
 即将行包 `Draggable<int>(taskId)`（拖动数据=任务 id）；日期头包
 `DragTarget<int>`（Key `upcoming_date_drop_${y}_${m}_${d}`）：
@@ -138,12 +138,12 @@ git commit -m "feat(ui): 多选批量操作（完成/删除/设日期/移动/恢
   （或按语义落入今日——目标日 ≤ 今日时）
 - 落点悬停高亮（日期头描边 `primary`）
 
-- [ ] **Step 2: 测试**
+- [x] **Step 2: 测试**
 
 拖任务到另一日期头 → `scheduled` 写入目标日、分组即时变化；拖到已过日期 → 落
 今日语义；不合法目标（当前日期）不接受。
 
-- [ ] **Step 3: analyze + 测试 + 提交**
+- [x] **Step 3: analyze + 测试 + 提交**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -152,6 +152,12 @@ flutter test test/widget/upcoming_page_test.dart 2>&1 | Select-Object -Last 1
 git add lib/features/upcoming test/widget/upcoming_page_test.dart
 git commit -m "feat(upcoming): 拖拽任务到日期头 = 安排开始日期"
 ```
+
+> **自审登记（偏差）**：实现语义「目标日期 ≠ 任务当前**生效日**（scheduled ?? dueDate）」优于计划
+> 字面「≠ scheduled」（避免仅有 dueDate 时拖回 dueDate 组的 no-op 空写）；触屏「快拖=拖到日期」
+> 与列表滚动的取舍为**显式产品决策**（spec §4 已批准、桌面为主目标，滚动由日期头/两侧 padding/
+> 滚轮承担；恢复方案=delay 启动 Draggable），已由冒烟测试固定现状；`task_list_view.dart` 因
+> Draggable 需组件参数（`dragToDateEnabled`）纳入提交（计划允许的最小改动）。
 
 ---
 
