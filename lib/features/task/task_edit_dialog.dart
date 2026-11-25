@@ -57,10 +57,6 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
             saturate: 1.8,
             borderColor: Theme.of(context).colorScheme.outline, // stroke
             borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
-            shadow: const [
-              BoxShadow(color: Color(0x472456FF), blurRadius: 50, offset: Offset(0, 18)),
-              BoxShadow(color: Color(0x1F141B33), blurRadius: 12, offset: Offset(0, 4)),
-            ],
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
