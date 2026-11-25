@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' hide isNull;
+import 'package:flutter/gestures.dart' show kLongPressTimeout, kPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtd_app/data/providers.dart';
@@ -153,6 +154,150 @@ void main() {
     final env = await TestEnv.create();
     await pumpPage(tester, env);
     expect(find.text('No upcoming tasks.'), findsOneWidget);
+    await env.db.close();
+  });
+
+  // —— Task 3：拖到日期（DragTarget 落点 = 日期头，Draggable 源 = 任务行）——
+
+  Key dropKey(DateTime d) =>
+      Key('upcoming_date_drop_${d.year}_${d.month}_${d.day}');
+  Key headerKey(DateTime d) =>
+      Key('upcoming_date_header_${d.year}_${d.month}_${d.day}');
+  Key highlightKey(DateTime d) =>
+      Key('upcoming_date_highlight_${d.year}_${d.month}_${d.day}');
+
+  /// 从 [source] 行中心拖到 [target] 中心（快拖：不等待长按，Draggable 立即接受），
+  /// 在 target 上悬停一帧后松开。返回手势以便调用方中途断言（悬停高亮）。
+  Future<TestGesture> dragRowTo(WidgetTester tester, String sourceTitle,
+      DateTime target) async {
+    final src = tester.getCenter(find.text(sourceTitle));
+    final dst = tester.getCenter(find.byKey(dropKey(target)));
+    final gesture = await tester.startGesture(src);
+    await tester.pump();
+    await gesture.moveBy(dst - src);
+    await tester.pump();
+    return gesture;
+  }
+
+  /// 日期头悬停描边颜色（恒定 2px Border，未悬停 = 透明）。
+  Color headerBorderColor(WidgetTester tester, DateTime d) {
+    final box = tester.widget<DecoratedBox>(find.byKey(highlightKey(d)));
+    return ((box.decoration as BoxDecoration).border as Border).top.color;
+  }
+
+  testWidgets('拖任务到另一日期头 → scheduled 写入目标日、分组即时变化（dueDate 保留、不重排）',
+      (tester) async {
+    final env = await TestEnv.create();
+    final d3 = futureDay(3);
+    final d10 = futureDay(10);
+    final a = await insertTask(env, '三天后任务', 'next_action',
+        scheduled: d3.millisecondsSinceEpoch,
+        dueDate: d10.millisecondsSinceEpoch,
+        sortOrder: 1);
+    final b = await insertTask(env, '十天后任务', 'next_action',
+        scheduled: d10.millisecondsSinceEpoch, sortOrder: 5);
+    await pumpPage(tester, env);
+    expect(find.byKey(headerKey(d3)), findsOneWidget);
+    // 快拖：三天后任务行 → 十天后日期头。
+    final gesture = await dragRowTo(tester, '三天后任务', d10);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // DB：scheduled = 目标日当日 00:00；dueDate 保留（仅安排开始日）；sortOrder 不动（未重排）。
+    final aRow = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.equals(a)))
+        .getSingle();
+    final bRow = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.equals(b)))
+        .getSingle();
+    expect(aRow.scheduled, DateTime(d10.year, d10.month, d10.day).millisecondsSinceEpoch);
+    expect(aRow.dueDate, d10.millisecondsSinceEpoch);
+    expect(aRow.sortOrder, 1);
+    expect(bRow.sortOrder, 5);
+    // 视图：day3 组消失，两任务同落 day10 组。
+    expect(find.byKey(headerKey(d3)), findsNothing);
+    expect(find.byKey(headerKey(d10)), findsOneWidget);
+    expect(find.text('三天后任务'), findsOneWidget);
+    expect(find.text('十天后任务'), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('不合法目标：拖回当前日期不接受（onWillAccept false，scheduled 不变、无高亮）',
+      (tester) async {
+    final env = await TestEnv.create();
+    final d3 = futureDay(3);
+    final d10 = futureDay(10);
+    final a = await insertTask(env, '三天后任务', 'next_action',
+        scheduled: d3.millisecondsSinceEpoch);
+    await insertTask(env, '十天后任务', 'next_action',
+        scheduled: d10.millisecondsSinceEpoch);
+    await pumpPage(tester, env);
+    // 拖三天后任务到自己的日期头（同日期 → 拒绝）。
+    final gesture = await dragRowTo(tester, '三天后任务', d3);
+    // 悬停无高亮：rejected 不进 candidateData。
+    expect(headerBorderColor(tester, d3), Colors.transparent);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    final rows = await env.db.select(env.db.tasks).get();
+    final aRow = rows.singleWhere((r) => r.id == a);
+    expect(aRow.scheduled, d3.millisecondsSinceEpoch);
+    expect(find.byKey(headerKey(d3)), findsOneWidget, reason: '仍在原组');
+    expect(find.text('三天后任务'), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('悬停日期头高亮：candidateData 非空时描边 primary，释放后落库并复位',
+      (tester) async {
+    final env = await TestEnv.create();
+    final d3 = futureDay(3);
+    final d10 = futureDay(10);
+    await insertTask(env, '三天后任务', 'next_action',
+        scheduled: d3.millisecondsSinceEpoch);
+    await insertTask(env, '十天后任务', 'next_action',
+        scheduled: d10.millisecondsSinceEpoch);
+    await pumpPage(tester, env);
+    // 未悬停：透明描边。
+    expect(headerBorderColor(tester, d10), Colors.transparent);
+    final gesture = await dragRowTo(tester, '三天后任务', d10);
+    // 悬停中：描边 = primary（非透明）。
+    expect(headerBorderColor(tester, d10), isNot(Colors.transparent));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // 释放后复位透明；且落库（三天后任务移入 day10 组）。
+    expect(headerBorderColor(tester, d10), Colors.transparent);
+    final rows = await env.db.select(env.db.tasks).get();
+    final aRow = rows.singleWhere((r) => r.title == '三天后任务');
+    expect(aRow.scheduled, DateTime(d10.year, d10.month, d10.day).millisecondsSinceEpoch);
+    await env.db.close();
+  });
+
+  testWidgets('与重排手势分叉：长按拖 = 组内重排（scheduled 不变、不触发拖到日期）',
+      (tester) async {
+    final env = await TestEnv.create();
+    final day = futureDayMs(3);
+    final a = await insertTask(env, '任务A', 'next_action', scheduled: day);
+    final b = await insertTask(env, '任务B', 'next_action', scheduled: day);
+    await pumpPage(tester, env);
+    // 长按 A（触屏延迟拖拽 = 重排），不等待即拖是 Draggable 快拖语义——此用例走长按分支。
+    final gesture =
+        await tester.startGesture(tester.getCenter(find.text('任务A')));
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await gesture.moveBy(const Offset(0, 150));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // 落库：sortOrder 重排（B 前 A 后）；scheduled 全部不变（拖到日期未触发）。
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b]))
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+        .get();
+    expect(rows.map((r) => r.id).toList(), [b, a]);
+    expect(rows.map((r) => r.scheduled).toList(), [day, day]);
+    // 视图顺序即时反映：B 在 A 上。
+    final titles = tester
+        .widgetList<ListTile>(find.byType(ListTile))
+        .map((t) => (t.title as Text).data)
+        .toList();
+    expect(titles, ['任务B', '任务A']);
     await env.db.close();
   });
 }

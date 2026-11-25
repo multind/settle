@@ -9,8 +9,7 @@ import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 /// 即将视图（index 2）：`watchUpcoming`（next_action 且 scheduled 或 dueDate > 今日末），
 /// 按生效日期（scheduled ?? dueDate）的日分组升序时间线。
 /// 公共组件 `TaskListView` 内统一排序 + 分组（`groupKey` = 生效日 DateTime），
-/// 组头由 `buildDateHeader` 注入（静态日期头；拖拽落点 DragTarget 由交互计划
-/// Task 3 加在此头上）。
+/// 组头由 `buildDateHeader` 注入（日期头 = 拖到日期的 DragTarget 落点，Task 3）。
 /// 行沿用 v0.2 样式（完成钮/编辑对话框），无 subtitle（生效日期已由组头表达）。
 /// 仓库约定：普通 Provider 无 watchByStatus 成员，改文件级 StreamProvider。
 /// [now] 为可注入时钟（测试用固定时刻消除跨午夜竞态）；缺省用 `DateTime.now`
@@ -52,9 +51,22 @@ class UpcomingPage extends ConsumerWidget {
             selectionEnabled: true,
             focusEnabled: true,
             actions: _batchActions,
+            dragToDateEnabled: true,
             groupKey: _effectiveDay,
-            buildDateHeader: (context, key) =>
-                _DateHeader(day: key as DateTime, today: today),
+            buildDateHeader: (context, key) {
+              final day = key as DateTime;
+              return _DateHeader(
+                day: day,
+                today: today,
+                tasks: rows,
+                onDrop: (taskId) {
+                  // 落点日期头只渲染未来日（watchUpcoming > 今日末），目标恒 > today；
+                  // 若未来渲染出「≤ 今日」头部（语义兜底），按 spec §4 落入今日。
+                  final target = day.isBefore(today) ? today : day;
+                  ref.read(taskRepositoryProvider).setScheduled(taskId, target);
+                },
+              );
+            },
           );
         },
       ),
@@ -70,31 +82,84 @@ class UpcomingPage extends ConsumerWidget {
   }
 }
 
-/// 日期头（静态）：明天/后天用友好文案，其余 `M月d日 周几`；muted 小字。
-/// 拖拽落点（DragTarget）由交互计划 Task 3 加在此头上。
-/// [today] 为「今日 00:00」，由页面注入时钟计算后传入（本 widget 不直接取时钟）。
+/// 日期头 = 拖到日期的落点（DragTarget<int>，Task 3）：悬停时描边 primary；
+/// `onWillAccept` 拒绝同日期（任务当前所在组），`onAccept` 走页面 onDrop 写 scheduled
+/// （目标日 ≤ 今日按「落今日」语义处理，见页面注释）。
+/// 明天/后天用友好文案，其余 `M月d日 周几`；muted 小字。
+/// [tasks] 为页面当前行（供 onWillAccept 查任务当前生效日，同日期不接受）。
 class _DateHeader extends StatelessWidget {
-  const _DateHeader({required this.day, required this.today});
+  const _DateHeader({
+    required this.day,
+    required this.today,
+    required this.tasks,
+    required this.onDrop,
+  });
+
+  /// 该组头的生效日（已归一化到当日 00:00）。
   final DateTime day;
+
+  /// 「今日 00:00」，由页面注入时钟计算后传入（本 widget 不直接取时钟）。
   final DateTime today;
+
+  /// 页面当前行快照：查任务当前生效日，判断落点是否同日期。
+  final List<Task> tasks;
+
+  /// 接受落点的回调（页面实现：setScheduled + 「落今日」兜底）。
+  final void Function(int taskId) onDrop;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
-    return Padding(
-      key: Key('upcoming_date_header_${day.year}_${day.month}_${day.day}'),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Text(
-        _headerText(l10n),
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: tokens.muted,
-        ),
-      ),
+    return DragTarget<int>(
+      key: Key('upcoming_date_drop_${day.year}_${day.month}_${day.day}'),
+      onWillAcceptWithDetails: (details) {
+        final task = _taskById(details.data);
+        if (task == null) return false;
+        // 不合法目标：拖回任务当前所在组（同日期）不接受；
+        // 目标日 ≤ 今日的头部本视图不渲染，若出现则由 onDrop 落今日兜底。
+        return UpcomingPage._effectiveDay(task) != day;
+      },
+      onAcceptWithDetails: (details) => onDrop(details.data),
+      builder: (context, candidateData, rejectedData) {
+        final isCandidate = candidateData.isNotEmpty;
+        // 恒定 2px 描边（未悬停透明）：悬停高亮不引起布局位移。
+        return Padding(
+          key: Key('upcoming_date_header_${day.year}_${day.month}_${day.day}'),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 2),
+          child: DecoratedBox(
+            key: Key(
+                'upcoming_date_highlight_${day.year}_${day.month}_${day.day}'),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isCandidate ? tokens.primary : Colors.transparent,
+                width: 2,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+              child: Text(
+                _headerText(l10n),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: tokens.muted,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
+  }
+
+  Task? _taskById(int taskId) {
+    for (final t in tasks) {
+      if (t.id == taskId) return t;
+    }
+    return null;
   }
 
   String _headerText(AppLocalizations l10n) {

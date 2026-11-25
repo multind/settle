@@ -41,6 +41,16 @@ enum TaskSortMode { standard, reverseChronological }
 /// 排序在组件内统一完成（[sortMode]），六页既有排序比较器差异在此收敛。
 /// 可选分组：给 [groupKey] 时按组键升序分组渲染，组首插入 [buildDateHeader]
 /// 组头（即将页日期头 / 今日逾期区标题；拖到日期的 DragTarget 由 Task 3 加在头上）。
+///
+/// 拖到日期（[dragToDateEnabled]，仅即将页）：任务行包 `Draggable<int>`（data=
+/// 任务 id），落点即页面注入的日期组头 DragTarget。手势协调：
+/// - 桌面：行内拖拽手柄（ReorderableDragStartListener）按命中顺序（更深层）
+///   先接受指针 → 手柄拖 = 重排；行主体拖 = 拖到日期，二者不冲突；
+/// - 触屏：`ReorderableDelayedDragStartListener`（长按 500ms）与 Draggable
+///   （立即拖，超 slop 即接受）同场竞技——长按先到 = 组内重排，快拖先到 =
+///   拖到日期；重排拖拽走 SliverReorderableList 的 `_DragInfo`（非 Draggable
+///   的 `_DragAvatar`），不会触发日期头 DragTarget；
+/// - 多选模式（[selectionMode]）优先：Draggable 与重排监听一并禁用。
 class TaskListView extends ConsumerStatefulWidget {
   const TaskListView({
     super.key,
@@ -56,6 +66,7 @@ class TaskListView extends ConsumerStatefulWidget {
     this.buildDateHeader,
     this.subtitleBuilder,
     this.isOverdue,
+    this.dragToDateEnabled = false,
   });
 
   /// 任务列表（组件内按 [sortMode] 排序；以组件内排序为准，收敛各页差异）。
@@ -98,6 +109,10 @@ class TaskListView extends ConsumerStatefulWidget {
 
   /// 逾期行判定（今日页）：true 时行左侧加 danger 色条。
   final bool Function(Task task)? isOverdue;
+
+  /// 拖到日期（即将页 Task 3）：true 时任务行包 `Draggable<int>`（data=任务 id），
+  /// 由页面注入的日期组头 DragTarget 接收；多选模式（[selectionMode]）禁用。
+  final bool dragToDateEnabled;
 
   @override
   TaskListViewState createState() => TaskListViewState();
@@ -267,18 +282,32 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         lastGroup = group;
         childIndex++;
       }
-      final draggable = widget.reorderEnabled && !_selectionMode;
-      if (draggable && isDesktop) {
-        children.add(_buildRow(i, dragIndex: childIndex));
-      } else if (draggable) {
-        children.add(ReorderableDelayedDragStartListener(
+      // 重排监听（长按延迟 / 桌面手柄）与拖到日期 Draggable 的协调见类注释。
+      final reorderDraggable = widget.reorderEnabled && !_selectionMode;
+      final dragToDate = widget.dragToDateEnabled && !_selectionMode;
+      Widget row;
+      if (reorderDraggable && isDesktop) {
+        row = _buildRow(i, dragIndex: childIndex);
+      } else if (reorderDraggable) {
+        row = ReorderableDelayedDragStartListener(
           key: Key('task_drag_${t.id}'),
           index: childIndex,
           child: _buildRow(i),
-        ));
+        );
       } else {
-        children.add(_buildRow(i));
+        row = _buildRow(i);
       }
+      if (dragToDate) {
+        row = Draggable<int>(
+          key: Key('task_drag_to_date_${t.id}'),
+          data: t.id,
+          feedback: _buildRowFeedback(i),
+          childWhenDragging: Opacity(opacity: 0.35, child: _buildRow(i)),
+          ignoringFeedbackPointer: true,
+          child: row,
+        );
+      }
+      children.add(row);
       positions.add(i);
       childIndex++;
     }
@@ -411,6 +440,33 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         if (hasFocus && !_selectionMode) setState(() => _focusIndex = index);
       },
       child: rowWidget,
+    );
+  }
+
+  /// 拖到日期（Task 3）的拖拽 feedback：行卡片副本（GlassContainer + 标准行），
+  /// 不挂 Focus/KeyedSubtree（feedback 浮在 Overlay 上，忽略指针事件）。
+  Widget _buildRowFeedback(int index) {
+    final t = _items[index];
+    final l10n = AppLocalizations.of(context)!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    final tile = widget.rowVariant == TaskRowVariant.logbook
+        ? _buildLogbookTile(t, l10n, tokens, false)
+        : _buildStandardTile(t, l10n, tokens, false, null);
+    return Material(
+      color: Colors.transparent,
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width - 24,
+        child: GlassContainer(
+          color: tokens.cardSolid,
+          blur: 5,
+          saturate: 1.0,
+          borderColor: tokens.stroke,
+          borderRadius: BorderRadius.circular(AppTokens.radiusRow),
+          shadow: tokens.shadowSm,
+          child: tile,
+        ),
+      ),
     );
   }
 
