@@ -302,6 +302,8 @@ ThemeData buildAppTheme(Brightness brightness) {
     colorScheme: scheme,
     // 纯色背景由主题 token 提供（Things 3 极简纯底，无光斑/渐变）。
     scaffoldBackgroundColor: tokens.bg1,
+    // Windows 中文清晰渲染（spec：中文字体指定微软雅黑）。
+    fontFamily: 'Microsoft YaHei',
     extensions: [extension],
 
     // —— 组件主题挂接（§7.4.4 末条：界面代码不散写色值）——
