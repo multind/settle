@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart' show kLongPressTimeout, kPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gtd_app/core/enums.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
 import 'package:gtd_app/features/task/task_edit_dialog.dart';
@@ -16,8 +17,14 @@ final _anytimeProvider = StreamProvider<List<Task>>(
 final _doneProvider = StreamProvider<List<Task>>(
     (ref) => ref.watch(taskRepositoryProvider).watchDone());
 
+/// 全部 next_action（含带日期的行，供「重复任务生成副本」用例渲染）。
+final _nextActionProvider = StreamProvider<List<Task>>(
+    (ref) =>
+        ref.watch(taskRepositoryProvider).watchByStatus(TaskStatus.nextAction));
+
 /// 测试宿主：watch 指定 provider 并把数据喂给 TaskListView（默认英文 locale）。
-/// 多选/焦点恒为 true（所有用例都依赖选择可用）；重排按用例开关。
+/// 多选/焦点恒为 true（所有用例都依赖选择可用）；重排按用例开关；
+/// 动作集默认全集（批量用例可按需裁剪，如日志恢复子集）。
 class _Host extends ConsumerWidget {
   const _Host(
     this.provider, {
@@ -26,6 +33,7 @@ class _Host extends ConsumerWidget {
     this.rowVariant = TaskRowVariant.standard,
     this.groupKey,
     this.buildDateHeader,
+    this.actions = _defaultActions,
   });
 
   final StreamProvider<List<Task>> provider;
@@ -34,6 +42,14 @@ class _Host extends ConsumerWidget {
   final TaskRowVariant rowVariant;
   final Comparable Function(Task task)? groupKey;
   final Widget Function(BuildContext context, Comparable key)? buildDateHeader;
+  final List<TaskListAction> actions;
+
+  static const List<TaskListAction> _defaultActions = [
+    TaskListAction.complete,
+    TaskListAction.delete,
+    TaskListAction.setDate,
+    TaskListAction.move,
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,12 +64,7 @@ class _Host extends ConsumerWidget {
         rowVariant: rowVariant,
         groupKey: groupKey,
         buildDateHeader: buildDateHeader,
-        actions: const [
-          TaskListAction.complete,
-          TaskListAction.delete,
-          TaskListAction.setDate,
-          TaskListAction.move,
-        ],
+        actions: actions,
       ),
     );
   }
@@ -66,11 +77,18 @@ Widget _groupHeader(BuildContext context, Comparable key) => Text('Group $key');
 
 void main() {
   Future<int> insertTask(TestEnv env, String title, String status,
-      {String? priority, int? sortOrder}) async {
+      {String? priority,
+      int? sortOrder,
+      DateTime? scheduled,
+      String? repeatRule}) async {
     return env.db.into(env.db.tasks).insert(TasksCompanion.insert(
       title: title,
       status: status,
       priority: Value(priority),
+      scheduled: scheduled == null
+          ? const Value.absent()
+          : Value(scheduled.millisecondsSinceEpoch),
+      repeatRule: repeatRule == null ? const Value.absent() : Value(repeatRule),
       sortOrder: sortOrder == null ? const Value.absent() : Value(sortOrder),
       createdAt: 1,
       updatedAt: 1,
@@ -325,7 +343,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('onAction 未接线：选择栏动作按钮置灰禁用', (tester) async {
+  testWidgets('onAction 未注入：组件默认处理批量动作（选中后按钮可点）', (tester) async {
     final env = await TestEnv.create();
     await insertTask(env, 'Task A', 'next_action');
     await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
@@ -335,7 +353,8 @@ void main() {
     final completeBtn = tester.widget<IconButton>(
       find.byKey(const Key('task_selection_action_complete')),
     );
-    expect(completeBtn.onPressed, isNull);
+    // Task 2 起组件内置默认处理：选中即可点（不再依赖 onAction 注入）。
+    expect(completeBtn.onPressed == null, isFalse);
     await env.db.close();
   });
 
@@ -403,6 +422,206 @@ void main() {
       {'A0': 5, 'A1': 9, 'B0': 13},
     );
     expect(tileTitles(tester), ['A0', 'A1', 'B0']);
+    await env.db.close();
+  });
+
+  testWidgets('批量完成：全部 done + 重复任务各自生成下一次副本', (tester) async {
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    final b = await insertTask(env, 'Task B', 'next_action',
+        scheduled: DateTime(2026, 11, 26, 9), repeatRule: 'daily');
+    await tester.pumpWidget(env.wrap(_Host(_nextActionProvider)));
+    await tester.pump();
+    // 长按 A 进选择，点选 B → 2 项。
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    await tester.tap(find.text('Task B'));
+    await tester.pump();
+    expect(find.text('2 selected'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('task_selection_action_complete')));
+    await tester.pumpAndSettle();
+    // 原任务全部 done；B 的每日副本 = next_action + scheduled 推进一天。
+    final rows = await env.db.select(env.db.tasks).get();
+    expect(rows.singleWhere((r) => r.id == a).status, 'done');
+    expect(rows.singleWhere((r) => r.id == b).status, 'done');
+    final clones = rows
+        .where((r) => r.status == 'next_action' && r.title == 'Task B')
+        .toList();
+    expect(clones, hasLength(1));
+    expect(clones.single.scheduled,
+        DateTime(2026, 11, 27, 9).millisecondsSinceEpoch);
+    expect(clones.single.repeatRule, 'daily');
+    // 动作后退出选择模式。
+    expect(find.byKey(const Key('task_selection_bar')), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('批量删除：确认后全部硬删除', (tester) async {
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    final b = await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    await tester.tap(find.text('Task B'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('task_selection_action_delete')));
+    await tester.pumpAndSettle();
+    // 确认对话框（复用 logbook_confirm_delete Key）→ 确认。
+    expect(find.byKey(const Key('logbook_confirm_delete')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('logbook_confirm_delete')));
+    await tester.pumpAndSettle();
+    final rows = await env.db.select(env.db.tasks).get();
+    expect(rows.map((r) => r.id).toList(), isNot(contains(a)));
+    expect(rows.map((r) => r.id).toList(), isNot(contains(b)));
+    expect(find.byKey(const Key('task_selection_bar')), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('批量删除取消：不删除、保持选择模式', (tester) async {
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('task_selection_action_delete')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    final rows = await env.db.select(env.db.tasks).get();
+    expect(rows.map((r) => r.id).toList(), [a]);
+    expect(find.byKey(const Key('task_selection_bar')), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('批量设日期（截止）：全部写入目标日', (tester) async {
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    final b = await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    await tester.tap(find.text('Task B'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('task_selection_action_setDate')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('task_selection_setdate_due')));
+    await tester.pumpAndSettle();
+    // 日期选择：initialDate = 今天，直接 OK（不点日格，与表单测试同款）。
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b])))
+        .get();
+    expect(rows.map((r) => r.dueDate).toList(), [today, today]);
+    expect(find.byKey(const Key('task_selection_bar')), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('批量设日期（开始）：全部写入目标日', (tester) async {
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    final b = await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    await tester.tap(find.text('Task B'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('task_selection_action_setDate')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('task_selection_setdate_scheduled')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day).millisecondsSinceEpoch;
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b])))
+        .get();
+    expect(rows.map((r) => r.scheduled).toList(), [today, today]);
+    expect(find.byKey(const Key('task_selection_bar')), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('批量移动：全部写入目标项目', (tester) async {
+    final env = await TestEnv.create();
+    final project = await env.db.into(env.db.projects).insert(
+        ProjectsCompanion.insert(
+            name: '客户交付', status: 'active', createdAt: 1, updatedAt: 1));
+    final a = await insertTask(env, 'Task A', 'next_action');
+    final b = await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    await tester.tap(find.text('Task B'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('task_selection_action_move')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('task_selection_move_dialog')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('task_selection_move_project')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('客户交付').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('task_selection_move_ok')));
+    await tester.pumpAndSettle();
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b])))
+        .get();
+    expect(rows.map((r) => r.projectId).toList(), [project, project]);
+    expect(find.byKey(const Key('task_selection_bar')), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('日志批量恢复：全部回到 next_action', (tester) async {
+    final env = await TestEnv.create();
+    final a = await insertDone(env, 'Done A',
+        DateTime(2026, 11, 25, 10).millisecondsSinceEpoch);
+    final b = await insertDone(env, 'Done B',
+        DateTime(2026, 11, 25, 11).millisecondsSinceEpoch);
+    await tester.pumpWidget(env.wrap(_Host(
+      _doneProvider,
+      sortMode: TaskSortMode.reverseChronological,
+      rowVariant: TaskRowVariant.logbook,
+      actions: const [TaskListAction.restore],
+    )));
+    await tester.pump();
+    await tester.longPress(find.text('Done A'));
+    await tester.pump();
+    await tester.tap(find.text('Done B'));
+    await tester.pump();
+    expect(find.text('2 selected'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('task_selection_action_restore')));
+    await tester.pumpAndSettle();
+    final rows = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.isIn([a, b])))
+        .get();
+    expect(rows.map((r) => r.status).toList(), ['next_action', 'next_action']);
+    expect(rows.map((r) => r.completedAt).toList(), [null, null]);
+    expect(find.byKey(const Key('task_selection_bar')), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('批量动作后退出选择模式：状态复位', (tester) async {
+    final env = await TestEnv.create();
+    await insertTask(env, 'Task A', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    await tester.longPress(find.text('Task A'));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    expect(state.selectionMode, isTrue);
+    await tester.tap(find.byKey(const Key('task_selection_action_complete')));
+    await tester.pumpAndSettle();
+    expect(state.selectionMode, isFalse);
+    expect(state.selectedIds, isEmpty);
+    expect(find.byKey(const Key('task_selection_bar')), findsNothing);
     await env.db.close();
   });
 }

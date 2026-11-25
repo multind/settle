@@ -233,6 +233,16 @@ class TaskRepository {
     ));
   }
 
+  /// 设置截止时间（ms epoch），null 表示清除；同时刷新 updatedAt。
+  /// 与 [setScheduled] 同款单列更新（批量设日期用；经 update/TaskDraft 会重写
+  /// 全字段并重建 tag 绑定，不适用于仅改截止日的批量场景）。
+  Future<void> setDueDate(int id, DateTime? date) async {
+    await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
+      dueDate: Value(date?.millisecondsSinceEpoch),
+      updatedAt: Value(_now().millisecondsSinceEpoch),
+    ));
+  }
+
   Future<void> setProject(int id, int? projectId) async {
     await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
       projectId: Value(projectId),

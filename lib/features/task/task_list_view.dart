@@ -7,8 +7,14 @@ import 'package:gtd_app/data/tables.dart';
 import 'package:gtd_app/features/task/task_edit_dialog.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 
-/// 多选批量动作类型。真实动作实现由 v0.3 交互计划 Task 2 接线；
-/// 本组件仅定义签名与选择栏按钮（[TaskListView.onAction] 可传 null）。
+/// 批量移动对话框用的项目列表（与 task_form_fields 同款文件级 StreamProvider）。
+final _projectsProvider = StreamProvider<List<Project>>(
+  (ref) => ref.watch(projectRepositoryProvider).watchAll(),
+);
+
+/// 多选批量动作类型。动作实现（对话框 + 批量落库）默认在组件内完成：
+/// [TaskListView.onAction] 传 null 时走内置默认处理（完成/删除/设日期/移动/恢复），
+/// 注入回调时改为委托回调（页面可自定义处理逻辑）。
 enum TaskListAction { complete, delete, setDate, move, restore }
 
 /// 行变体：standard = 完成钮 + 点击编辑；logbook = 已完成行
@@ -73,7 +79,10 @@ class TaskListView extends ConsumerStatefulWidget {
   /// 选择模式顶栏展示的操作按钮集合（按视图裁剪；日志 = 恢复/删除子集）。
   final List<TaskListAction> actions;
 
-  /// 批量操作回调（Task 2 接线实现；本 Task 仅定义签名，可传 null）。
+  /// 批量操作回调（可选）。传 null（默认）时组件内置默认处理：
+  /// 对话框（删除确认/设日期/移动项目）+ 经 taskRepositoryProvider 批量落库，
+  /// 动作完成后退出选择模式。注入回调则委托给回调（`void Function(action, ids)`）
+  /// 而不走内置默认处理；回调返回后组件同样退出选择模式。
   final void Function(TaskListAction action, Set<int> taskIds)? onAction;
 
   /// 组键（Comparable）：非空时任务分组渲染（组按键升序，组内按比较器序），
@@ -549,10 +558,10 @@ class TaskListViewState extends ConsumerState<TaskListView> {
             key: Key('task_selection_action_${action.name}'),
             tooltip: _actionTooltip(l10n, action),
             visualDensity: VisualDensity.compact,
-            // onAction 未接线（Task 1）时禁点；未选中任何行也禁点。
-            onPressed: widget.onAction == null || _selected.isEmpty
+            // 选中任意行即可点：组件内置默认处理（onAction 注入时委托回调）。
+            onPressed: _selected.isEmpty
                 ? null
-                : () => widget.onAction!(action, _selected.toSet()),
+                : () => _handleAction(action),
             icon: Icon(_actionIcon(action)),
           ),
       ]),
@@ -576,8 +585,70 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         TaskListAction.restore => l10n.logbookRestore,
       };
 
-  /// 日志删除确认对话框（保留既有 logbook_confirm_delete Key）。
-  Future<void> _confirmDelete(BuildContext context, Task t) async {
+  // —— 多选批量动作 ——
+
+  /// 选择模式动作按钮分发。默认组件内实现（对话框 + provider 批量落库）；
+  /// 注入 [TaskListView.onAction] 时改为委托回调。
+  /// 动作完成后退出选择模式；用户取消对话框则保持选择模式。
+  Future<void> _handleAction(TaskListAction action) async {
+    // 快照选中集：对话框期间列表被模态遮罩，无法点选；数据流可能在批量写后
+    // 回填（didUpdateWidget 修剪 _selected），因此循环一律用此快照。
+    final ids = _selected.toSet();
+    if (widget.onAction != null) {
+      widget.onAction!(action, ids);
+      exitSelection();
+      return;
+    }
+    final repo = ref.read(taskRepositoryProvider);
+    switch (action) {
+      case TaskListAction.complete:
+        // 批量 complete：重复任务各自在事务内生成下一次副本（complete 已承担）。
+        for (final id in ids) {
+          await repo.complete(id);
+        }
+      case TaskListAction.delete:
+        if (!await _confirmBatchDelete(context)) return;
+        for (final id in ids) {
+          await repo.delete(id);
+        }
+      case TaskListAction.setDate:
+        final field = await _pickDateField(context);
+        if (field == null || !mounted) return;
+        final date = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2035),
+        );
+        if (date == null || !mounted) return;
+        final day = DateTime(date.year, date.month, date.day);
+        for (final id in ids) {
+          if (field == _DateField.due) {
+            await repo.setDueDate(id, day);
+          } else {
+            await repo.setScheduled(id, day);
+          }
+        }
+      case TaskListAction.move:
+        final result = await showDialog<_ProjectMoveResult>(
+          context: context,
+          builder: (_) => const _MoveProjectDialog(),
+        );
+        if (result == null || !mounted) return;
+        for (final id in ids) {
+          await repo.setProject(id, result.projectId);
+        }
+      case TaskListAction.restore:
+        for (final id in ids) {
+          await repo.reopen(id);
+        }
+    }
+    if (mounted) exitSelection();
+  }
+
+  /// 批量删除确认对话框（与单行日志删除共用 [logbook_confirm_delete] Key
+  /// 与 logbookDeleteConfirm/confirmDeleteBody 既有文案；确认后批量硬删除）。
+  Future<bool> _confirmBatchDelete(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -597,8 +668,95 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         ],
       ),
     );
-    if (confirmed == true) {
+    return confirmed == true;
+  }
+
+  /// 设日期对话框第一步：截止/开始 二选一（SimpleDialog，点选项即返回）。
+  Future<_DateField?> _pickDateField(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    return showDialog<_DateField>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.actionSetDate),
+        children: [
+          SimpleDialogOption(
+            key: const Key('task_selection_setdate_due'),
+            onPressed: () => Navigator.pop(ctx, _DateField.due),
+            child: Text(l10n.taskDueDate),
+          ),
+          SimpleDialogOption(
+            key: const Key('task_selection_setdate_scheduled'),
+            onPressed: () => Navigator.pop(ctx, _DateField.scheduled),
+            child: Text(l10n.taskScheduled),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 日志单行删除确认（复用批量确认对话框）。
+  Future<void> _confirmDelete(BuildContext context, Task t) async {
+    if (await _confirmBatchDelete(context)) {
       await ref.read(taskRepositoryProvider).delete(t.id);
     }
+  }
+}
+
+/// 设日期对话框返回的字段目标：截止 / 开始。
+enum _DateField { due, scheduled }
+
+/// 批量移动对话框的返回值（null 对话框结果 = 取消；[projectId] 可为 null =
+/// 选择「无项目」清除归属）。
+class _ProjectMoveResult {
+  const _ProjectMoveResult(this.projectId);
+  final int? projectId;
+}
+
+/// 批量移动对话框：项目下拉（无项目 → null 清除）+ 确认/取消。
+class _MoveProjectDialog extends ConsumerStatefulWidget {
+  const _MoveProjectDialog();
+
+  @override
+  ConsumerState<_MoveProjectDialog> createState() => _MoveProjectDialogState();
+}
+
+class _MoveProjectDialogState extends ConsumerState<_MoveProjectDialog> {
+  int? _projectId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final projects = ref.watch(_projectsProvider);
+    return AlertDialog(
+      key: const Key('task_selection_move_dialog'),
+      title: Text(l10n.actionMove),
+      content: projects.when(
+        data: (list) => DropdownButtonFormField<int?>(
+          key: const Key('task_selection_move_project'),
+          initialValue: _projectId,
+          decoration: InputDecoration(labelText: l10n.taskProject),
+          items: [
+            const DropdownMenuItem<int?>(value: null, child: Text('—')),
+            for (final p in list)
+              DropdownMenuItem<int?>(value: p.id, child: Text(p.name)),
+          ],
+          onChanged: (v) => setState(() => _projectId = v),
+        ),
+        loading: () => const SizedBox.shrink(),
+        error: (_, __) => const SizedBox.shrink(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          key: const Key('task_selection_move_ok'),
+          onPressed: () =>
+              Navigator.pop(context, _ProjectMoveResult(_projectId)),
+          child: Text(l10n.save),
+        ),
+      ],
+    );
   }
 }
