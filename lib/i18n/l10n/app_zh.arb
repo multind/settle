@@ -79,5 +79,14 @@
   "backupInvalid": "备份文件无效",
   "aiPlaceholder": "AI 模型配置（M2 启用）",
   "waitingOnRequired": "等待任务必须填写等待对象。",
-  "todayTitle": "今日"
+  "todayTitle": "今日",
+  "todayOverdue": "逾期 {count} 项",
+  "@todayOverdue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todayEmpty": "今日无安排"
 }

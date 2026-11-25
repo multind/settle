@@ -16,6 +16,8 @@ abstract final class AppTokens {
     // —— 文字 ——
     text: Color(0xFF1A1A1A),
     muted: Color(0xFF8A8A8E),
+    // —— 危险/逾期 ——
+    danger: Color(0xFFB3261E),
     // —— 表面（纯色，非半透明）——
     card: Color(0xFFFFFFFF),
     cardSolid: Color(0xFFFFFFFF),
@@ -50,6 +52,8 @@ abstract final class AppTokens {
     // —— 文字 ——
     text: Color(0xFFF5F5F7),
     muted: Color(0xFF8E8E93),
+    // —— 危险/逾期 ——
+    danger: Color(0xFFF2B8B5),
     // —— 表面（纯黑系）——
     card: Color(0xFF000000),
     cardSolid: Color(0xFF000000),
@@ -93,6 +97,7 @@ class AppTokenSet {
     required this.ai,
     required this.text,
     required this.muted,
+    required this.danger,
     required this.card,
     required this.selectedBg,
     required this.cardSolid,
@@ -119,6 +124,7 @@ class AppTokenSet {
   final Color ai;
   final Color text;
   final Color muted;
+  final Color danger;
   final Color card;
   final Color selectedBg;
   final Color cardSolid;

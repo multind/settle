@@ -79,5 +79,14 @@
   "backupInvalid": "Invalid backup file",
   "aiPlaceholder": "AI model config (available in M2)",
   "waitingOnRequired": "Waiting on is required for waiting tasks.",
-  "todayTitle": "Today"
+  "todayTitle": "Today",
+  "todayOverdue": "{count} overdue",
+  "@todayOverdue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todayEmpty": "Nothing scheduled today."
 }

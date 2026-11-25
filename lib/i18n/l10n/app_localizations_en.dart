@@ -248,4 +248,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todayTitle => 'Today';
+
+  @override
+  String todayOverdue(int count) {
+    return '$count overdue';
+  }
+
+  @override
+  String get todayEmpty => 'Nothing scheduled today.';
 }

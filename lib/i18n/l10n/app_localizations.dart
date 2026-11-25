@@ -577,6 +577,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Today'**
   String get todayTitle;
+
+  /// No description provided for @todayOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} overdue'**
+  String todayOverdue(int count);
+
+  /// No description provided for @todayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing scheduled today.'**
+  String get todayEmpty;
 }
 
 class _AppLocalizationsDelegate
