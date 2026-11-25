@@ -338,4 +338,71 @@ void main() {
     expect(completeBtn.onPressed, isNull);
     await env.db.close();
   });
+
+  testWidgets('组内拖至组首：非首组任务拖到该组顶部槽位，reorder() 落库', (tester) async {
+    final env = await TestEnv.create();
+    await insertTask(env, 'A1', 'next_action');
+    await insertTask(env, 'B0', 'next_action');
+    await insertTask(env, 'B1', 'next_action');
+    await insertTask(env, 'B2', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(
+      _anytimeProvider,
+      reorderEnabled: true,
+      groupKey: _groupOf,
+      buildDateHeader: _groupHeader,
+    )));
+    await tester.pump();
+    expect(tileTitles(tester), ['A1', 'B0', 'B1', 'B2']);
+    // B 组顶部槽位 = 「Group 1」组头正下方第一槽。落点取 B0 行中心偏下 10px：
+    // 代理行顶边落在 B0 前半段 → 框架插入位 = B0 位置（组首槽），且不触碰组头。
+    final b0Center = tester.getCenter(find.text('B0'));
+    final b2Center = tester.getCenter(find.text('B2'));
+    final gesture = await tester.startGesture(b2Center);
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await gesture.moveBy(Offset(0, b0Center.dy + 10 - b2Center.dy));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // 落库：B2 排到 B 组第一（sortOrder 顺序 [A1, B2, B0, B1]）。
+    final rows = await (env.db.select(env.db.tasks)
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+        .get();
+    expect(rows.map((r) => r.title).toList(), ['A1', 'B2', 'B0', 'B1']);
+    expect(tileTitles(tester), ['A1', 'B2', 'B0', 'B1']);
+    await env.db.close();
+  });
+
+  testWidgets('他组拖至组首被拒绝：no-op 弹回，reorder() 不落库', (tester) async {
+    final env = await TestEnv.create();
+    await insertTask(env, 'A0', 'next_action', sortOrder: 5);
+    await insertTask(env, 'A1', 'next_action', sortOrder: 9);
+    await insertTask(env, 'B0', 'next_action', sortOrder: 13);
+    await tester.pumpWidget(env.wrap(_Host(
+      _anytimeProvider,
+      reorderEnabled: true,
+      groupKey: _groupOf,
+      buildDateHeader: _groupHeader,
+    )));
+    await tester.pump();
+    expect(tileTitles(tester), ['A0', 'A1', 'B0']);
+    // 把 A1（组 0）拖到 B 组顶部槽位（B0 行中心偏下 10px，同上一用例的落点）。
+    final b0Center = tester.getCenter(find.text('B0'));
+    final a1Center = tester.getCenter(find.text('A1'));
+    final gesture = await tester.startGesture(a1Center);
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await gesture.moveBy(Offset(0, b0Center.dy + 10 - a1Center.dy));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // sortOrder 保持原值（reorder() 未被调用）；视图顺序未变。
+    final rows = await (env.db.select(env.db.tasks)
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get();
+    expect(
+      {for (final r in rows) r.title: r.sortOrder},
+      {'A0': 5, 'A1': 9, 'B0': 13},
+    );
+    expect(tileTitles(tester), ['A0', 'A1', 'B0']);
+    await env.db.close();
+  });
 }

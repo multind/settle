@@ -298,33 +298,63 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   /// 重排落点：`onReorderItem` 已把 `newIndex` 折算为「移除后」列表插入位
   /// （reduced child-space；旧 `onReorder` 需手动 -1，v3.41 起弃用）。
   /// 组头是 child 空间占位（`_childPositions` 记 -1），换算回 `_items` 索引。
-  /// 分组存在时只允许组内重排：目标插入位落在他组则忽略（no-op 弹回，
-  /// 不写库，避免 sortOrder 跨组污染与 stream 回填后的闪烁回跳）。
+  /// 分组存在时只允许组内重排：目标插入位的归属按 **child 空间左侧相邻 child**
+  /// 判定（任务行 → 该行组；组头 → 该组头引入的组，即「该组顶部槽位」属组内）。
+  /// 跨组拖动 no-op 弹回，不写库（避免 sortOrder 跨组污染与 stream 回填闪烁回跳）。
   void _onReorder(int oldIndex, int newIndex) {
     if (_items.isEmpty) return;
     final positions = _childPositions;
     if (oldIndex < 0 || oldIndex >= positions.length) return;
     final srcItem = positions[oldIndex];
     if (srcItem < 0) return; // 组头不可拖。
+    // reduced child 空间 = 去掉被拖行后的顺序。拖拽动画期间 _items 未变、
+    // _childPositions 仍是构建时的原始映射，这里仅做空间换算，不修改 _items。
+    final reduced = <int>[];
+    for (var j = 0; j < positions.length; j++) {
+      if (j != oldIndex) reduced.add(positions[j]);
+    }
+    // 目标槽位在 _items 中的插入位 = reduced 空间 newIndex 之前的非组头数量。
     var destItem = 0;
-    for (var i = 0; i < newIndex && i < positions.length; i++) {
-      if (positions[i] != -1) destItem++;
+    for (var j = 0; j < newIndex && j < reduced.length; j++) {
+      if (reduced[j] != -1) destItem++;
     }
     if (widget.groupKey != null) {
       final srcGroup = widget.groupKey!(_items[srcItem]);
-      // 目标插入位归属：插在最前 → 首个任务组；否则 → 左邻任务组
-      // （插入紧随左邻、归入左邻的连续组段；左邻永不为被拖行自身）。
-      final destGroup = destItem == 0
-          ? widget.groupKey!(_items[0])
-          : widget.groupKey!(
-              _items[destItem - 1 < srcItem ? destItem - 1 : destItem]);
-      if (srcGroup.compareTo(destGroup) != 0) return; // 跨组 → no-op。
+      final destGroup = _slotGroup(newIndex, positions, oldIndex);
+      if (destGroup != null && srcGroup.compareTo(destGroup) != 0) {
+        return; // 跨组 → no-op。
+      }
     }
     setState(() {
       final moved = _items.removeAt(srcItem);
       _items.insert(destItem.clamp(0, _items.length), moved);
     });
     ref.read(taskRepositoryProvider).reorder(_items.map((t) => t.id).toList());
+  }
+
+  /// 目标插入位归属组：reduced 空间插入位 `newIndex` 的左侧相邻 child 决定。
+  /// - 任务行 → 该行组；
+  /// - 组头 → 该组头引入的组（目标槽位即「该组顶部槽位」，属组内重排，应允许）。
+  /// 组头组归属查 **原始（pre-removal）child 空间**：组头之后第一个任务行即该组
+  /// （被拖行是该组唯一一行时，其组头后面仍能找到该行，避免误判跨组）。
+  /// `leftReduced < oldIndex ? leftReduced : leftReduced + 1` 为 reduced → 原始索引映射。
+  Comparable? _slotGroup(int newIndex, List<int> positions, int oldIndex) {
+    if (newIndex == 0) {
+      // 最顶部槽位（首个组头之上）→ 首组。
+      for (var j = 0; j < positions.length; j++) {
+        if (positions[j] != -1) return widget.groupKey!(_items[positions[j]]);
+      }
+      return null;
+    }
+    final leftReduced = newIndex - 1;
+    final origLeft = leftReduced < oldIndex ? leftReduced : leftReduced + 1;
+    final leftPos = positions[origLeft];
+    if (leftPos != -1) return widget.groupKey!(_items[leftPos]);
+    // 左邻是组头 → 该组头引入的组 = 原始空间里它后面第一个任务行的组。
+    for (var j = origLeft + 1; j < positions.length; j++) {
+      if (positions[j] != -1) return widget.groupKey!(_items[positions[j]]);
+    }
+    return null;
   }
 
   Widget _buildRow(int index, {int? dragIndex}) {
