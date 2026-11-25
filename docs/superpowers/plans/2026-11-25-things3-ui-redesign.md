@@ -495,7 +495,7 @@ Expected: 全绿（NavigationRail/Bar 类型与 8/5 项计数保留；FAB 互斥
 - Modify: `lib/features/inbox/quick_collect_bar.dart`
 - Modify: `lib/features/inbox/collect_dialog.dart`
 
-- [ ] **Step 1: quick_collect_bar 改输入框风格**
+- [x] **Step 1: quick_collect_bar 改输入框风格** ✅ 2ae05d7
 
 将 `_QuickCollectBarState.build`（第 40-112 行）的 Container 渐变装饰替换为 Things 3 输入框（`fieldBg` 填充 + `stroke` 描边 + 圆角 8），文字/hint 用 `text`/`muted`（不再白色），提交钮改实色 primary 圆钮：
 
@@ -559,7 +559,7 @@ Expected: 全绿（NavigationRail/Bar 类型与 8/5 项计数保留；FAB 互斥
 
 > `AppTokens.radiusField` 需新增（Task 1 未加，见下方 Task 4 Step 2 注记）。文件头注释同步改为 Things 3 输入框说明。移除 `ext`/`accent2`/`accent` 变量（不再使用），相关 import 若不再引用则删除。
 
-- [ ] **Step 2: 新增 radiusField token**
+- [x] **Step 2: 新增 radiusField token** ✅ 2ae05d7
 
 `lib/app/theme.dart` 圆角体系（Task 1 Step 3 之后）追加一行：
 
@@ -567,25 +567,15 @@ Expected: 全绿（NavigationRail/Bar 类型与 8/5 项计数保留；FAB 互斥
   static const double radiusField = 8;
 ```
 
-- [ ] **Step 3: collect_dialog 适配（组件改造后自动，仅检查注释/背景）**
+- [x] **Step 3: collect_dialog 适配（组件改造后自动，仅检查注释/背景）** ✅ 2ae05d7
 
 读取 `lib/features/inbox/collect_dialog.dart`：`GlassContainer` 与 `GradientButton` 已由 Task 2 改造自动生效（纯底+实色），无需逻辑改动；仅将文件头注释（第 11-12 行）同步为 Things 3 化描述。若其中有 `scheme.surface` 等残留取值逻辑，确认与纯色主题不冲突（不改 Key/逻辑）。
 
-- [ ] **Step 4: 测试**
-
-```powershell
-$env:PATH = "C:\flutter\bin;$env:PATH"
-flutter test test/widget/quick_collect_test.dart test/widget/collect_dialog_test.dart
-```
+- [x] **Step 4: 测试** ✅ 2ae05d7（注：原文引用的 `collect_dialog_test.dart` 不存在，对话框断言在 `quick_collect_test.dart`，已修正路径；关键 3/3 + 全量 96/96）
 
 Expected: 全绿（`quick_collect_field/button`、`collect_dialog_field/submit` Key 保留）。
 
-- [ ] **Step 5: 提交**
-
-```powershell
-git add lib/features/inbox/quick_collect_bar.dart lib/features/inbox/collect_dialog.dart lib/app/theme.dart
-git commit -m "refactor(collect): 快速收集框改 Things 3 输入框风格"
-```
+- [x] **Step 5: 提交** ✅ 2ae05d7（工作区干净）
 
 ---
 
