@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
@@ -125,7 +128,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     final l10n = AppLocalizations.of(context)!;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
-    return LayoutBuilder(
+    final Widget shell = LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= ResponsiveShell.breakpoint;
         return Scaffold(
@@ -168,6 +171,52 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
               : null,
         );
       },
+    );
+    // 桌面平台全局快捷键（规格 §5）：N → 收集；Ctrl/Cmd+1..9 → 侧边栏第
+    // 1..9 项（收件箱..日志）；Ctrl/Cmd+0 → 回顾。仅桌面（含 Web）包裹
+    // Shortcuts/Actions；文本输入焦点时经 [isEnabled] 门控放行按键。
+    if (!_shortcutsEnabled) return shell;
+    final Map<ShortcutActivator, Intent> shortcuts = {
+      const SingleActivator(LogicalKeyboardKey.keyN): const _CollectIntent(),
+      const SingleActivator(LogicalKeyboardKey.digit0, control: true):
+          const _SwitchViewIntent(9),
+      const SingleActivator(LogicalKeyboardKey.digit0, meta: true):
+          const _SwitchViewIntent(9),
+    };
+    // Ctrl/Cmd+n → 侧边栏第 n 项（_navSpecs 项序即全局索引序，n-1 = 索引）。
+    for (var n = 0; n < _digitKeys.length; n++) {
+      final index = _navSpecs[n].index;
+      shortcuts[SingleActivator(_digitKeys[n], control: true)] =
+          _SwitchViewIntent(index);
+      shortcuts[SingleActivator(_digitKeys[n], meta: true)] =
+          _SwitchViewIntent(index);
+    }
+    return Shortcuts(
+      shortcuts: shortcuts,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          _CollectIntent: _ShellAction<_CollectIntent>(
+            enabled: () => !_isTextEditingFocus(),
+            onInvoke: (_) {
+              if (!mounted) return null;
+              showDialog<void>(
+                context: context,
+                builder: (_) => const CollectDialog(),
+              );
+              return true;
+            },
+          ),
+          _SwitchViewIntent: _ShellAction<_SwitchViewIntent>(
+            enabled: () => !_isTextEditingFocus(),
+            onInvoke: (intent) {
+              if (!mounted) return null;
+              _switchTo(intent.index);
+              return true;
+            },
+          ),
+        },
+        child: shell,
+      ),
     );
   }
 
@@ -268,6 +317,32 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
         _index = _navSpecs[i].index;
       });
     }
+  }
+
+  /// 桌面平台判定（规格 §5）：快捷键仅桌面（含 Web）启用。
+  bool get _shortcutsEnabled =>
+      kIsWeb ||
+      defaultTargetPlatform == TargetPlatform.windows ||
+      defaultTargetPlatform == TargetPlatform.macOS ||
+      defaultTargetPlatform == TargetPlatform.linux;
+
+  /// 文本输入焦点判定：primary focus 落在 `EditableText`（TextField 底层）
+  /// 上时不触发全局快捷键，让 N/数字键正常输入（规格 §5 不拦截约束）。
+  /// 经 [Shortcuts] 的 isEnabled 门控实现：返回 false 时事件继续冒泡到输入框。
+  bool _isTextEditingFocus() {
+    final context = FocusManager.instance.primaryFocus?.context;
+    return context != null &&
+        context.findAncestorWidgetOfExactType<EditableText>() != null;
+  }
+
+  /// 快捷键切视图：同步 `_index` 与窄屏底部栏高亮位（目标为 inNarrow 项时
+  /// 更新 _narrowIndex，镜像 [_onNarrowSelected] 语义）。
+  void _switchTo(int index) {
+    setState(() {
+      _index = index;
+      final pos = _navSpecs.indexWhere((s) => s.inNarrow && s.index == index);
+      if (pos != -1) _narrowIndex = pos;
+    });
   }
 
   /// 「更多」抽屉（规格 §2.3）：由 [_navSpecs] 派生 inMore 项，
@@ -468,6 +543,19 @@ const List<_NavSpec> _navSpecs = [
   ),
 ];
 
+/// 快捷键数字键表（Ctrl/Cmd+1..9，按侧边栏项序；下标 n ↔ 第 n+1 项）。
+const List<LogicalKeyboardKey> _digitKeys = [
+  LogicalKeyboardKey.digit1,
+  LogicalKeyboardKey.digit2,
+  LogicalKeyboardKey.digit3,
+  LogicalKeyboardKey.digit4,
+  LogicalKeyboardKey.digit5,
+  LogicalKeyboardKey.digit6,
+  LogicalKeyboardKey.digit7,
+  LogicalKeyboardKey.digit8,
+  LogicalKeyboardKey.digit9,
+];
+
 /// 由 l10n key 解析本地化文本（AppLocalizations 无 byKey 查找，集中此一处）。
 String _labelOf(AppLocalizations l10n, String key) {
   switch (key) {
@@ -527,4 +615,30 @@ class _BrandMark extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 全局快捷键 Intent（规格 §5）：`N` → 打开收集对话框。
+class _CollectIntent extends Intent {
+  const _CollectIntent();
+}
+
+/// 全局快捷键 Intent：切到指定全局视图索引（Ctrl/Cmd+1..9 → 侧边栏第 n 项；
+/// Ctrl/Cmd+0 → 回顾 index 9）。
+class _SwitchViewIntent extends Intent {
+  const _SwitchViewIntent(this.index);
+
+  /// 目标全局视图索引（0..10，对应 [_navSpecs]）。
+  final int index;
+}
+
+/// 带 isEnabled 门控的 CallbackAction：文本输入焦点时禁用全局快捷键。
+/// Shortcuts.handleKeypress 在 isEnabled=false 时返回 ignored，按键继续
+/// 冒泡到 EditableText 正常输入（规格 §5 不拦截约束）。
+class _ShellAction<T extends Intent> extends CallbackAction<T> {
+  _ShellAction({required super.onInvoke, this.enabled});
+
+  final bool Function()? enabled;
+
+  @override
+  bool isEnabled(T intent) => enabled?.call() ?? true;
 }

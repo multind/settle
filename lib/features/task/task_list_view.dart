@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/app/glass.dart';
 import 'package:gtd_app/app/theme.dart';
@@ -256,6 +257,22 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     });
   }
 
+  // —— 列表层快捷键门控（Task 4，规格 §5：J/K/Enter/Delete）——
+
+  /// 前提：primary focus 落在某焦点行节点上——列表快捷键仅在列表「激活」
+  /// （有焦点行）时生效，避免拦截行内控件（如完成钮）自身的 Enter 激活。
+  bool get _hasRowFocus {
+    final focus = FocusManager.instance.primaryFocus;
+    return focus != null && _focusNodes.containsValue(focus);
+  }
+
+  /// J/K 门控：非选择模式、行获焦、有行可移。
+  bool get _canMoveRowFocus =>
+      !_selectionMode && _hasRowFocus && _items.isNotEmpty;
+
+  /// Enter/Delete 门控：非选择模式、行获焦、焦点任务存在。
+  bool get _canOperateRow => !_selectionMode && _hasRowFocus && focusedTask != null;
+
   // —— 构建 ——
 
   @override
@@ -329,11 +346,58 @@ class TaskListViewState extends ConsumerState<TaskListView> {
             onReorderItem: _onReorder,
             children: children,
           );
-    return Column(
+    final column = Column(
       children: [
         if (_selectionMode) _buildSelectionBar(context),
         Expanded(child: list),
       ],
+    );
+    // 列表层快捷键（规格 §5）：仅桌面（isDesktop）且 focusEnabled 时包裹
+    // Shortcuts/Actions；J/K 循环移动焦点、Enter 完成焦点任务、Delete 删除
+    // 焦点任务（确认对话框）。事件自焦点行冒泡至此层，经 [isEnabled] 门控
+    // 确保仅焦点行获焦（且非选择模式）时生效。
+    if (!widget.focusEnabled || !isDesktop) return column;
+    return Shortcuts(
+      shortcuts: const {
+        SingleActivator(LogicalKeyboardKey.keyJ):
+            _ListMoveFocusIntent(1),
+        SingleActivator(LogicalKeyboardKey.keyK):
+            _ListMoveFocusIntent(-1),
+        SingleActivator(LogicalKeyboardKey.enter):
+            _CompleteFocusedIntent(),
+        SingleActivator(LogicalKeyboardKey.delete):
+            _DeleteFocusedIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          _ListMoveFocusIntent: _ListShortcutAction<_ListMoveFocusIntent>(
+            enabled: () => _canMoveRowFocus,
+            onInvoke: (intent) {
+              moveFocus(intent.delta);
+              return true;
+            },
+          ),
+          _CompleteFocusedIntent: _ListShortcutAction<_CompleteFocusedIntent>(
+            enabled: () => _canOperateRow,
+            onInvoke: (_) {
+              final task = focusedTask;
+              if (task == null) return null;
+              ref.read(taskRepositoryProvider).complete(task.id);
+              return true;
+            },
+          ),
+          _DeleteFocusedIntent: _ListShortcutAction<_DeleteFocusedIntent>(
+            enabled: () => _canOperateRow,
+            onInvoke: (_) {
+              final task = focusedTask;
+              if (task == null) return null;
+              _confirmDelete(context, task);
+              return true;
+            },
+          ),
+        },
+        child: column,
+      ),
     );
   }
 
@@ -773,6 +837,35 @@ class TaskListViewState extends ConsumerState<TaskListView> {
 
 /// 设日期对话框返回的字段目标：截止 / 开始。
 enum _DateField { due, scheduled }
+
+/// 列表层快捷键 Intent（规格 §5）：J/K 焦点移动（delta = ±1，列表内循环）。
+class _ListMoveFocusIntent extends Intent {
+  const _ListMoveFocusIntent(this.delta);
+
+  /// 焦点移动步长：+1 下移（J）、-1 上移（K）。
+  final int delta;
+}
+
+/// 列表层快捷键 Intent：Enter 完成焦点任务。
+class _CompleteFocusedIntent extends Intent {
+  const _CompleteFocusedIntent();
+}
+
+/// 列表层快捷键 Intent：Delete 删除焦点任务（确认对话框）。
+class _DeleteFocusedIntent extends Intent {
+  const _DeleteFocusedIntent();
+}
+
+/// 带 isEnabled 门控的 CallbackAction：仅焦点行获焦（且非选择模式）时生效，
+/// 避免拦截行内控件（完成钮/恢复钮等）自身的 Enter 激活等既有行为。
+class _ListShortcutAction<T extends Intent> extends CallbackAction<T> {
+  _ListShortcutAction({required super.onInvoke, this.enabled});
+
+  final bool Function()? enabled;
+
+  @override
+  bool isEnabled(T intent) => enabled?.call() ?? true;
+}
 
 /// 批量移动对话框的返回值（null 对话框结果 = 取消；[projectId] 可为 null =
 /// 选择「无项目」清除归属）。

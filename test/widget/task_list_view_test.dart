@@ -1,6 +1,9 @@
 import 'package:drift/drift.dart' hide isNull;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, debugDefaultTargetPlatformOverride;
 import 'package:flutter/gestures.dart' show kLongPressTimeout, kPressTimeout;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtd_app/core/enums.dart';
@@ -642,6 +645,87 @@ void main() {
     expect(state.selectionMode, isFalse);
     expect(state.selectedIds, isEmpty);
     expect(find.byKey(const Key('task_selection_bar')), findsNothing);
+    await env.db.close();
+  });
+
+  // —— 桌面焦点快捷键（规格 §5：J/K/Enter/Delete，仅桌面 focusEnabled）——
+
+  /// 桌面平台覆盖：widget 测试默认 Android/触屏，列表快捷键仅桌面生效。
+  void useDesktop() {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+  }
+
+  testWidgets('桌面焦点快捷键：J/K 上下移焦点（列表内循环）', (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    await insertTask(env, 'Task A', 'next_action');
+    await insertTask(env, 'Task B', 'next_action');
+    await insertTask(env, 'Task C', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    // 先聚焦首行（requestFocus），随后 J/K 经焦点行冒泡触发列表快捷键。
+    state.focusRow(0);
+    await tester.pump();
+    expect(state.focusIndex, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pump();
+    expect(state.focusIndex, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pump();
+    expect(state.focusIndex, 2);
+    // 末行 J → 回绕首行。
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pump();
+    expect(state.focusIndex, 0);
+    // 首行 K → 回绕末行。
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+    await tester.pump();
+    expect(state.focusIndex, 2);
+    await env.db.close();
+  });
+
+  testWidgets('桌面焦点快捷键：Enter 完成焦点任务', (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    state.focusRow(0); // 标准排序 id 升序 → Task A。
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    final row = await (env.db.select(env.db.tasks)
+          ..where((t) => t.id.equals(a)))
+        .getSingle();
+    expect(row.status, 'done');
+    expect(find.text('Task A'), findsNothing);
+    await env.db.close();
+  });
+
+  testWidgets('桌面焦点快捷键：Delete 删除焦点任务（确认对话框）', (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    final a = await insertTask(env, 'Task A', 'next_action');
+    await insertTask(env, 'Task B', 'next_action');
+    await tester.pumpWidget(env.wrap(_Host(_anytimeProvider)));
+    await tester.pump();
+    final state = tester.state<TaskListViewState>(find.byType(TaskListView));
+    state.focusRow(0);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pumpAndSettle();
+    // 确认对话框（复用 logbook_confirm_delete Key）→ 确认后硬删除。
+    expect(find.byKey(const Key('logbook_confirm_delete')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('logbook_confirm_delete')));
+    await tester.pumpAndSettle();
+    final rows =
+        await (env.db.select(env.db.tasks)..where((t) => t.id.equals(a))).get();
+    expect(rows, isEmpty);
+    expect(find.text('Task A'), findsNothing);
     await env.db.close();
   });
 }

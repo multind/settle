@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gtd_app/app/responsive_shell.dart';
+import 'package:gtd_app/features/someday/someday_page.dart';
+import 'package:gtd_app/features/today/today_page.dart';
 import 'widget_utils.dart';
 
 void main() {
@@ -97,6 +102,85 @@ void main() {
     expect(find.byKey(const Key('new_project_fab')), findsOneWidget);
     // 项目页无全局收集 FAB（显隐集合 {0,5,6,9} 隐藏）
     expect(find.byKey(const Key('global_collect_fab')), findsNothing);
+    await env.db.close();
+  });
+
+  // —— 桌面快捷键（规格 §5）——
+
+  /// 桌面平台覆盖：widget 测试默认 Android/触屏，快捷键仅桌面启用。
+  void useDesktop() {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+  }
+
+  /// 发送 Ctrl+key 组合（完整 up 序列，避免硬件键盘状态泄漏）。
+  Future<void> sendCtrlKey(WidgetTester tester, LogicalKeyboardKey key) async {
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(key);
+    await tester.sendKeyUpEvent(key);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+  }
+
+  testWidgets('桌面快捷键：N 打开收集对话框（规格 §5）', (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    await tester.binding.setSurfaceSize(const Size(1000, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(const ResponsiveShell()));
+    await tester.pump();
+    // 先 Tab 建立 shell 内焦点（侧边栏首项），按键才能冒泡到 shell 层快捷键。
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('collect_dialog_field')), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('桌面快捷键：Ctrl+2 → 今日、Ctrl+5 → 将来也许（侧边栏项序映射，规格 §5）',
+      (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    await tester.binding.setSurfaceSize(const Size(1000, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(const ResponsiveShell()));
+    await tester.pump();
+    // Ctrl+2 → 侧边栏第 2 项 = 今日（index 1）。
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await sendCtrlKey(tester, LogicalKeyboardKey.digit2);
+    await tester.pumpAndSettle();
+    expect(find.byType(TodayPage), findsOneWidget);
+    // Ctrl+5 → 侧边栏第 5 项 = 将来也许（index 4）。
+    await sendCtrlKey(tester, LogicalKeyboardKey.digit5);
+    await tester.pumpAndSettle();
+    expect(find.byType(SomedayPage), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('文本输入焦点时 N 不触发收集对话框（按键进输入框，规格 §5）',
+      (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    await tester.binding.setSurfaceSize(const Size(1000, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(const ResponsiveShell()));
+    await tester.pump();
+    // 切到日志页（常驻搜索输入框）并聚焦输入框。
+    await tester.tap(find.byKey(const Key('nav_item_8')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('logbook_search')));
+    await tester.pump();
+    // 前置断言：primary focus 确实落在 EditableText（TextField 底层）上。
+    expect(
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<EditableText>(),
+      isNotNull,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('collect_dialog_field')), findsNothing);
     await env.db.close();
   });
 }
