@@ -136,44 +136,46 @@ void main() {
 
   // ---- v0.3 数据层：四视图查询边界（规格 §4.1） ----
 
-  /// 今日 23:59:59.999 的 ms epoch（与 TaskRepository._endOfTodayMs 同口径）。
-  int endOfTodayMs() {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, 23, 59, 59, 999)
-        .millisecondsSinceEpoch;
-  }
+  // 固定「当前」时刻：边界用例注入时钟，消除跨午夜竞态。
+  final fixedNow = DateTime(2026, 11, 25, 10, 0);
+
+  /// [base] 当日 23:59:59.999 的 ms epoch（与 TaskRepository._endOfTodayMs 同口径）。
+  int endOfDayMs(DateTime base) =>
+      DateTime(base.year, base.month, base.day, 23, 59, 59, 999)
+          .millisecondsSinceEpoch;
 
   test('watchToday/Upcoming 边界：今日 23:59:59.999 与明日 00:00 精确命中', () async {
-    final todayEndMs = endOfTodayMs();
+    final fixedRepo = TaskRepository(db, now: () => fixedNow);
+    final todayEndMs = endOfDayMs(fixedNow);
     final tomorrowStartMs = todayEndMs + 1; // 明日 00:00:00.000
-    final t1 = await repo.create(TaskDraft(
+    final t1 = await fixedRepo.create(TaskDraft(
       title: '今日末 scheduled',
       status: TaskStatus.nextAction,
       scheduled: DateTime.fromMillisecondsSinceEpoch(todayEndMs),
     ));
-    final t2 = await repo.create(TaskDraft(
+    final t2 = await fixedRepo.create(TaskDraft(
       title: '今日末 dueDate',
       status: TaskStatus.nextAction,
       dueDate: DateTime.fromMillisecondsSinceEpoch(todayEndMs),
     ));
-    final t3 = await repo.create(TaskDraft(
+    final t3 = await fixedRepo.create(TaskDraft(
       title: '明日零时 scheduled',
       status: TaskStatus.nextAction,
       scheduled: DateTime.fromMillisecondsSinceEpoch(tomorrowStartMs),
     ));
-    final t4 = await repo.create(TaskDraft(
+    final t4 = await fixedRepo.create(TaskDraft(
       title: '明日零时 dueDate',
       status: TaskStatus.nextAction,
       dueDate: DateTime.fromMillisecondsSinceEpoch(tomorrowStartMs),
     ));
 
-    final todayIds = (await repo.watchToday().first).map((t) => t.id).toList();
+    final todayIds = (await fixedRepo.watchToday().first).map((t) => t.id).toList();
     expect(todayIds, containsAll([t1.id, t2.id]));
     expect(todayIds, isNot(contains(t3.id)));
     expect(todayIds, isNot(contains(t4.id)));
 
     final upcomingIds =
-        (await repo.watchUpcoming().first).map((t) => t.id).toList();
+        (await fixedRepo.watchUpcoming().first).map((t) => t.id).toList();
     expect(upcomingIds, containsAll([t3.id, t4.id]));
     expect(upcomingIds, isNot(contains(t1.id)));
     expect(upcomingIds, isNot(contains(t2.id)));
@@ -194,31 +196,31 @@ void main() {
 
   test('边界混合：scheduled=今天 + dueDate=明天 → Today/Upcoming 双命中（spec OR 语义）',
       () async {
-    final todayEndMs = endOfTodayMs();
-    final t = await repo.create(TaskDraft(
+    final fixedRepo = TaskRepository(db, now: () => fixedNow);
+    final todayEndMs = endOfDayMs(fixedNow);
+    final t = await fixedRepo.create(TaskDraft(
       title: '跨日任务',
       status: TaskStatus.nextAction,
       scheduled: DateTime.fromMillisecondsSinceEpoch(todayEndMs),
       dueDate: DateTime.fromMillisecondsSinceEpoch(todayEndMs + 1),
     ));
-    expect((await repo.watchToday().first).map((x) => x.id), [t.id]);
-    expect((await repo.watchUpcoming().first).map((x) => x.id), [t.id]);
-    expect(await repo.watchAnytime().first, isEmpty);
+    expect((await fixedRepo.watchToday().first).map((x) => x.id), [t.id]);
+    expect((await fixedRepo.watchUpcoming().first).map((x) => x.id), [t.id]);
+    expect(await fixedRepo.watchAnytime().first, isEmpty);
   });
 
   test('waiting/done 不进三个 next_action 视图；watchDone 只含 done（规格 §4.1）',
       () async {
-    final todayEndMs = endOfTodayMs();
     final waiting = await repo.create(TaskDraft(
       title: '等待中',
       status: TaskStatus.waiting,
       waitingOn: '财务部',
-      scheduled: DateTime.fromMillisecondsSinceEpoch(todayEndMs),
+      scheduled: DateTime(2026, 11, 25),
     ));
     final done = await repo.create(TaskDraft(
       title: '已完成',
       status: TaskStatus.nextAction,
-      scheduled: DateTime.fromMillisecondsSinceEpoch(todayEndMs),
+      scheduled: DateTime(2026, 11, 25),
     ));
     await repo.complete(done.id);
     expect(await repo.watchToday().first, isEmpty);
@@ -380,7 +382,9 @@ void main() {
     ));
     await repo.complete(t.id);
     final clone = (await repo.watchByStatus(TaskStatus.nextAction).first).single;
-    expect(clone.scheduled, DateTime(2026, 11, 25 + 3, 9, 30).millisecondsSinceEpoch);
+    expect(
+        clone.scheduled,
+        DateTime(2026, 11, 25 + 3, 9, 30).millisecondsSinceEpoch);
     expect(clone.repeatRule, 'every:3');
     expect(await db.select(db.tasks).get(), hasLength(2));
   });
@@ -413,6 +417,8 @@ void main() {
     await repo.complete(t.id);
     expect(await db.select(db.tasks).get(), hasLength(2));
   });
+
+  // ---- v0.3 数据层：无效重复规则（规格 §4.3） ----
 
   test('无效重复规则（EVERY:3 大小写 / unknown）→ complete 不生成副本（规格 §4.3）',
       () async {

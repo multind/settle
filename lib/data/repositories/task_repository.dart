@@ -5,8 +5,11 @@ import 'package:gtd_app/core/models/task_draft.dart';
 import 'package:gtd_app/data/tables.dart';
 
 class TaskRepository {
-  TaskRepository(this._db);
+  /// [now] 为可注入时钟（测试用固定时刻消除跨午夜竞态）；缺省用 `DateTime.now`。
+  TaskRepository(this._db, {DateTime Function()? now})
+      : _now = now ?? DateTime.now;
   final AppDatabase _db;
+  final DateTime Function() _now;
 
   Stream<List<Task>> watchAll() =>
       (_db.select(_db.tasks)..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
@@ -86,7 +89,7 @@ class TaskRepository {
   /// 返回新任务 id；不负责 sortOrder 回填——create 单独回填 = id，
   /// 重复副本在 complete 事务内设为 max+1。
   Future<int> _insertTask(TaskDraft draft) async {
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = _now().millisecondsSinceEpoch;
     final id = await _db.into(_db.tasks).insert(TasksCompanion.insert(
       title: draft.title,
       notes: Value(draft.notes),
@@ -124,7 +127,7 @@ class TaskRepository {
       contextId: Value(draft.contextId),
       repeatRule: Value(draft.repeatRule),
       reminderAt: Value(draft.reminderAt?.millisecondsSinceEpoch),
-      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      updatedAt: Value(_now().millisecondsSinceEpoch),
     ));
     await (_db.delete(_db.taskTags)..where((t) => t.taskId.equals(id))).go();
     for (final tagId in draft.tagIds) {
@@ -138,7 +141,7 @@ class TaskRepository {
         (waitingOn == null || waitingOn.trim().isEmpty)) {
       throw ArgumentError('waiting_on is required for waiting tasks');
     }
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = _now().millisecondsSinceEpoch;
     await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
       status: Value(status.storage),
       waitingOn: Value(status == TaskStatus.waiting ? waitingOn : null),
@@ -214,21 +217,21 @@ class TaskRepository {
   Future<void> setScheduled(int id, DateTime? date) async {
     await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
       scheduled: Value(date?.millisecondsSinceEpoch),
-      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      updatedAt: Value(_now().millisecondsSinceEpoch),
     ));
   }
 
   Future<void> setProject(int id, int? projectId) async {
     await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
       projectId: Value(projectId),
-      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      updatedAt: Value(_now().millisecondsSinceEpoch),
     ));
   }
 
   Future<void> setContext(int id, int? contextId) async {
     await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
       contextId: Value(contextId),
-      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      updatedAt: Value(_now().millisecondsSinceEpoch),
     ));
   }
 
@@ -263,9 +266,10 @@ class TaskRepository {
     }
   }
 
-  /// 今日 23:59:59.999 的 ms epoch（本地时区，调用时刻缓存）。
+  /// 今日 23:59:59.999 的 ms epoch（以注入时钟 [_now] 取「当前」时刻，
+  /// 默认 `DateTime.now`；测试可注入固定时刻消除跨午夜竞态）。
   int _endOfTodayMs() {
-    final now = DateTime.now();
+    final now = _now();
     return DateTime(now.year, now.month, now.day, 23, 59, 59, 999)
         .millisecondsSinceEpoch;
   }
