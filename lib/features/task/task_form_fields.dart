@@ -79,6 +79,8 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
 
   /// 反解析存储 repeatRule 回下拉态：null→无；daily/weekly/monthly→对应项；
   /// every:N→'every' 并把 N 值回填进 [interval] 控制器。
+  /// N 非法（非数字 / 超出 1-365 表单有效域）时与 [RepeatRule.parse] 一致视为
+  /// 「不重复」→ 回退 null（下拉显示「无」），避免校验器永久拦截保存。
   String? _decodeRepeatKind(String? rule, TextEditingController interval) {
     switch (rule) {
       case 'daily':
@@ -87,8 +89,11 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
         return rule;
       default:
         if (rule != null && rule.startsWith('every:')) {
-          interval.text = rule.substring('every:'.length);
-          return 'every';
+          final n = int.tryParse(rule.substring('every:'.length));
+          if (n != null && n >= 1 && n <= 365) {
+            interval.text = '$n';
+            return 'every';
+          }
         }
         return null;
     }

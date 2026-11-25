@@ -23,10 +23,10 @@ void main() {
 
   String p2(int n) => n.toString().padLeft(2, '0');
 
-  /// 在打开的日期选择器中选「今天」，再在时间选择器确认默认 09:00。
+  /// 用例均从「无初始值」进入，DatePicker 的 initialDate 默认今天：直接连点两次 OK
+  /// （确认今天日期 + 确认默认 09:00 时间）。不点击日历日格——今天为每月 1~7 日时，
+  /// 网格尾部渲染的下月首格同号数字会被 `.last` 静默选中（12 月跨年更是硬失败）。
   Future<void> pickTodayAt0900(WidgetTester tester) async {
-    await tester.tap(find.text('${DateTime.now().day}').last);
-    await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
@@ -124,7 +124,10 @@ void main() {
     expect(draft, isNotNull);
     final d = draft!.dueDate;
     expect(d, isNotNull);
-    expect(d!.year, DateTime.now().year);
+    final now = DateTime.now();
+    expect(d!.year, now.year);
+    expect(d.month, now.month);
+    expect(d.day, now.day);
     expect(d.hour, 9);
     expect(d.minute, 0);
     final label = '${d.year}-${p2(d.month)}-${p2(d.day)} ${p2(d.hour)}:${p2(d.minute)}';
@@ -141,9 +144,13 @@ void main() {
     await tester.pumpAndSettle();
     await pickTodayAt0900(tester);
     final draft = formKey.currentState!.validate();
-    expect(draft!.scheduled, isNotNull);
-    expect(draft.scheduled!.hour, 9);
-    expect(draft.scheduled!.minute, 0);
+    final s = draft!.scheduled!;
+    final now = DateTime.now();
+    expect(s.year, now.year);
+    expect(s.month, now.month);
+    expect(s.day, now.day);
+    expect(s.hour, 9);
+    expect(s.minute, 0);
     await env.db.close();
   });
 
@@ -244,6 +251,23 @@ void main() {
     await env.db.close();
   });
 
+  testWidgets('非法 every:N（0/非数字/超界）反解析回退「无」', (tester) async {
+    final env = await TestEnv.create();
+    for (final bad in ['every:0', 'every:abc', 'every:999']) {
+      final formKey = GlobalKey<TaskFormFieldsState>();
+      await pumpForm(
+        tester,
+        env,
+        formKey,
+        initial: TaskDraft(title: '任务', repeatRule: bad),
+      );
+      // 回退「无」：不出现间隔输入框，草稿不携带 repeatRule
+      expect(find.byKey(const Key('task_repeat_interval')), findsNothing);
+      expect(formKey.currentState!.validate()!.repeatRule, isNull);
+    }
+    await env.db.close();
+  });
+
   // —— v0.3 调度：提醒 ——
 
   testWidgets('提醒：选择与清除', (tester) async {
@@ -255,8 +279,12 @@ void main() {
     await tester.pumpAndSettle();
     await pickTodayAt0900(tester);
     final draft = formKey.currentState!.validate();
-    expect(draft!.reminderAt, isNotNull);
-    expect(draft.reminderAt!.hour, 9);
+    final r = draft!.reminderAt!;
+    final now = DateTime.now();
+    expect(r.year, now.year);
+    expect(r.month, now.month);
+    expect(r.day, now.day);
+    expect(r.hour, 9);
     expect(find.byKey(const Key('clear_reminder')), findsOneWidget);
     await tester.tap(find.byKey(const Key('clear_reminder')));
     await tester.pumpAndSettle();
