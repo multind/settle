@@ -47,7 +47,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('按 优先级→sortOrder 排序', (tester) async {
+  testWidgets('按 优先级→sortOrder 排序（sortOrder 为同级 tiebreak）', (tester) async {
     final env = await TestEnv.create();
     await insertTask(env, '低优先级前', 'next_action',
         priority: 'low', sortOrder: 1);
@@ -55,13 +55,16 @@ void main() {
         priority: 'high', sortOrder: 5);
     await insertTask(env, '中优先级中', 'next_action',
         priority: 'medium', sortOrder: 2);
+    // 同级（无优先级）按 sortOrder 升序。
+    await insertTask(env, '同级后', 'next_action', sortOrder: 20);
+    await insertTask(env, '同级前', 'next_action', sortOrder: 10);
     await tester.pumpWidget(env.wrap(const AnytimePage()));
     await tester.pump();
     final titles = tester
         .widgetList<ListTile>(find.byType(ListTile))
         .map((t) => (t.title as Text).data)
         .toList();
-    expect(titles, ['高优先级后', '中优先级中', '低优先级前']);
+    expect(titles, ['高优先级后', '中优先级中', '低优先级前', '同级前', '同级后']);
     await env.db.close();
   });
 
