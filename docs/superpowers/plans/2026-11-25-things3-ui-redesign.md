@@ -423,13 +423,13 @@ git commit -m "refactor(glass): 组件 Things 3 化（纯描边容器/实色按�
 - Modify: `lib/app/app.dart:27`
 - Modify: `lib/app/responsive_shell.dart`
 
-- [ ] **Step 1: 删除 spot_background.dart**
+- [x] **Step 1: 删除 spot_background.dart** ✅ 9b5a5ae
 
 ```powershell
 git rm lib/app/spot_background.dart
 ```
 
-- [ ] **Step 2: 移除 app.dart 中的 SpotBackground 引用**
+- [x] **Step 2: 移除 app.dart 中的 SpotBackground 引用** ✅ 9b5a5ae
 
 读取 `lib/app/app.dart`，移除 builder 中的 `Positioned.fill(child: SpotBackground())` 包裹与相关 import、const 调整——将 Scaffold 包装改为直接返回 child（保持 GtdApp 其余逻辑不变）。改后结构应为：
 
@@ -439,7 +439,7 @@ git rm lib/app/spot_background.dart
 
 具体以实际代码为准：删除 `SpotBackground` 的 import、删除 builder 内 Stack/Positioned.fill 包裹（若 Stack 无其他子项则直接返回 body）。
 
-- [ ] **Step 3: shell 去 _Glass 换纯底分隔**
+- [x] **Step 3: shell 去 _Glass 换纯底分隔** ✅ 9b5a5ae
 
 `lib/app/responsive_shell.dart`：
 - 删除 `import 'dart:ui' show ImageFilter;`（第 1 行）
@@ -448,7 +448,7 @@ git rm lib/app/spot_background.dart
 - 删除 `_Glass` 类（第 179-223 行）与饱和度矩阵常量（第 194-206 行）
 - 若 NavigationBar 背景不再透明（无 BackdropFilter），确认 `Container` 用不透明 `tokens.nav`（=bg 纯色）
 
-- [ ] **Step 4: 品牌字去渐变**
+- [x] **Step 4: 品牌字去渐变** ✅ 9b5a5ae
 
 `_BrandMark`（第 227-255 行）替换为普通文字（删 ShaderMask）：
 
@@ -476,7 +476,7 @@ class _BrandMark extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 5: 测试**
+- [x] **Step 5: 测试** ✅ 9b5a5ae（6/6 目标 + 全量 96/96）
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -485,12 +485,7 @@ flutter test test/widget/responsive_shell_test.dart test/widget/app_smoke_test.d
 
 Expected: 全绿（NavigationRail/Bar 类型与 8/5 项计数保留；FAB 互斥条件未动）。
 
-- [ ] **Step 6: 提交**
-
-```powershell
-git add -A
-git commit -m "refactor(shell): 删光斑背景与毛玻璃，侧边栏/导航纯底 hairline 分隔"
-```
+- [x] **Step 6: 提交** ✅ 9b5a5ae（3 files：app.dart/shell/删 spot_background）
 
 ---
 
