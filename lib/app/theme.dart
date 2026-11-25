@@ -8,94 +8,78 @@ import 'package:flutter/material.dart';
 /// topLeft end bottomRight，对应 CSS `135deg`）。
 abstract final class AppTokens {
   static const AppTokenSet light = AppTokenSet(
-    // —— 渐变端点（§7.4.2 浅色列）——
-    primary: Color(0xFF2456FF),
-    primary2: Color(0xFF00C2FF),
-    accent2: Color(0xFF00B478),
-    accent: Color(0xFF00E676),
-    ai2: Color(0xFF7C3DFF),
-    ai: Color(0xFFD400FF),
+    // —— 主色（Things 3 蓝）——
+    primary: Color(0xFF3D7CFB),
+    primary2: Color(0xFF3D7CFB),
+    accent2: Color(0xFF3D7CFB),
+    accent: Color(0xFF3D7CFB),
+    ai2: Color(0xFF3D7CFB),
+    ai: Color(0xFF3D7CFB),
     // —— 文字 ——
-    text: Color(0xFF141B33),
-    muted: Color(0xFF5A6285),
-    // —— 表面（半透明，α→round(α×255) 换算）——
-    card: Color(0x99FFFFFF), // rgba(255,255,255,.60)
-    cardSolid: Color(0xEBFFFFFF), // rgba(255,255,255,.92)
-    stroke: Color(0xE6FFFFFF), // rgba(255,255,255,.90) 浅色下呈高光
-    nav: Color(0x73FFFFFF), // rgba(255,255,255,.45)
-    sidebar: Color(0x66FFFFFF), // rgba(255,255,255,.40)
-    field: Color(0x8CFFFFFF), // rgba(255,255,255,.55)
-    // —— 建议徽标（§7.4.3）——
-    chipBg: Color(0x2900B478), // rgba(0,180,120,.16)
-    chipText: Color(0xFF00775A),
-    // —— 彩色投影（§7.4.2 shadow / shadow-sm）——
-    shadowSmColor: Color(0x2E2456FF), // rgba(36,86,255,.18)
-    shadow: [
-      BoxShadow(
-        color: Color(0x472456FF), // rgba(36,86,255,.28)
-        blurRadius: 50,
-        offset: Offset(0, 18),
-      ),
-      BoxShadow(
-        color: Color(0x1F141B33), // rgba(20,27,51,.12)
-        blurRadius: 12,
-        offset: Offset(0, 4),
-      ),
-    ],
-    shadowSm: [
-      BoxShadow(color: Color(0x2E2456FF), blurRadius: 22, offset: Offset(0, 8)),
-    ],
-    // —— 底色渐变（§7.4.3 linear-gradient(160deg)）——
-    bg1: Color(0xFFDDE7FF),
-    bg2: Color(0xFFFFE9D6),
-    // —— AI 元素 token（M1 定义、M2 启用，§7.4.5）——
-    aiShadow: Color(0x667C3DFF), // rgba(124,61,255,.4)
-    aiGlow: Color(0x59D400FF), // rgba(212,0,255,.35)
+    text: Color(0xFF1A1A1A),
+    muted: Color(0xFF8A8A8E),
+    // —— 表面（纯色，非半透明）——
+    card: Color(0xFFFFFFFF),
+    cardSolid: Color(0xFFFFFFFF),
+    selectedBg: Color(0xFFF2F4FA), // 浅色：浅蓝灰
+    stroke: Color(0xFFE5E5EA),
+    nav: Color(0xFFFFFFFF),
+    sidebar: Color(0xFFFFFFFF),
+    field: Color(0xFFF5F5F7),
+    // —— 徽标（灰字细描边）——
+    chipBg: Color(0xFFF5F5F7),
+    chipText: Color(0xFF8A8A8E),
+    // —— 阴影（全部移除）——
+    shadowSmColor: Color(0x00000000),
+    shadow: [],
+    shadowSm: [],
+    // —— 背景（纯白，无渐变）——
+    bg1: Color(0xFFFFFFFF),
+    bg2: Color(0xFFFFFFFF),
+    // —— AI 元素 token（M1 定义 M2 启用，主色占位）——
+    aiShadow: Color(0x00000000),
+    aiGlow: Color(0x00000000),
   );
 
   static const AppTokenSet dark = AppTokenSet(
-    // —— 渐变端点（§7.4.2 深色列）——
-    primary: Color(0xFF4D7DFF),
-    primary2: Color(0xFF00D4FF),
-    accent2: Color(0xFF00E676),
-    accent: Color(0xFF00C4FF),
-    ai2: Color(0xFFB388FF),
-    ai: Color(0xFFFF66E5),
+    // —— 主色（Things 3 蓝，深色提亮）——
+    primary: Color(0xFF4D8CFF),
+    primary2: Color(0xFF4D8CFF),
+    accent2: Color(0xFF4D8CFF),
+    accent: Color(0xFF4D8CFF),
+    ai2: Color(0xFF4D8CFF),
+    ai: Color(0xFF4D8CFF),
     // —— 文字 ——
-    text: Color(0xFFEEF1FF),
-    muted: Color(0xFF8F97C0),
-    // —— 表面 ——
-    card: Color(0x8C1C2240), // rgba(28,34,64,.55)
-    cardSolid: Color(0xE61E2648), // rgba(30,38,72,.90)
-    stroke: Color(0x38FFFFFF), // rgba(255,255,255,.22)
-    nav: Color(0x8016222E), // rgba(16,22,46,.50)
-    sidebar: Color(0x7310162E), // rgba(16,22,46,.45)
-    field: Color(0x14FFFFFF), // rgba(255,255,255,.08)
-    // —— 建议徽标 ——
-    chipBg: Color(0x3300E676), // rgba(0,230,118,.20)
-    chipText: Color(0xFF6DF7B3),
-    // —— 彩色投影 ——
-    shadowSmColor: Color(0x73000000), // rgba(0,0,0,.45)
-    shadow: [
-      BoxShadow(color: Color(0x99000000), blurRadius: 60, offset: Offset(0, 20)),
-      BoxShadow(color: Color(0x66000000), blurRadius: 16, offset: Offset(0, 4)),
-    ],
-    shadowSm: [
-      BoxShadow(color: Color(0x73000000), blurRadius: 28, offset: Offset(0, 10)),
-    ],
-    // —— 底色渐变 ——
-    bg1: Color(0xFF0A0E22),
-    bg2: Color(0xFF1C0F2E),
-    // —— AI 元素 token（浅深两套同值，§7.4.3）——
-    aiShadow: Color(0x667C3DFF),
-    aiGlow: Color(0x59D400FF),
+    text: Color(0xFFF5F5F7),
+    muted: Color(0xFF8E8E93),
+    // —— 表面（纯黑系）——
+    card: Color(0xFF000000),
+    cardSolid: Color(0xFF000000),
+    selectedBg: Color(0xFF1C1C1E),
+    stroke: Color(0xFF2C2C2E),
+    nav: Color(0xFF000000),
+    sidebar: Color(0xFF000000),
+    field: Color(0xFF1C1C1E),
+    // —— 徽标 ——
+    chipBg: Color(0xFF1C1C1E),
+    chipText: Color(0xFF8E8E93),
+    // —— 阴影（全部移除）——
+    shadowSmColor: Color(0x00000000),
+    shadow: [],
+    shadowSm: [],
+    // —— 背景（纯黑）——
+    bg1: Color(0xFF000000),
+    bg2: Color(0xFF000000),
+    // —— AI 元素 token ——
+    aiShadow: Color(0x00000000),
+    aiGlow: Color(0x00000000),
   );
 
-  // 圆角体系两套同值（§7.4.3 末条）。
-  static const double radiusContainer = 18;
-  static const double radiusCard = 16;
-  static const double radiusRow = 12;
-  static const double radiusButton = 10;
+  // 圆角体系（Things 3 小圆角）。
+  static const double radiusContainer = 8;
+  static const double radiusCard = 8;
+  static const double radiusRow = 8;
+  static const double radiusButton = 6;
   static const double radiusBadge = 8;
 }
 
@@ -111,6 +95,7 @@ class AppTokenSet {
     required this.text,
     required this.muted,
     required this.card,
+    required this.selectedBg,
     required this.cardSolid,
     required this.stroke,
     required this.nav,
@@ -136,6 +121,7 @@ class AppTokenSet {
   final Color text;
   final Color muted;
   final Color card;
+  final Color selectedBg;
   final Color cardSolid;
   final Color stroke;
   final Color nav;
@@ -315,35 +301,28 @@ ThemeData buildAppTheme(Brightness brightness) {
     useMaterial3: true,
     brightness: brightness,
     colorScheme: scheme,
-    // 光斑背景由 GtdApp.builder 垫底：Scaffold 透明以让背景可见（§7.4.4）。
-    scaffoldBackgroundColor: Colors.transparent,
+    // 纯色背景由主题 token 提供（Things 3 极简纯底，无光斑/渐变）。
+    scaffoldBackgroundColor: tokens.bg1,
     extensions: [extension],
 
     // —— 组件主题挂接（§7.4.4 末条：界面代码不散写色值）——
     cardTheme: CardThemeData(
       color: tokens.cardSolid,
       surfaceTintColor: Colors.transparent,
-      // 阴影交给单层 shadowSm 主色近似（多层彩色阴影无法用 CardTheme 表达）。
       elevation: 0,
-      shadowColor: tokens.shadowSmColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusCard),
         side: BorderSide(color: tokens.stroke),
       ),
-      clipBehavior: Clip.antiAlias,
     ),
     navigationBarTheme: NavigationBarThemeData(
-      // 玻璃底由 shell 的 BackdropFilter 提供，导航条自身透明（§7.4.3 `.bottombar`）。
       backgroundColor: Colors.transparent,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      indicatorColor: tokens.primary,
-      indicatorShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTokens.radiusBadge),
-      ),
+      indicatorColor: tokens.selectedBg,
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const IconThemeData(color: Colors.white);
+          return IconThemeData(color: tokens.primary);
         }
         return IconThemeData(color: tokens.muted);
       }),
@@ -359,24 +338,19 @@ ThemeData buildAppTheme(Brightness brightness) {
       }),
     ),
     navigationRailTheme: NavigationRailThemeData(
-      // 玻璃底由 shell 的 BackdropFilter 提供，侧边栏自身透明（§7.4.3 `.sidebar`）。
+      // Things 3 侧边栏：纯底 + hairline 分隔（分隔由 shell 提供）。
       backgroundColor: Colors.transparent,
       elevation: 0,
-      // 激活项表达：primary 色 indicator 圆角 + 白色图标 + 发光 label
-      // （preview `.sideitem.active` 渐变胶囊的 Flutter 近似，见波 1 shell）。
-      indicatorColor: tokens.primary,
+      indicatorColor: tokens.selectedBg,
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusButton),
       ),
-      selectedIconTheme: const IconThemeData(color: Colors.white),
+      selectedIconTheme: IconThemeData(color: tokens.primary),
       unselectedIconTheme: IconThemeData(color: tokens.muted),
-      selectedLabelTextStyle: const TextStyle(
+      selectedLabelTextStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w700,
-        color: Colors.white,
-        shadows: [
-          Shadow(color: Color(0x66FFFFFF), blurRadius: 10, offset: Offset(0, 0)),
-        ],
+        color: tokens.primary,
       ),
       unselectedLabelTextStyle: TextStyle(fontSize: 12, color: tokens.muted),
     ),
@@ -402,29 +376,25 @@ ThemeData buildAppTheme(Brightness brightness) {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
+      backgroundColor: tokens.bg1,
       surfaceTintColor: Colors.transparent,
       foregroundColor: tokens.text,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
-      // 大号粗体标题 + 微光 text-shadow（对应 preview `h2`）。
+      // Things 3 标题：17px 中等字重，无光晕。
       titleTextStyle: TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.3,
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
         color: tokens.text,
-        shadows: const [
-          Shadow(color: Color(0x66FFFFFF), blurRadius: 12, offset: Offset(0, 2)),
-        ],
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: WidgetStatePropertyAll(tokens.accent),
+        backgroundColor: WidgetStatePropertyAll(tokens.primary),
         foregroundColor: const WidgetStatePropertyAll(Colors.white),
         overlayColor: WidgetStatePropertyAll(
-          Colors.white.withValues(alpha: 0.15),
+          Colors.black.withValues(alpha: 0.1),
         ),
         elevation: const WidgetStatePropertyAll(0),
         textStyle: const WidgetStatePropertyAll(
@@ -436,7 +406,7 @@ ThemeData buildAppTheme(Brightness brightness) {
           ),
         ),
         padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         ),
       ),
     ),
@@ -460,7 +430,7 @@ ThemeData buildAppTheme(Brightness brightness) {
         fontSize: 11,
         fontWeight: FontWeight.w600,
       ),
-      side: BorderSide.none,
+      side: BorderSide(color: tokens.stroke),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusBadge),
       ),
@@ -469,19 +439,16 @@ ThemeData buildAppTheme(Brightness brightness) {
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: tokens.cardSolid,
-      contentTextStyle: TextStyle(color: tokens.text),
+      backgroundColor: tokens.text.withValues(alpha: 0.92),
+      contentTextStyle: TextStyle(color: tokens.bg1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusRow),
       ),
     ),
     dialogTheme: DialogThemeData(
-      // 半透明玻璃底：模糊由波 2 在 dialog 内容用 GlassContainer 提供，
-      // 阴影用 shadow 主色单层近似（§7.4.3 `.mockup` box-shadow）。
-      backgroundColor: tokens.card,
+      backgroundColor: tokens.cardSolid,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      shadowColor: tokens.shadow.first.color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
         side: BorderSide(color: tokens.stroke),
