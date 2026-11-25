@@ -2613,7 +2613,7 @@ Expected: 提交成功。
 **Files:**
 - Create: `lib/data/providers.dart`
 
-- [ ] **Step 1: 写失败测试（Provider 可解析所有仓库）**
+- [x] **Step 1: 写失败测试（Provider 可解析所有仓库）**
 
 `test/data/providers_test.dart`：
 
@@ -2642,12 +2642,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/data/providers_test.dart`
 Expected: FAIL，编译错误（`providers.dart` 不存在）。
 
-- [ ] **Step 3: 实现 lib/data/providers.dart（完整文件）**
+- [x] **Step 3: 实现 lib/data/providers.dart（完整文件）**
 
 ```dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -2686,17 +2686,17 @@ final exportServiceProvider = Provider<ExportService>(
     (ref) => ExportService(ref.watch(databaseProvider)));
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/data/providers_test.dart`
 Expected: PASS。
 
-- [ ] **Step 5: 运行全部数据层测试**
+- [x] **Step 5: 运行全部数据层测试**
 
 Run: `flutter test test/data`
 Expected: 所有数据层测试全绿（enums/database/migration/各 repository/clarify/export/providers）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add lib/data/providers.dart test/data/providers_test.dart
@@ -2714,7 +2714,7 @@ Expected: 提交成功。
 - Create: `lib/features/settings/backup_file_gateway.dart`
 - Create: `test/widget/widget_utils.dart`
 
-- [ ] **Step 1: 创建 lib/features/settings/backup_file_gateway.dart**
+- [x] **Step 1: 创建 lib/features/settings/backup_file_gateway.dart**
 
 ```dart
 import 'dart:convert';
@@ -2759,7 +2759,7 @@ final backupFileGatewayProvider = Provider<BackupFileGateway>(
     (ref) => FilePickerBackupGateway());
 ```
 
-- [ ] **Step 2: 创建 test/widget/widget_utils.dart**
+- [x] **Step 2: 创建 test/widget/widget_utils.dart**
 
 ```dart
 import 'dart:convert';
@@ -2825,12 +2825,12 @@ class TestEnv {
 }
 ```
 
-- [ ] **Step 3: 验证编译**
+- [x] **Step 3: 验证编译**
 
 Run: `flutter analyze`
 Expected: 无 error（`backup_file_gateway.dart`、`widget_utils.dart` 及生成的本地化类均可解析）。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add lib/features/settings/backup_file_gateway.dart test/widget/widget_utils.dart
@@ -2845,7 +2845,7 @@ Expected: 提交成功。
 - Create: `lib/features/inbox/collect_dialog.dart`
 - Test: `test/widget/quick_collect_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/quick_collect_test.dart`：
 
@@ -2918,12 +2918,12 @@ class _CollectHost extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/quick_collect_test.dart`
 Expected: FAIL，编译错误（`quick_collect_bar.dart`、`collect_dialog.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/inbox/quick_collect_bar.dart**
+- [x] **Step 3: 创建 lib/features/inbox/quick_collect_bar.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2994,7 +2994,7 @@ class _QuickCollectBarState extends ConsumerState<QuickCollectBar> {
 }
 ```
 
-- [ ] **Step 4: 创建 lib/features/inbox/collect_dialog.dart**
+- [x] **Step 4: 创建 lib/features/inbox/collect_dialog.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -3055,12 +3055,12 @@ class _CollectDialogState extends ConsumerState<CollectDialog> {
 }
 ```
 
-- [ ] **Step 5: 运行测试确认通过**
+- [x] **Step 5: 运行测试确认通过**
 
 Run: `flutter test test/widget/quick_collect_test.dart`
 Expected: PASS（3 个测试全绿）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add lib/features/inbox test/widget/quick_collect_test.dart
@@ -3074,7 +3074,7 @@ Expected: 提交成功。
 - Create: `lib/features/inbox/inbox_page.dart`
 - Test: `test/widget/inbox_page_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/inbox_page_test.dart`：
 
@@ -3142,12 +3142,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/inbox_page_test.dart`
 Expected: FAIL，编译错误（`inbox_page.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/inbox/inbox_page.dart**
+- [x] **Step 3: 创建 lib/features/inbox/inbox_page.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -3270,12 +3270,12 @@ class _InboxTile extends ConsumerWidget {
 
 说明：`ClarifyDialog` 在 Task 25 才创建，而本任务 Step 3 的 `inbox_page.dart` 已 import 它；因此在 Task 25 完成前，Step 4 运行测试会因 `clarify_dialog.dart` 缺失而编译失败。处理顺序：若 Step 4 编译失败，**先完成 Task 25（写测试→实现→测试通过→提交），再回来运行本任务 Step 4 与 Step 5**（两次提交分别保留）。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/inbox_page_test.dart`
 Expected: PASS（3 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/inbox/inbox_page.dart test/widget/inbox_page_test.dart
@@ -3289,7 +3289,7 @@ Expected: 提交成功。
 - Create: `lib/features/task/task_form_fields.dart`
 - Test: `test/widget/task_form_fields_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/task_form_fields_test.dart`：
 
@@ -3396,12 +3396,12 @@ class _FormHostState extends State<_FormHost> {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/task_form_fields_test.dart`
 Expected: FAIL，编译错误（`task_form_fields.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/task/task_form_fields.dart**
+- [x] **Step 3: 创建 lib/features/task/task_form_fields.dart**
 
 ```dart
 import 'package:flutter/foundation.dart';
@@ -3670,12 +3670,12 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/task_form_fields_test.dart`
 Expected: PASS（3 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/task/task_form_fields.dart test/widget/task_form_fields_test.dart
@@ -3689,7 +3689,7 @@ Expected: 提交成功。
 - Create: `lib/features/task/task_edit_dialog.dart`
 - Test: `test/widget/task_edit_dialog_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/task_edit_dialog_test.dart`：
 
@@ -3780,12 +3780,12 @@ class _EditHost extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/task_edit_dialog_test.dart`
 Expected: FAIL，编译错误（`task_edit_dialog.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/task/task_edit_dialog.dart**
+- [x] **Step 3: 创建 lib/features/task/task_edit_dialog.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -3867,12 +3867,12 @@ class _TaskEditDialogState extends ConsumerState<TaskEditDialog> {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/task_edit_dialog_test.dart`
 Expected: PASS（2 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/task/task_edit_dialog.dart test/widget/task_edit_dialog_test.dart
@@ -3886,7 +3886,7 @@ Expected: 提交成功。
 - Create: `lib/features/inbox/clarify_dialog.dart`
 - Test: `test/widget/clarify_dialog_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/clarify_dialog_test.dart`：
 
@@ -4033,12 +4033,12 @@ class _ClarifyHost extends ConsumerWidget {
 ```
 （测试文件头部 imports 已在上述代码块中完整给出，无需额外补充。）
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/clarify_dialog_test.dart`
 Expected: FAIL，编译错误（`clarify_dialog.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/inbox/clarify_dialog.dart**
+- [x] **Step 3: 创建 lib/features/inbox/clarify_dialog.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -4166,12 +4166,12 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/clarify_dialog_test.dart`
 Expected: PASS（5 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/inbox/clarify_dialog.dart test/widget/clarify_dialog_test.dart
@@ -4185,7 +4185,7 @@ Expected: 提交成功。
 - Create: `lib/features/today/today_page.dart`
 - Test: `test/widget/today_page_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/today_page_test.dart`：
 
@@ -4245,12 +4245,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/today_page_test.dart`
 Expected: FAIL，编译错误（`today_page.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/today/today_page.dart**
+- [x] **Step 3: 创建 lib/features/today/today_page.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -4331,12 +4331,12 @@ class _TaskTile extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/today_page_test.dart`
 Expected: PASS（3 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/today test/widget/today_page_test.dart
@@ -4351,7 +4351,7 @@ Expected: 提交成功。
 - Create: `lib/features/projects/project_dialog.dart`
 - Test: `test/widget/projects_page_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/projects_page_test.dart`：
 
@@ -4426,12 +4426,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/projects_page_test.dart`
 Expected: FAIL，编译错误（`projects_page.dart`、`project_dialog.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/projects/project_dialog.dart**
+- [x] **Step 3: 创建 lib/features/projects/project_dialog.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -4519,7 +4519,7 @@ class _ProjectDialogState extends ConsumerState<ProjectDialog> {
 }
 ```
 
-- [ ] **Step 4: 创建 lib/features/projects/projects_page.dart**
+- [x] **Step 4: 创建 lib/features/projects/projects_page.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -4664,12 +4664,12 @@ class _ProjectCard extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 5: 运行测试确认通过**
+- [x] **Step 5: 运行测试确认通过**
 
 Run: `flutter test test/widget/projects_page_test.dart`
 Expected: PASS（3 个测试全绿）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add lib/features/projects test/widget/projects_page_test.dart
@@ -4683,7 +4683,7 @@ Expected: 提交成功。
 - Create: `lib/features/contexts/contexts_page.dart`
 - Test: `test/widget/contexts_page_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/contexts_page_test.dart`：
 
@@ -4730,12 +4730,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/contexts_page_test.dart`
 Expected: FAIL，编译错误（`contexts_page.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/contexts/contexts_page.dart（完整版）**
+- [x] **Step 3: 创建 lib/features/contexts/contexts_page.dart（完整版）**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -4871,12 +4871,12 @@ class _ContextDialogState extends ConsumerState<_ContextDialog> {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/contexts_page_test.dart`
 Expected: PASS（2 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/contexts test/widget/contexts_page_test.dart
@@ -4891,7 +4891,7 @@ Expected: 提交成功。
 - Create: `lib/features/someday/someday_page.dart`
 - Test: `test/widget/waiting_someday_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/waiting_someday_test.dart`：
 
@@ -4949,12 +4949,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/waiting_someday_test.dart`
 Expected: FAIL，编译错误（`waiting_page.dart`、`someday_page.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/waiting/waiting_page.dart**
+- [x] **Step 3: 创建 lib/features/waiting/waiting_page.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -5015,7 +5015,7 @@ class _WaitingTile extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 4: 创建 lib/features/someday/someday_page.dart**
+- [x] **Step 4: 创建 lib/features/someday/someday_page.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -5075,12 +5075,12 @@ class _SomedayTile extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 5: 运行测试确认通过**
+- [x] **Step 5: 运行测试确认通过**
 
 Run: `flutter test test/widget/waiting_someday_test.dart`
 Expected: PASS（3 个测试全绿）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add lib/features/waiting lib/features/someday test/widget/waiting_someday_test.dart
@@ -5094,7 +5094,7 @@ Expected: 提交成功。
 - Create: `lib/features/review/review_page.dart`
 - Test: `test/widget/review_page_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/review_page_test.dart`：
 
@@ -5137,12 +5137,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/review_page_test.dart`
 Expected: FAIL，编译错误（`review_page.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/review/review_page.dart**
+- [x] **Step 3: 创建 lib/features/review/review_page.dart**
 
 ```dart
 import 'dart:convert';
@@ -5305,12 +5305,12 @@ class _ReviewDialogState extends ConsumerState<_ReviewDialog> {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/review_page_test.dart`
 Expected: PASS（2 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/features/review test/widget/review_page_test.dart
@@ -5325,7 +5325,7 @@ Expected: 提交成功。
 - Create: `lib/features/settings/settings_page.dart`
 - Test: `test/widget/settings_page_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/settings_page_test.dart`：
 
@@ -5401,12 +5401,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/settings_page_test.dart`
 Expected: FAIL，编译错误（`settings_page.dart`、`settings_controller.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/features/settings/settings_controller.dart**
+- [x] **Step 3: 创建 lib/features/settings/settings_controller.dart**
 
 ```dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5440,7 +5440,7 @@ final settingsControllerProvider =
 );
 ```
 
-- [ ] **Step 4: 创建 lib/features/settings/settings_page.dart**
+- [x] **Step 4: 创建 lib/features/settings/settings_page.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -5549,12 +5549,12 @@ class SettingsPage extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 5: 运行测试确认通过**
+- [x] **Step 5: 运行测试确认通过**
 
 Run: `flutter test test/widget/settings_page_test.dart`
 Expected: PASS（5 个测试全绿）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```powershell
 git add lib/features/settings test/widget/settings_page_test.dart
@@ -5568,7 +5568,7 @@ Expected: 提交成功。
 - Create: `lib/app/responsive_shell.dart`
 - Test: `test/widget/responsive_shell_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/responsive_shell_test.dart`：
 
@@ -5631,12 +5631,12 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/responsive_shell_test.dart`
 Expected: FAIL，编译错误（`responsive_shell.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/app/responsive_shell.dart**
+- [x] **Step 3: 创建 lib/app/responsive_shell.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -5791,12 +5791,12 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `flutter test test/widget/responsive_shell_test.dart`
 Expected: PASS（4 个测试全绿）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add lib/app/responsive_shell.dart test/widget/responsive_shell_test.dart
@@ -5812,7 +5812,7 @@ Expected: 提交成功。
 - Modify: `lib/main.dart`（覆写为空模板）
 - Test: `test/widget/app_smoke_test.dart`
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `test/widget/app_smoke_test.dart`：
 
@@ -5861,12 +5861,12 @@ Widget _app(TestEnv env) => ProviderScope(
     );
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `flutter test test/widget/app_smoke_test.dart`
 Expected: FAIL，编译错误（`app.dart`、`theme.dart` 不存在）。
 
-- [ ] **Step 3: 创建 lib/app/theme.dart**
+- [x] **Step 3: 创建 lib/app/theme.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -5877,7 +5877,7 @@ ThemeData buildAppTheme() {
 }
 ```
 
-- [ ] **Step 4: 创建 lib/app/app.dart**
+- [x] **Step 4: 创建 lib/app/app.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -5906,7 +5906,7 @@ class GtdApp extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 5: 覆写 lib/main.dart**
+- [x] **Step 5: 覆写 lib/main.dart**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -5930,12 +5930,12 @@ Future<void> main() async {
 }
 ```
 
-- [ ] **Step 6: 运行测试确认通过**
+- [x] **Step 6: 运行测试确认通过**
 
 Run: `flutter test test/widget/app_smoke_test.dart`
 Expected: PASS（2 个测试全绿）。
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add lib/app lib/main.dart test/widget/app_smoke_test.dart
@@ -5952,22 +5952,22 @@ Expected: 提交成功。
 **Files:**
 - None（纯验证）
 
-- [ ] **Step 1: 运行全量测试**
+- [x] **Step 1: 运行全量测试**
 
 Run: `flutter test`
 Expected: 输出 `All tests passed!`。若有失败，修复对应文件后重跑（每个 Task 均已独立绿，此处为回归确认）。
 
-- [ ] **Step 2: 运行静态分析**
+- [x] **Step 2: 运行静态分析**
 
 Run: `flutter analyze`
 Expected: `No issues found!`。若为 lint 警告（如 unused import），按提示清理。
 
-- [ ] **Step 3: 验证无 AI / 无网络依赖（规格 §4.2 不变量 1、验收⑨）**
+- [x] **Step 3: 验证无 AI / 无网络依赖（规格 §4.2 不变量 1、验收⑨）**
 
 Run: `Select-String -Path pubspec.yaml -Pattern "^\s+(http|dio|openai|anthropic):"`
 Expected: 无输出（dependencies 段不含任何网络或 AI 客户端包）。
 
-- [ ] **Step 4: Commit（若有分析清理变更）**
+- [x] **Step 4: Commit（若有分析清理变更）**
 
 ```powershell
 git add -A
@@ -5980,7 +5980,7 @@ Expected: 提交成功（若 Step 1-3 无变更则跳过本步）。
 **Files:**
 - Create: `test/acceptance/milestone1_checklist.md`
 
-- [ ] **Step 1: 创建走查清单**
+- [x] **Step 1: 创建走查清单**
 
 `test/acceptance/milestone1_checklist.md`：
 
@@ -6043,7 +6043,7 @@ Expected: 提交成功（若 Step 1-3 无变更则跳过本步）。
 - [ ] `flutter analyze` 无 issue
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```powershell
 git add test/acceptance/milestone1_checklist.md
@@ -6056,7 +6056,7 @@ Expected: 提交成功。
 **Files:**
 - None（纯验证）
 
-- [ ] **Step 1: Windows 桌面构建**
+- [x] **Step 1: Windows 桌面构建**
 
 Run: `flutter build windows --debug`
 Expected: 输出 `Built build\windows\x64\runner\Debug\gtd_app.exe`。
@@ -6079,7 +6079,7 @@ Expected: 应用在手机端启动，底部导航 5 项可见。
 断开本机网络 → 重新 `flutter run -d windows` → 按 Task 35 清单第 9 项完整走一遍。
 Expected: 收集/理清/视图/回顾/导出全部正常，无任何网络相关报错。
 
-- [ ] **Step 5: 在走查清单勾选完成项**
+- [x] **Step 5: 在走查清单勾选完成项**
 
 把 `test/acceptance/milestone1_checklist.md` 中已完成项勾为 `[x]` 并提交：
 
@@ -6094,17 +6094,17 @@ Expected: 提交成功。若个别项未通过，修复对应 Task 后重跑并�
 **Files:**
 - None（纯验证）
 
-- [ ] **Step 1: 最终全量回归**
+- [x] **Step 1: 最终全量回归**
 
 Run: `flutter test` 与 `flutter analyze`
 Expected: `All tests passed!` 与 `No issues found!`。
 
-- [ ] **Step 2: 确认 git 工作区干净**
+- [x] **Step 2: 确认 git 工作区干净**
 
 Run: `git status --short`
 Expected: 无未提交变更（`tool/windows/` 已被忽略）。
 
-- [ ] **Step 3: 里程碑总结提交（记录验收状态）**
+- [x] **Step 3: 里程碑总结提交（记录验收状态）**
 
 ```powershell
 git log --oneline -5
