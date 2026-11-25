@@ -169,7 +169,7 @@ git commit -m "feat(upcoming): 拖拽任务到日期头 = 安排开始日期"
 - Modify: `test/widget/responsive_shell_test.dart`
 - Modify: l10n（快捷键 tooltip 文案，可选）
 
-- [ ] **Step 1: shell 层全局快捷键（Shortcuts/Actions/Intent）**
+- [x] **Step 1: shell 层全局快捷键（Shortcuts/Actions/Intent）**
 
 桌面平台（`kIsWeb || Platform.isWindows/Linux/macOS`）启用；文本输入焦点时
 不拦截（`FocusManager.instance.primaryFocus` 落在 `EditableText` 则跳过）：
@@ -177,19 +177,19 @@ git commit -m "feat(upcoming): 拖拽任务到日期头 = 安排开始日期"
 - `Ctrl/Cmd+1..9` → 侧边栏第 1..9 项（收件箱..日志）
 - `Ctrl/Cmd+0` → 回顾（index 9）
 
-- [ ] **Step 2: 列表层焦点快捷键**
+- [x] **Step 2: 列表层焦点快捷键**
 
 `TaskListView` 焦点行（Task 1 已建焦点态）：`J`/`K` 上下移焦点（列表内循环）、
 `Enter` 完成焦点任务、`Delete` 删除焦点任务（确认对话框）。仅 `focusEnabled`
 且桌面时生效。
 
-- [ ] **Step 3: 测试**
+- [x] **Step 3: 测试**
 
 快捷键：N 打开收集对话框；Ctrl+2 切今日；Ctrl+5 切将来也许；输入框聚焦时 N
 不触发；J/K 焦点移动 + Enter 完成 + Delete 确认删除（列表层测试，用
 `tester.sendKeyEvent`）。
 
-- [ ] **Step 4: analyze + 测试 + 提交**
+- [x] **Step 4: analyze + 测试 + 提交**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -198,6 +198,12 @@ flutter test test/widget/responsive_shell_test.dart test/widget/task_list_view_t
 git add lib/app/responsive_shell.dart lib/features/task test/widget
 git commit -m "feat(shortcuts): 桌面快捷键（N/数字切视图/JK/Enter/Delete）"
 ```
+
+> **自审登记（偏差/收尾项）**：列表层快捷键在长列表下通过 `_revealAndFocusRow`（addPostFrameCallback +
+> `Scrollable.ensureVisible`）滚动跟随，防止 Enter/Delete 作用于屏外任务（审查发现的 Important 已修复，
+> 含 30 行长列表实证测试）；平台门控与选择模式/行内控件获焦门控均有负向测试锁定。收尾清单新增：
+> `_ShellAction`/`_ListShortcutAction` 6 行重复门控可抽共享类（跨 layer 归属未定，登记留待）；Ctrl/Cmd+0
+> 已随 `_navSpecs` 派生；l10n 快捷键 tooltip 可选未做。
 
 ---
 
