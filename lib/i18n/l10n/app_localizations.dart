@@ -746,6 +746,36 @@ abstract class AppLocalizations {
   /// **'Restore'**
   String get logbookRestore;
 
+  /// No description provided for @taskListSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String taskListSelectedCount(int count);
+
+  /// No description provided for @exitSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit selection'**
+  String get exitSelection;
+
+  /// No description provided for @actionComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get actionComplete;
+
+  /// No description provided for @actionSetDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set date'**
+  String get actionSetDate;
+
+  /// No description provided for @actionMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get actionMove;
+
   /// No description provided for @reminderBannerTitle.
   ///
   /// In en, this message translates to:

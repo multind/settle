@@ -128,6 +128,18 @@
   "logbookSearchHint": "搜索",
   "logbookDeleteConfirm": "确认删除？",
   "logbookRestore": "恢复",
+  "taskListSelectedCount": "已选 {count} 项",
+  "@taskListSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exitSelection": "退出选择",
+  "actionComplete": "完成",
+  "actionSetDate": "设日期",
+  "actionMove": "移动",
   "reminderBannerTitle": "提醒：{title}",
   "@reminderBannerTitle": {
     "placeholders": {

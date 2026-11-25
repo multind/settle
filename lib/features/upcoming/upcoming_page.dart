@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/app/glass.dart';
 import 'package:gtd_app/app/theme.dart';
 import 'package:gtd_app/data/providers.dart';
 import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/task_edit_dialog.dart';
+import 'package:gtd_app/features/task/task_list_view.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 
 /// 即将视图（index 2）：`watchUpcoming`（next_action 且 scheduled 或 dueDate > 今日末），
 /// 按生效日期（scheduled ?? dueDate）的日分组升序时间线。
-/// 日期头：近两天「明天/后天」友好文案，其余 locale 化 `M月d日 周几`（muted 小字）。
-/// 组内按 优先级→sortOrder；行沿用 v0.2 样式（完成钮/编辑对话框），无 subtitle
-/// （生效日期已由组头表达，避免重复）。
-/// 拖拽落点由交互计划 Task 3 在此日期头上加 DragTarget，本页只渲染静态头。
+/// 公共组件 `TaskListView` 内统一排序 + 分组（`groupKey` = 生效日 DateTime），
+/// 组头由 `buildDateHeader` 注入（静态日期头；拖拽落点 DragTarget 由交互计划
+/// Task 3 加在此头上）。
+/// 行沿用 v0.2 样式（完成钮/编辑对话框），无 subtitle（生效日期已由组头表达）。
 /// 仓库约定：普通 Provider 无 watchByStatus 成员，改文件级 StreamProvider。
 /// [now] 为可注入时钟（测试用固定时刻消除跨午夜竞态）；缺省用 `DateTime.now`
 /// （与 TaskRepository 时钟注入同款口径）。
 final _upcomingProvider = StreamProvider<List<Task>>(
     (ref) => ref.watch(taskRepositoryProvider).watchUpcoming());
+
+/// 即将页批量操作集（Task 2 接线 onAction 实现；本 Task 仅展示按钮）。
+const _batchActions = [
+  TaskListAction.complete,
+  TaskListAction.delete,
+  TaskListAction.setDate,
+  TaskListAction.move,
+];
 
 class UpcomingPage extends ConsumerWidget {
   const UpcomingPage({super.key, this.now = DateTime.now});
@@ -39,20 +46,15 @@ class UpcomingPage extends ConsumerWidget {
           // 今日 00:00（以注入时钟取「今日」，与数据层 watchUpcoming 口径一致）。
           final current = now();
           final today = DateTime(current.year, current.month, current.day);
-          // 按生效日期（scheduled ?? dueDate）的日分组，日期升序。
-          final groups = <DateTime, List<Task>>{};
-          for (final t in rows) {
-            groups.putIfAbsent(_effectiveDay(t), () => []).add(t);
-          }
-          final days = groups.keys.toList()..sort();
-          return ListView(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            children: [
-              for (final day in days) ...[
-                _DateHeader(day: day, today: today),
-                for (final t in groups[day]!..sort(_compare)) _TaskTile(task: t),
-              ],
-            ],
+          return TaskListView(
+            tasks: rows,
+            reorderEnabled: true,
+            selectionEnabled: true,
+            focusEnabled: true,
+            actions: _batchActions,
+            groupKey: _effectiveDay,
+            buildDateHeader: (context, key) =>
+                _DateHeader(day: key as DateTime, today: today),
           );
         },
       ),
@@ -66,21 +68,6 @@ class UpcomingPage extends ConsumerWidget {
     final eff = DateTime.fromMillisecondsSinceEpoch(t.scheduled ?? t.dueDate!);
     return DateTime(eff.year, eff.month, eff.day);
   }
-
-  /// 组内排序：优先级 → sortOrder（同一天分组内无需再按日期比较）。
-  static int _compare(Task a, Task b) {
-    final pa = _priorityIndex(a.priority);
-    final pb = _priorityIndex(b.priority);
-    if (pa != pb) return pa.compareTo(pb);
-    return a.sortOrder.compareTo(b.sortOrder);
-  }
-
-  static int _priorityIndex(String? p) => switch (p) {
-        'high' => 0,
-        'medium' => 1,
-        'low' => 2,
-        _ => 3,
-      };
 }
 
 /// 日期头（静态）：明天/后天用友好文案，其余 `M月d日 周几`；muted 小字。
@@ -129,43 +116,4 @@ class _DateHeader extends StatelessWidget {
         DateTime.saturday => l10n.weekdaySat,
         _ => l10n.weekdaySun,
       };
-}
-
-/// 即将行（v0.2 样式，同随时页 _TaskTile）：完成钮 / 点击编辑 / GlassContainer 圆角零阴影。
-class _TaskTile extends ConsumerWidget {
-  const _TaskTile({required this.task});
-  final Task task;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final tokens = isLight ? AppTokens.light : AppTokens.dark;
-    final row = ListTile(
-      key: Key('task_tile_${task.id}'),
-      title: Text(task.title),
-      leading: IconButton(
-        key: Key('task_done_${task.id}'),
-        tooltip: l10n.markDone,
-        onPressed: () => ref.read(taskRepositoryProvider).complete(task.id),
-        icon: const GlassCheckbox(value: false, onChanged: null),
-      ),
-      onTap: () => showDialog<void>(
-        context: context,
-        builder: (_) => TaskEditDialog(task: task),
-      ),
-    );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: GlassContainer(
-        color: tokens.cardSolid,
-        blur: 5,
-        saturate: 1.0,
-        borderColor: tokens.stroke,
-        borderRadius: BorderRadius.circular(AppTokens.radiusRow),
-        shadow: tokens.shadowSm,
-        child: row,
-      ),
-    );
-  }
 }

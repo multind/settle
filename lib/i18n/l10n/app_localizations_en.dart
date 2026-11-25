@@ -338,6 +338,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logbookRestore => 'Restore';
 
   @override
+  String taskListSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get exitSelection => 'Exit selection';
+
+  @override
+  String get actionComplete => 'Complete';
+
+  @override
+  String get actionSetDate => 'Set date';
+
+  @override
+  String get actionMove => 'Move';
+
+  @override
   String reminderBannerTitle(String title) {
     return 'Reminder: $title';
   }

@@ -128,6 +128,18 @@
   "logbookSearchHint": "Search",
   "logbookDeleteConfirm": "Delete this task?",
   "logbookRestore": "Restore",
+  "taskListSelectedCount": "{count} selected",
+  "@taskListSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exitSelection": "Exit selection",
+  "actionComplete": "Complete",
+  "actionSetDate": "Set date",
+  "actionMove": "Move",
   "reminderBannerTitle": "Reminder: {title}",
   "@reminderBannerTitle": {
     "placeholders": {

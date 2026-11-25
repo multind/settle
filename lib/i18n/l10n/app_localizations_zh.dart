@@ -338,6 +338,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get logbookRestore => '恢复';
 
   @override
+  String taskListSelectedCount(int count) {
+    return '已选 $count 项';
+  }
+
+  @override
+  String get exitSelection => '退出选择';
+
+  @override
+  String get actionComplete => '完成';
+
+  @override
+  String get actionSetDate => '设日期';
+
+  @override
+  String get actionMove => '移动';
+
+  @override
   String reminderBannerTitle(String title) {
     return '提醒：$title';
   }
