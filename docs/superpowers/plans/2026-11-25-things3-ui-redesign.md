@@ -585,7 +585,7 @@ Expected: 全绿（`quick_collect_field/button`、`collect_dialog_field/submit` 
 - Modify: `lib/features/inbox/inbox_page.dart`（徽标硬编码）
 - 其余页面**零改动**（GlassContainer/GradientButton/GlassCheckbox 改造自动生效）
 
-- [ ] **Step 1: inbox 状态徽标改灰字细描边**
+- [x] **Step 1: inbox 状态徽标改灰字细描边** ✅ 4825003
 
 `lib/features/inbox/inbox_page.dart` 第 72-85 行的状态 Chip 替换为（去掉琥珀/绿玻璃底，改灰字细描边）：
 
@@ -603,7 +603,7 @@ Expected: 全绿（`quick_collect_field/button`、`collect_dialog_field/submit` 
 
 （`isLight`/`tokens` 变量若该处不再使用则检查清理，其余保持不变。）
 
-- [ ] **Step 2: 全量回归**
+- [x] **Step 2: 全量回归** ✅ 4825003（96/96）
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -612,7 +612,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: `All tests passed!`（96/96）。
 
-- [ ] **Step 3: analyze 全仓**
+- [x] **Step 3: analyze 全仓** ✅ 4825003（0 error，无新增 warning）
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -621,7 +621,7 @@ flutter analyze 2>&1 | Select-String -Pattern 'error' | Select-Object -First 5
 
 Expected: 0 error（58 条既有 info/warning 基线除外）。
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交** ✅ 4825003（含 I1 投影修复；工作区干净）
 
 ```powershell
 git add lib/features/inbox/inbox_page.dart
