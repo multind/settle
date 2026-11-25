@@ -72,13 +72,8 @@ class _InboxTile extends ConsumerWidget {
           Chip(
             label: Text(isPending ? l10n.statusPending : l10n.statusClarified),
             visualDensity: VisualDensity.compact,
-            backgroundColor: isPending
-                ? const Color(0x33FFB74D) // 琥珀玻璃底（Pending）
-                : const Color(0x3300B478), // 绿玻璃底（Clarified）
             labelStyle: TextStyle(
-              color: isPending
-                  ? const Color(0xFF8A5A00)
-                  : (isLight ? const Color(0xFF00775A) : const Color(0xFF6DF7B3)),
+              color: tokens.muted,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),

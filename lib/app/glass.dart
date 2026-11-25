@@ -9,8 +9,8 @@ import 'package:gtd_app/app/theme.dart';
 
 /// 纯底描边容器（原玻璃容器）。
 ///
-/// 保留 `blur` / `saturate` 构造参数仅作兼容占位（不再产生任何视觉效果）；
-/// 渲染为纯色底 + 可选 hairline 描边 + 可选投影。
+/// 保留 `blur` / `saturate` / `shadow` 构造参数仅作兼容占位（不再产生任何
+/// 视觉效果）；渲染为纯色底 + 可选 hairline 描边（0 阴影）。
 class GlassContainer extends StatelessWidget {
   const GlassContainer({
     super.key,
@@ -38,7 +38,7 @@ class GlassContainer extends StatelessWidget {
 
   final BorderRadius borderRadius;
 
-  /// 外层投影（`List<BoxShadow>`）。
+  /// 兼容占位：外层投影（已不再生效，0 阴影）。
   final List<BoxShadow>? shadow;
 
   final EdgeInsetsGeometry? padding;
@@ -54,7 +54,7 @@ class GlassContainer extends StatelessWidget {
         color: color,
         borderRadius: borderRadius,
         border: border,
-        boxShadow: shadow,
+        // 0 阴影：不再渲染 shadow（规格 §3「全部彩色阴影移除」）。
       ),
       // 透明 Material：防止 ListTile 断言「背景色 DecoratedBox 包裹会隐藏
       // 墨迹/背景」（Flutter 官方建议的修复），渲染效果不变。
