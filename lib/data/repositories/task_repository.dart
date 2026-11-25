@@ -71,6 +71,18 @@ class TaskRepository {
             ]))
           .watch();
 
+  /// 到点提醒的一次性查询（v0.3 调度 §4.2 轮询窗口）：
+  /// `since < reminderAt <= now`（严格大于上一轮、小于等于当前轮，边界精确命中）
+  /// 且未完成，按 `reminderAt` 升序。NULL reminderAt 经 SQL 比较天然排除。
+  Future<List<Task>> dueReminders({required int since, required int now}) =>
+      (_db.select(_db.tasks)
+            ..where((t) =>
+                t.reminderAt.isBiggerThanValue(since) &
+                t.reminderAt.isSmallerOrEqualValue(now) &
+                t.status.equals(TaskStatus.done.storage).not())
+            ..orderBy([(t) => OrderingTerm.asc(t.reminderAt)]))
+          .get();
+
   Future<List<Task>> getAll() async => _db.select(_db.tasks).get();
 
   Future<Task?> byId(int id) async =>

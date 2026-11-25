@@ -127,5 +127,15 @@
   "logbookSearchEmpty": "No matching tasks.",
   "logbookSearchHint": "Search",
   "logbookDeleteConfirm": "Delete this task?",
-  "logbookRestore": "Restore"
+  "logbookRestore": "Restore",
+  "reminderBannerTitle": "Reminder: {title}",
+  "@reminderBannerTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderOpen": "Open",
+  "reminderDismiss": "OK"
 }

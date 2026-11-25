@@ -745,6 +745,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore'**
   String get logbookRestore;
+
+  /// No description provided for @reminderBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder: {title}'**
+  String reminderBannerTitle(String title);
+
+  /// No description provided for @reminderOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get reminderOpen;
+
+  /// No description provided for @reminderDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get reminderDismiss;
 }
 
 class _AppLocalizationsDelegate

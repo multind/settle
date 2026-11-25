@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gtd_app/app/theme.dart';
+import 'package:gtd_app/data/providers.dart';
+import 'package:gtd_app/data/tables.dart';
 import 'package:gtd_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gtd_app/features/anytime/anytime_page.dart';
@@ -11,6 +15,8 @@ import 'package:gtd_app/features/projects/projects_page.dart';
 import 'package:gtd_app/features/review/review_page.dart';
 import 'package:gtd_app/features/settings/settings_page.dart';
 import 'package:gtd_app/features/someday/someday_page.dart';
+import 'package:gtd_app/features/task/reminder_service.dart';
+import 'package:gtd_app/features/task/task_edit_dialog.dart';
 import 'package:gtd_app/features/today/today_page.dart';
 import 'package:gtd_app/features/upcoming/upcoming_page.dart';
 import 'package:gtd_app/features/waiting/waiting_page.dart';
@@ -36,6 +42,67 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 
   /// 底部栏「更多」槽位（最后一个目的地，弹抽屉而非切页）。
   static const int _kMoreIndex = 4;
+
+  /// 应用内到点提醒服务（v0.3 调度 §4.2）：initState 启动、dispose 取消。
+  ReminderService? _reminderService;
+  StreamSubscription<List<Task>>? _reminderSub;
+
+  @override
+  void initState() {
+    super.initState();
+    final service = ReminderService(ref.read(taskRepositoryProvider));
+    _reminderService = service;
+    service.start();
+    _reminderSub = service.reminders.listen(_onReminders);
+  }
+
+  @override
+  void dispose() {
+    _reminderSub?.cancel();
+    _reminderService?.dispose();
+    super.dispose();
+  }
+
+  /// 提醒流命中（规格 §4.2）：逐条排队弹顶部 MaterialBanner
+  /// （ScaffoldMessenger 的 banner 队列天然串行展示）。
+  void _onReminders(List<Task> tasks) {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    for (final task in tasks) {
+      messenger.showMaterialBanner(
+        MaterialBanner(
+          key: Key('reminder_banner_${task.id}'),
+          leading: const Icon(Icons.alarm),
+          content: Text(l10n.reminderBannerTitle(task.title)),
+          actions: [
+            TextButton(
+              key: Key('reminder_open_${task.id}'),
+              onPressed: () {
+                messenger.hideCurrentMaterialBanner();
+                _openTask(task);
+              },
+              child: Text(l10n.reminderOpen),
+            ),
+            TextButton(
+              key: Key('reminder_dismiss_${task.id}'),
+              onPressed: messenger.hideCurrentMaterialBanner,
+              child: Text(l10n.reminderDismiss),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  /// [打开]：隐藏当前 Banner 后弹该任务编辑对话框。
+  void _openTask(Task task) {
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (_) => TaskEditDialog(task: task),
+    );
+  }
 
   /// 全局视图索引表（规格 §2.1）：index i ↔ [_navSpecs][i] ↔ `_pages[i]`，
   /// 侧边栏 / 底部 / 「更多」抽屉三处渲染共用此顺序。

@@ -336,4 +336,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logbookRestore => 'Restore';
+
+  @override
+  String reminderBannerTitle(String title) {
+    return 'Reminder: $title';
+  }
+
+  @override
+  String get reminderOpen => 'Open';
+
+  @override
+  String get reminderDismiss => 'OK';
 }

@@ -127,5 +127,15 @@
   "logbookSearchEmpty": "无匹配任务",
   "logbookSearchHint": "搜索",
   "logbookDeleteConfirm": "确认删除？",
-  "logbookRestore": "恢复"
+  "logbookRestore": "恢复",
+  "reminderBannerTitle": "提醒：{title}",
+  "@reminderBannerTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderOpen": "打开",
+  "reminderDismiss": "知道了"
 }

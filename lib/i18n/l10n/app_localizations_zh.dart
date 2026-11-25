@@ -336,4 +336,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get logbookRestore => '恢复';
+
+  @override
+  String reminderBannerTitle(String title) {
+    return '提醒：$title';
+  }
+
+  @override
+  String get reminderOpen => '打开';
+
+  @override
+  String get reminderDismiss => '知道了';
 }
