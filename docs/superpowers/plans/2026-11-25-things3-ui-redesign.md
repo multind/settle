@@ -635,40 +635,12 @@ git commit -m "refactor(inbox): 状态徽标 Things 3 化（灰字细描边）"
 **Files:**
 - 产物：`dist\gtd_app-setup-0.1.1.exe`
 
-- [ ] **Step 1: 清理并构建**
+- [x] **Step 1: 清理并构建** ✅（release 157.8s）
+- [x] **Step 2: 打包** ✅（ISCC Successful，产物 15:48:36）
 
-```powershell
-$env:PATH = "C:\flutter\bin;$env:PATH"
-Get-Process gtd_app -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Remove-Item -Recurse -Force "D:\Project\gtd-project\build\windows" -ErrorAction SilentlyContinue
-flutter build windows --release
-```
-
-Expected: `Built build\windows\x64\runner\Release\gtd_app.exe`。
-
-- [ ] **Step 2: 打包**
-
-```powershell
-& "C:\Users\EDY\AppData\Local\Programs\Inno Setup 6\ISCC.exe" "D:\Project\gtd-project\windows\installer\setup.iss"
-```
-
-Expected: `Successful compile`，`dist\gtd_app-setup-0.1.1.exe` 更新。
-
-- [ ] **Step 3: 启动 + 截图（浅色）**
-
-启动 exe，用 PrintWindow 截取窗口保存 `build\windows\things3-light.png`（复用既有截图方法：Start-Process → 12s → PrintWindow → 保存 → 结束进程）。
-
-- [ ] **Step 4: 截图（深色，可选）**
-
-若系统主题可切深色则补一张 `things3-dark.png`；不可切换则仅浅色。
-
-- [ ] **Step 5: 工作区确认**
-
-```powershell
-git status --short
-```
-
-Expected: 干净（build/ 与 dist/ 已忽略）。
+- [x] **Step 3: 启动 + 截图（浅色）** ✅ things3-light.png（直方图 83% 纯白 + #3D7CFB 蓝，token 吻合）
+- [x] **Step 4: 截图（深色，可选）** ✅ things3-dark.png（#000000 底 85% + #4D8CFF，token 吻合）
+- [x] **Step 5: 工作区确认** ✅ 干净
 
 ---
 
