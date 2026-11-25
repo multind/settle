@@ -99,6 +99,12 @@ class ExportService {
           contextId: Value(m['contextId'] as int?),
           createdAt: Value(m['createdAt'] as int),
           updatedAt: Value(m['updatedAt'] as int),
+          // v0.3 调度新字段；缺省/旧备份容错：completedAt/repeatRule/reminderAt
+          // 缺失按 null，sortOrder 缺失按 0。
+          completedAt: Value(m['completedAt'] as int?),
+          sortOrder: Value(m['sortOrder'] as int? ?? 0),
+          repeatRule: Value(m['repeatRule'] as String?),
+          reminderAt: Value(m['reminderAt'] as int?),
         ));
       }
       for (final raw in data['task_tags'] as List) {
