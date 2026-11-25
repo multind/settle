@@ -299,16 +299,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get logbookEmpty => '暂无完成记录';
 
   @override
+  String get logbookSearchEmpty => '无匹配任务';
+
+  @override
   String get logbookSearchHint => '搜索';
 
   @override
   String get logbookDeleteConfirm => '确认删除？';
-
-  @override
-  String get logbookDeleteConfirmBody => '此操作不可撤销。';
-
-  @override
-  String get logbookDelete => '删除';
 
   @override
   String get logbookRestore => '恢复';

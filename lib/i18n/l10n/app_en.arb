@@ -115,9 +115,8 @@
     }
   },
   "logbookEmpty": "No completed tasks yet.",
+  "logbookSearchEmpty": "No matching tasks.",
   "logbookSearchHint": "Search",
   "logbookDeleteConfirm": "Delete this task?",
-  "logbookDeleteConfirmBody": "This cannot be undone.",
-  "logbookDelete": "Delete",
   "logbookRestore": "Restore"
 }

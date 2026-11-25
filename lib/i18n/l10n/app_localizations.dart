@@ -668,6 +668,12 @@ abstract class AppLocalizations {
   /// **'No completed tasks yet.'**
   String get logbookEmpty;
 
+  /// No description provided for @logbookSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching tasks.'**
+  String get logbookSearchEmpty;
+
   /// No description provided for @logbookSearchHint.
   ///
   /// In en, this message translates to:
@@ -679,18 +685,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete this task?'**
   String get logbookDeleteConfirm;
-
-  /// No description provided for @logbookDeleteConfirmBody.
-  ///
-  /// In en, this message translates to:
-  /// **'This cannot be undone.'**
-  String get logbookDeleteConfirmBody;
-
-  /// No description provided for @logbookDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get logbookDelete;
 
   /// No description provided for @logbookRestore.
   ///

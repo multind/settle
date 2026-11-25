@@ -59,7 +59,14 @@ class _LogbookPageState extends ConsumerState<LogbookPage> {
               final filtered = rows
                   .where((t) => t.title.toLowerCase().contains(_query))
                   .toList();
-              if (filtered.isEmpty) return Center(child: Text(l10n.logbookEmpty));
+              if (filtered.isEmpty) {
+                // 空串（未搜索）→ 归档空态；搜索无匹配 → 独立「无匹配任务」文案。
+                return Center(
+                  child: Text(_query.isEmpty
+                      ? l10n.logbookEmpty
+                      : l10n.logbookSearchEmpty),
+                );
+              }
               return ListView(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 children: filtered.map((t) => _LogEntryTile(task: t)).toList(),
@@ -86,6 +93,7 @@ class _LogEntryTile extends ConsumerWidget {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
     final row = ListTile(
+      key: Key('logbook_tile_${task.id}'),
       title: Text(task.title),
       leading: const GlassCheckbox(value: true, onChanged: null),
       subtitle: task.completedAt == null
@@ -95,16 +103,28 @@ class _LogEntryTile extends ConsumerWidget {
               style: TextStyle(color: tokens.muted, fontSize: 12),
             ),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-        TextButton(
+        // 图标+tooltip（比文本按钮更稳）：英文 'Restore'/'Delete' 在 280dp
+        // 窄屏下文本宽度占满 trailing 槽位，触发 _RenderListTile
+        // 「Trailing widget consumes the entire tile width」断言（审查实证）。
+        IconButton(
           key: Key('logbook_reopen_${task.id}'),
+          tooltip: l10n.logbookRestore,
+          visualDensity: VisualDensity.compact,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          padding: EdgeInsets.zero,
+          icon: const Icon(Icons.replay, size: 20),
+          color: tokens.muted,
           onPressed: () => ref.read(taskRepositoryProvider).reopen(task.id),
-          child: Text(l10n.logbookRestore),
         ),
-        TextButton(
+        IconButton(
           key: Key('logbook_delete_${task.id}'),
-          style: TextButton.styleFrom(foregroundColor: tokens.danger),
+          tooltip: l10n.delete,
+          visualDensity: VisualDensity.compact,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          padding: EdgeInsets.zero,
+          icon: const Icon(Icons.delete_outline, size: 20),
+          color: tokens.danger,
           onPressed: () => _confirmDelete(context, ref, l10n),
-          child: Text(l10n.logbookDelete),
         ),
       ]),
     );
@@ -136,15 +156,16 @@ class _LogEntryTile extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.logbookDeleteConfirm),
-        content: Text(l10n.logbookDeleteConfirmBody),
+        content: Text(l10n.confirmDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(l10n.cancel),
           ),
           FilledButton(
+            key: const Key('logbook_confirm_delete'),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.logbookDelete),
+            child: Text(l10n.delete),
           ),
         ],
       ),

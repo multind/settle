@@ -35,7 +35,20 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('搜索按标题过滤（大小写不敏感，不匹配行消失）', (tester) async {
+  testWidgets('完成时间格式化 1 位月/日补零（yyyy-MM-dd HH:mm）', (tester) async {
+    final env = await TestEnv.create();
+    await insertTask(env, '单日任务', 'done',
+        completedAt: DateTime(2026, 11, 5, 9, 5).millisecondsSinceEpoch);
+    await insertTask(env, '单月任务', 'done',
+        completedAt: DateTime(2026, 1, 25, 9, 5).millisecondsSinceEpoch);
+    await tester.pumpWidget(env.wrap(const LogbookPage()));
+    await tester.pump();
+    expect(find.text('2026-11-05 09:05'), findsOneWidget);
+    expect(find.text('2026-01-25 09:05'), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('搜索按标题过滤（大小写不敏感），无匹配显示独立空态', (tester) async {
     final env = await TestEnv.create();
     final ms = DateTime(2026, 11, 25, 10).millisecondsSinceEpoch;
     await insertTask(env, 'Meeting prep', 'done', completedAt: ms);
@@ -44,10 +57,21 @@ void main() {
     await tester.pump();
     expect(find.text('Meeting prep'), findsOneWidget);
     expect(find.text('Buy milk'), findsOneWidget);
-    await tester.enterText(find.byKey(Key('logbook_search')), 'MEET');
+    await tester.enterText(find.byKey(const Key('logbook_search')), 'MEET');
     await tester.pump();
     expect(find.text('Meeting prep'), findsOneWidget);
     expect(find.text('Buy milk'), findsNothing);
+    // 无匹配：独立「无匹配任务」文案（区别于归档空态）。
+    await tester.enterText(find.byKey(const Key('logbook_search')), 'zzz');
+    await tester.pump();
+    expect(find.text('Meeting prep'), findsNothing);
+    expect(find.text('Buy milk'), findsNothing);
+    expect(find.text('No matching tasks.'), findsOneWidget);
+    // 清空搜索：全部恢复。
+    await tester.enterText(find.byKey(const Key('logbook_search')), '');
+    await tester.pump();
+    expect(find.text('Meeting prep'), findsOneWidget);
+    expect(find.text('Buy milk'), findsOneWidget);
     await env.db.close();
   });
 
@@ -77,20 +101,46 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(Key('logbook_delete_$id')));
     await tester.pumpAndSettle();
-    // 对话框出现：确认前任务仍在。
     expect(find.text('Delete this task?'), findsOneWidget);
     expect(find.text('待删除任务'), findsOneWidget);
-    // 点对话框内确认（FilledButton，避免与行内 Delete TextButton 重名冲突）。
-    await tester.tap(find.descendant(
-      of: find.byType(AlertDialog),
-      matching: find.byType(FilledButton),
-    ));
+    await tester.tap(find.byKey(const Key('logbook_confirm_delete')));
     await tester.pumpAndSettle();
     expect(find.text('待删除任务'), findsNothing);
     expect(find.text('No completed tasks yet.'), findsOneWidget);
     final remaining =
         await (env.db.select(env.db.tasks)..where((t) => t.id.equals(id))).get();
     expect(remaining, isEmpty);
+    await env.db.close();
+  });
+
+  testWidgets('删除对话框点取消：行仍在、DB 未删', (tester) async {
+    final env = await TestEnv.create();
+    final id = await insertTask(env, '保留任务', 'done',
+        completedAt: DateTime(2026, 11, 25, 10).millisecondsSinceEpoch);
+    await tester.pumpWidget(env.wrap(const LogbookPage()));
+    await tester.pump();
+    await tester.tap(find.byKey(Key('logbook_delete_$id')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('保留任务'), findsOneWidget);
+    final row =
+        await (env.db.select(env.db.tasks)..where((t) => t.id.equals(id))).getSingle();
+    expect(row.status, 'done');
+    await env.db.close();
+  });
+
+  testWidgets('窄屏（280dp 逻辑宽）渲染无布局异常', (tester) async {
+    tester.view.physicalSize = const Size(280, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final env = await TestEnv.create();
+    await insertTask(env, '很长的任务标题用于窄屏渲染验证很长的任务标题用于窄屏渲染验证', 'done',
+        completedAt: DateTime(2026, 11, 25, 10).millisecondsSinceEpoch);
+    await tester.pumpWidget(env.wrap(const LogbookPage()));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.text('很长的任务标题用于窄屏渲染验证很长的任务标题用于窄屏渲染验证'), findsOneWidget);
     await env.db.close();
   });
 
