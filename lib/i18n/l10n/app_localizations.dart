@@ -661,6 +661,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month}/{day} {weekday}'**
   String upcomingDateHeader(int month, int day, String weekday);
+
+  /// No description provided for @logbookEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed tasks yet.'**
+  String get logbookEmpty;
+
+  /// No description provided for @logbookSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get logbookSearchHint;
+
+  /// No description provided for @logbookDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this task?'**
+  String get logbookDeleteConfirm;
+
+  /// No description provided for @logbookDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get logbookDeleteConfirmBody;
+
+  /// No description provided for @logbookDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get logbookDelete;
+
+  /// No description provided for @logbookRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get logbookRestore;
 }
 
 class _AppLocalizationsDelegate

@@ -294,4 +294,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String upcomingDateHeader(int month, int day, String weekday) {
     return '$month/$day $weekday';
   }
+
+  @override
+  String get logbookEmpty => 'No completed tasks yet.';
+
+  @override
+  String get logbookSearchHint => 'Search';
+
+  @override
+  String get logbookDeleteConfirm => 'Delete this task?';
+
+  @override
+  String get logbookDeleteConfirmBody => 'This cannot be undone.';
+
+  @override
+  String get logbookDelete => 'Delete';
+
+  @override
+  String get logbookRestore => 'Restore';
 }

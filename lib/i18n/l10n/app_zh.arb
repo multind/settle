@@ -113,5 +113,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "logbookEmpty": "暂无完成记录",
+  "logbookSearchHint": "搜索",
+  "logbookDeleteConfirm": "确认删除？",
+  "logbookDeleteConfirmBody": "此操作不可撤销。",
+  "logbookDelete": "删除",
+  "logbookRestore": "恢复"
 }

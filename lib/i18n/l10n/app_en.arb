@@ -113,5 +113,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "logbookEmpty": "No completed tasks yet.",
+  "logbookSearchHint": "Search",
+  "logbookDeleteConfirm": "Delete this task?",
+  "logbookDeleteConfirmBody": "This cannot be undone.",
+  "logbookDelete": "Delete",
+  "logbookRestore": "Restore"
 }
