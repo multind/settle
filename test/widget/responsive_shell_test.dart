@@ -40,6 +40,9 @@ void main() {
     await tester.tap(find.text('Contexts'));
     await tester.pumpAndSettle();
     expect(find.text('@电脑'), findsOneWidget);
+    // 按页互斥（spec 2026-11-25）：情境页只显示新建 FAB，不显示全局收集 FAB
+    expect(find.byKey(const Key('new_context_fab')), findsOneWidget);
+    expect(find.byKey(const Key('global_collect_fab')), findsNothing);
     await env.db.close();
   });
 
@@ -52,6 +55,8 @@ void main() {
     // 先切到非收件箱页（今日），收件箱页本身不显示全局 FAB
     await tester.tap(find.text('Today'));
     await tester.pumpAndSettle();
+    // 按页互斥（spec 2026-11-25）：今日页无页面级 FAB，仍显示全局收集 FAB
+    expect(find.byKey(const Key('global_collect_fab')), findsOneWidget);
     await tester.tap(find.byKey(const Key('global_collect_fab')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('collect_dialog_field')), '给客户回邮件');

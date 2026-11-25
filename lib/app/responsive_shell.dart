@@ -92,7 +92,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
                     destinations: _barDestinations(l10n),
                   ),
                 ),
-          floatingActionButton: _index != 0
+          floatingActionButton: _index != 0 && !const {2, 3, 6}.contains(_index)
               ? FloatingActionButton(
                   key: const Key('global_collect_fab'),
                   tooltip: l10n.collectAction,
