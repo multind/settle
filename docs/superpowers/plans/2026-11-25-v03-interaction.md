@@ -86,7 +86,7 @@ git commit -m "feat(ui): TaskListView 公共组件（重排/多选/焦点）接�
 - Modify: 各页（传批量操作参数）
 - Modify: l10n（完成/删除/设日期/移动/恢复文案）
 
-- [ ] **Step 1: 动作面板**
+- [x] **Step 1: 动作面板**
 
 选择模式顶栏按钮（按视图裁剪）：
 - **完成**：`complete` 批量（重复任务各自生成下一次）
@@ -96,16 +96,16 @@ git commit -m "feat(ui): TaskListView 公共组件（重排/多选/焦点）接�
 - **移动**：项目下拉对话框 → 批量写 `projectId`（`setProject`）
 - **恢复**（日志）：批量 `reopen`
 
-- [ ] **Step 2: 接线**
+- [x] **Step 2: 接线**
 
 各页 `onAction` 回调传对应操作集（日志子集：恢复/删除）。
 
-- [ ] **Step 3: 测试**
+- [x] **Step 3: 测试**
 
 批量完成 → 全部 done + 重复任务生成副本；批量删除 → 确认后全部消失；设日期 →
 全部写入；移动 → 全部改项目；日志恢复 → 全部 next_action。
 
-- [ ] **Step 4: analyze + 测试 + 提交**
+- [x] **Step 4: analyze + 测试 + 提交**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -114,6 +114,12 @@ flutter test test/widget/task_list_view_test.dart 2>&1 | Select-Object -Last 1
 git add lib/features/task lib/i18n test/widget/task_list_view_test.dart
 git commit -m "feat(ui): 多选批量操作（完成/删除/设日期/移动/恢复）"
 ```
+
+> **自审登记（偏差）**：接线形态为「六页传 `actions:` 操作集裁剪（Task 1 已配置）+ 组件内置默认处理」，
+> `onAction` 留作可选委托钩子（当前无调用方）——与 spec §6 行为等价；新增仓库单列方法
+> `setDueDate`（镜像 setScheduled，因 `update(TaskDraft)` 会重建 taskTags 绑定，不适合作批量
+> 仅改截止日的场景）。批量动作相关 Minor（循环 try/finally、测试固定时钟、移动对话框 loading
+> 禁 OK、onAction 异步签名）记入收尾清单统一处理。
 
 ---
 
