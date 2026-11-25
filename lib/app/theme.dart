@@ -338,23 +338,6 @@ ThemeData buildAppTheme(Brightness brightness) {
         return TextStyle(fontSize: 12, color: tokens.muted);
       }),
     ),
-    navigationRailTheme: NavigationRailThemeData(
-      // Things 3 侧边栏：纯底 + hairline 分隔（分隔由 shell 提供）。
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      indicatorColor: tokens.selectedBg,
-      indicatorShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTokens.radiusButton),
-      ),
-      selectedIconTheme: IconThemeData(color: tokens.primary),
-      unselectedIconTheme: IconThemeData(color: tokens.muted),
-      selectedLabelTextStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-        color: tokens.primary,
-      ),
-      unselectedLabelTextStyle: TextStyle(fontSize: 12, color: tokens.muted),
-    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: tokens.field,
