@@ -18,7 +18,7 @@
 - Modify: `lib/app/responsive_shell.dart:95`
 - Modify: `test/widget/responsive_shell_test.dart`
 
-- [ ] **Step 1: 修改外壳 FAB 显示条件**
+- [x] **Step 1: 修改外壳 FAB 显示条件**
 
 将 `lib/app/responsive_shell.dart` 第 95 行 `floatingActionButton: _index != 0` 改为：
 
@@ -30,7 +30,7 @@ floatingActionButton: _index != 0 && !const {2, 3, 6}.contains(_index)
 
 用 edit 工具精确替换 `_index != 0\n              ? FloatingActionButton(` 为 `_index != 0 && !const {2, 3, 6}.contains(_index)\n              ? FloatingActionButton(`。
 
-- [ ] **Step 2: 修改测试——情境页断言**
+- [x] **Step 2: 修改测试——情境页断言**
 
 在 `test/widget/responsive_shell_test.dart` 中修改「侧边栏切到情境页并展示情境（验收①⑤）」测试，在 `expect(find.text('@电脑'), findsOneWidget);` 之后追加两行：
 
@@ -40,7 +40,7 @@ floatingActionButton: _index != 0 && !const {2, 3, 6}.contains(_index)
     expect(find.byKey(const Key('global_collect_fab')), findsNothing);
 ```
 
-- [ ] **Step 3: 修改测试——今日页回归断言**
+- [x] **Step 3: 修改测试——今日页回归断言**
 
 在「非收件箱页全局 FAB 一步收集（验收②）」测试中，`await tester.tap(find.text('Today'));` 与 `await tester.pumpAndSettle();` 之后追加：
 
@@ -49,7 +49,7 @@ floatingActionButton: _index != 0 && !const {2, 3, 6}.contains(_index)
     expect(find.byKey(const Key('global_collect_fab')), findsOneWidget);
 ```
 
-- [ ] **Step 4: 运行两个测试文件**
+- [x] **Step 4: 运行两个测试文件**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -58,7 +58,7 @@ flutter test test/widget/responsive_shell_test.dart
 
 Expected: 4/4 全绿（2 布局 + 情境页互斥断言 + 今日页收集回归）。
 
-- [ ] **Step 5: 全量回归 + analyze**
+- [x] **Step 5: 全量回归 + analyze**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -68,7 +68,7 @@ flutter analyze 2>&1 | Select-String -Pattern 'error' | Select-Object -First 5
 
 Expected: `All tests passed!`（96/96）；无 error 输出行。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```powershell
 git add lib/app/responsive_shell.dart test/widget/responsive_shell_test.dart
