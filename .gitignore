@@ -34,3 +34,6 @@ Thumbs.db
 
 # 测试用原生库（下载产物）
 tool/windows/
+
+# 发布产物
+dist/
