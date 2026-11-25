@@ -121,7 +121,7 @@ git commit -m "feat(schedule): 应用内到点提醒（Banner + 打开/知道了
 
 ### Task 3: 全量回归 + 收尾
 
-- [ ] **Step 1: 全量测试**
+- [x] **Step 1: 全量测试**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -130,7 +130,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: `All tests passed!`。
 
-- [ ] **Step 2: 全仓 analyze**
+- [x] **Step 2: 全仓 analyze**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -139,7 +139,7 @@ flutter analyze 2>&1 | Select-Object -Last 3
 
 Expected: 0 error（既有 SDK 弃用 info / 旧基线 warning 除外）。
 
-- [ ] **Step 3: 工作区确认**
+- [x] **Step 3: 工作区确认**
 
 ```powershell
 git status --short
