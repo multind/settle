@@ -14,6 +14,8 @@ class TaskDraft {
     this.projectId,
     this.contextId,
     this.tagIds = const {},
+    this.repeatRule,
+    this.reminderAt,
   });
 
   final String title;
@@ -27,4 +29,10 @@ class TaskDraft {
   final int? projectId;
   final int? contextId;
   final Set<int> tagIds;
+
+  /// 重复规则（daily/weekly/monthly/every:N）。
+  final String? repeatRule;
+
+  /// 提醒时间（ms epoch 存储时的本地 DateTime）。
+  final DateTime? reminderAt;
 }

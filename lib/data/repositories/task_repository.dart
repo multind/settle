@@ -8,18 +8,63 @@ class TaskRepository {
   final AppDatabase _db;
 
   Stream<List<Task>> watchAll() =>
-      (_db.select(_db.tasks)..orderBy([(t) => OrderingTerm.asc(t.id)])).watch();
+      (_db.select(_db.tasks)..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
+          .watch();
 
   Stream<List<Task>> watchByStatus(TaskStatus status) =>
-      (_db.select(_db.tasks)..where((t) => t.status.equals(status.storage))..orderBy([(t) => OrderingTerm.asc(t.id)]))
+      (_db.select(_db.tasks)..where((t) => t.status.equals(status.storage))..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
           .watch();
 
   Stream<List<Task>> watchByProject(int projectId) =>
-      (_db.select(_db.tasks)..where((t) => t.projectId.equals(projectId))..orderBy([(t) => OrderingTerm.asc(t.id)]))
+      (_db.select(_db.tasks)..where((t) => t.projectId.equals(projectId))..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
           .watch();
 
   Stream<List<Task>> watchByContext(int contextId) =>
-      (_db.select(_db.tasks)..where((t) => t.contextId.equals(contextId))..orderBy([(t) => OrderingTerm.asc(t.id)]))
+      (_db.select(_db.tasks)..where((t) => t.contextId.equals(contextId))..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
+          .watch();
+
+  /// 今日：`next_action` 且 `scheduled` 或 `dueDate` ≤ 今日 23:59:59.999。
+  Stream<List<Task>> watchToday() {
+    final endOfToday = _endOfTodayMs();
+    return (_db.select(_db.tasks)
+          ..where((t) =>
+              t.status.equals(TaskStatus.nextAction.storage) &
+              (t.scheduled.isSmallerOrEqualValue(endOfToday) |
+                  t.dueDate.isSmallerOrEqualValue(endOfToday)))
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
+        .watch();
+  }
+
+  /// 随时：`next_action` 且 `scheduled` 与 `dueDate` 均为 null。
+  Stream<List<Task>> watchAnytime() =>
+      (_db.select(_db.tasks)
+            ..where((t) =>
+                t.status.equals(TaskStatus.nextAction.storage) &
+                t.scheduled.isNull() &
+                t.dueDate.isNull())
+            ..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
+          .watch();
+
+  /// 即将：`next_action` 且 `scheduled` 或 `dueDate` > 今日 23:59:59.999。
+  Stream<List<Task>> watchUpcoming() {
+    final endOfToday = _endOfTodayMs();
+    return (_db.select(_db.tasks)
+          ..where((t) =>
+              t.status.equals(TaskStatus.nextAction.storage) &
+              (t.scheduled.isBiggerThanValue(endOfToday) |
+                  t.dueDate.isBiggerThanValue(endOfToday)))
+          ..orderBy([(t) => OrderingTerm.asc(t.sortOrder), (t) => OrderingTerm.asc(t.id)]))
+        .watch();
+  }
+
+  /// 已完成：`done`，按 `completedAt` 降序（null 最后）再 `id` 降序。
+  Stream<List<Task>> watchDone() =>
+      (_db.select(_db.tasks)
+            ..where((t) => t.status.equals(TaskStatus.done.storage))
+            ..orderBy([
+              (t) => OrderingTerm.desc(t.completedAt),
+              (t) => OrderingTerm.desc(t.id),
+            ]))
           .watch();
 
   Future<List<Task>> getAll() async => _db.select(_db.tasks).get();
@@ -41,9 +86,14 @@ class TaskRepository {
       waitingOn: Value(draft.waitingOn),
       projectId: Value(draft.projectId),
       contextId: Value(draft.contextId),
+      repeatRule: Value(draft.repeatRule),
+      reminderAt: Value(draft.reminderAt?.millisecondsSinceEpoch),
       createdAt: now,
       updatedAt: now,
     ));
+    // 回填 sortOrder = id（与旧 id 序等价）。
+    await (_db.update(_db.tasks)..where((t) => t.id.equals(id)))
+        .write(TasksCompanion(sortOrder: Value(id)));
     for (final tagId in draft.tagIds) {
       await _db.into(_db.taskTags).insert(TaskTagsCompanion.insert(taskId: id, tagId: tagId));
     }
@@ -63,6 +113,8 @@ class TaskRepository {
       waitingOn: Value(draft.waitingOn),
       projectId: Value(draft.projectId),
       contextId: Value(draft.contextId),
+      repeatRule: Value(draft.repeatRule),
+      reminderAt: Value(draft.reminderAt?.millisecondsSinceEpoch),
       updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
     ));
     await (_db.delete(_db.taskTags)..where((t) => t.taskId.equals(id))).go();
@@ -77,16 +129,37 @@ class TaskRepository {
         (waitingOn == null || waitingOn.trim().isEmpty)) {
       throw ArgumentError('waiting_on is required for waiting tasks');
     }
+    final now = DateTime.now().millisecondsSinceEpoch;
     await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
       status: Value(status.storage),
       waitingOn: Value(status == TaskStatus.waiting ? waitingOn : null),
-      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+      // 完成写时间戳；非 done（重开/改状态）清空，避免残留完成时间。
+      completedAt: Value(status == TaskStatus.done ? now : null),
+      updatedAt: Value(now),
     ));
   }
 
   Future<void> complete(int id) => setStatus(id, TaskStatus.done);
 
   Future<void> reopen(int id) => setStatus(id, TaskStatus.nextAction);
+
+  /// 重排的唯一落库入口：按 [orderedIds] 顺序逐 id 写 `sortOrder = index`。
+  Future<void> reorder(List<int> orderedIds) async {
+    await _db.transaction(() async {
+      for (var i = 0; i < orderedIds.length; i++) {
+        await (_db.update(_db.tasks)..where((t) => t.id.equals(orderedIds[i])))
+            .write(TasksCompanion(sortOrder: Value(i)));
+      }
+    });
+  }
+
+  /// 设置调度时间（ms epoch），null 表示清除；同时刷新 updatedAt。
+  Future<void> setScheduled(int id, DateTime? date) async {
+    await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
+      scheduled: Value(date?.millisecondsSinceEpoch),
+      updatedAt: Value(DateTime.now().millisecondsSinceEpoch),
+    ));
+  }
 
   Future<void> setProject(int id, int? projectId) async {
     await (_db.update(_db.tasks)..where((t) => t.id.equals(id))).write(TasksCompanion(
@@ -131,5 +204,12 @@ class TaskRepository {
         (draft.waitingOn == null || draft.waitingOn!.trim().isEmpty)) {
       throw ArgumentError('waiting_on is required for waiting tasks');
     }
+  }
+
+  /// 今日 23:59:59.999 的 ms epoch（本地时区，调用时刻缓存）。
+  int _endOfTodayMs() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, 23, 59, 59, 999)
+        .millisecondsSinceEpoch;
   }
 }
