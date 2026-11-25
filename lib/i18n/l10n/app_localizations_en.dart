@@ -259,4 +259,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get anytimeEmpty => 'No tasks anytime.';
+
+  @override
+  String get upcomingEmpty => 'No upcoming tasks.';
+
+  @override
+  String get upcomingTomorrow => 'Tomorrow';
+
+  @override
+  String get upcomingDayAfter => 'Day after tomorrow';
+
+  @override
+  String get weekdayMon => 'Mon';
+
+  @override
+  String get weekdayTue => 'Tue';
+
+  @override
+  String get weekdayWed => 'Wed';
+
+  @override
+  String get weekdayThu => 'Thu';
+
+  @override
+  String get weekdayFri => 'Fri';
+
+  @override
+  String get weekdaySat => 'Sat';
+
+  @override
+  String get weekdaySun => 'Sun';
+
+  @override
+  String upcomingDateHeader(int month, int day, String weekday) {
+    return '$month/$day $weekday';
+  }
 }

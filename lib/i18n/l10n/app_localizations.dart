@@ -595,6 +595,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No tasks anytime.'**
   String get anytimeEmpty;
+
+  /// No description provided for @upcomingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming tasks.'**
+  String get upcomingEmpty;
+
+  /// No description provided for @upcomingTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get upcomingTomorrow;
+
+  /// No description provided for @upcomingDayAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Day after tomorrow'**
+  String get upcomingDayAfter;
+
+  /// No description provided for @weekdayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get weekdayMon;
+
+  /// No description provided for @weekdayTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get weekdayTue;
+
+  /// No description provided for @weekdayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get weekdayWed;
+
+  /// No description provided for @weekdayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get weekdayThu;
+
+  /// No description provided for @weekdayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get weekdayFri;
+
+  /// No description provided for @weekdaySat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get weekdaySat;
+
+  /// No description provided for @weekdaySun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get weekdaySun;
+
+  /// No description provided for @upcomingDateHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}/{day} {weekday}'**
+  String upcomingDateHeader(int month, int day, String weekday);
 }
 
 class _AppLocalizationsDelegate

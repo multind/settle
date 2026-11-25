@@ -89,5 +89,29 @@
     }
   },
   "todayEmpty": "Nothing scheduled today.",
-  "anytimeEmpty": "No tasks anytime."
+  "anytimeEmpty": "No tasks anytime.",
+  "upcomingEmpty": "No upcoming tasks.",
+  "upcomingTomorrow": "Tomorrow",
+  "upcomingDayAfter": "Day after tomorrow",
+  "weekdayMon": "Mon",
+  "weekdayTue": "Tue",
+  "weekdayWed": "Wed",
+  "weekdayThu": "Thu",
+  "weekdayFri": "Fri",
+  "weekdaySat": "Sat",
+  "weekdaySun": "Sun",
+  "upcomingDateHeader": "{month}/{day} {weekday}",
+  "@upcomingDateHeader": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -89,5 +89,29 @@
     }
   },
   "todayEmpty": "今日无安排",
-  "anytimeEmpty": "没有随时可做的任务"
+  "anytimeEmpty": "没有随时可做的任务",
+  "upcomingEmpty": "没有未来安排",
+  "upcomingTomorrow": "明天",
+  "upcomingDayAfter": "后天",
+  "weekdayMon": "周一",
+  "weekdayTue": "周二",
+  "weekdayWed": "周三",
+  "weekdayThu": "周四",
+  "weekdayFri": "周五",
+  "weekdaySat": "周六",
+  "weekdaySun": "周日",
+  "upcomingDateHeader": "{month}月{day}日 {weekday}",
+  "@upcomingDateHeader": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -259,4 +259,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get anytimeEmpty => '没有随时可做的任务';
+
+  @override
+  String get upcomingEmpty => '没有未来安排';
+
+  @override
+  String get upcomingTomorrow => '明天';
+
+  @override
+  String get upcomingDayAfter => '后天';
+
+  @override
+  String get weekdayMon => '周一';
+
+  @override
+  String get weekdayTue => '周二';
+
+  @override
+  String get weekdayWed => '周三';
+
+  @override
+  String get weekdayThu => '周四';
+
+  @override
+  String get weekdayFri => '周五';
+
+  @override
+  String get weekdaySat => '周六';
+
+  @override
+  String get weekdaySun => '周日';
+
+  @override
+  String upcomingDateHeader(int month, int day, String weekday) {
+    return '$month月$day日 $weekday';
+  }
 }
