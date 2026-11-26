@@ -1,4 +1,4 @@
-# 安顿 Settle 全量改名实施计划
+﻿# 安顿 Settle 全量改名实施计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers-subagent-driven-development (recommended) or superpowers-executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -32,7 +32,7 @@
 - Modify: `pubspec.yaml`（第 1-2 行）
 - Modify: `lib/**/*.dart` 与 `test/**/*.dart`（`package:gtd_app/` → `package:settle_app/`，277 处机械替换）
 
-- [ ] **Step 1: 改 pubspec 包名与描述**
+- [x] **Step 1: 改 pubspec 包名与描述**
 
 `pubspec.yaml` 第 1-2 行：
 
@@ -47,7 +47,7 @@ name: settle_app
 description: "安顿 Settle — 本地优先的 GTD 个人任务管理应用"
 ```
 
-- [ ] **Step 2: 全仓机械替换 import 前缀**
+- [x] **Step 2: 全仓机械替换 import 前缀**
 
 在仓库根目录执行（UTF-8 无 BOM 读写，保护中文注释编码）：
 
@@ -66,7 +66,7 @@ foreach ($f in $files) {
 
 Expected: 无报错；`git diff --stat` 显示约 60 个 Dart 文件变更（lib 33 + test 27 上下，以实际为准）。
 
-- [ ] **Step 3: 验证替换无残留**
+- [x] **Step 3: 验证替换无残留**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -75,7 +75,7 @@ git grep -c "package:gtd_app/" -- lib test
 
 Expected: 无输出（0 匹配；git grep 无匹配时退出码为 1，属预期）。此时 `git grep -c "gtd_app" -- lib test` 应仅剩 1 处：`lib/data/app_database.dart` 的数据库文件名（Task 2 处理）。
 
-- [ ] **Step 4: flutter clean + pub get 重建 package_config**
+- [x] **Step 4: flutter clean + pub get 重建 package_config**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -85,7 +85,7 @@ flutter pub get
 
 Expected: `flutter clean` 输出 Deleting 各目录；`flutter pub get` 末尾输出 `Got dependencies!`。若 pub get 网络失败，先按「环境约定」设置代理重试。若 `pubspec.lock` 有变更属正常（一并提交）。
 
-- [ ] **Step 5: analyze 门禁（漏改即编译失败）**
+- [x] **Step 5: analyze 门禁（漏改即编译失败）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -94,7 +94,7 @@ flutter analyze 2>&1 | Select-Object -Last 3
 
 Expected: 输出 `No issues found!`；若出现汇总行，必须为 0 error 且 0 warning（仅允许既有 SDK 弃用 info）。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -207,7 +207,7 @@ flutter test test/widget/l10n_smoke_test.dart test/widget/app_smoke_test.dart te
 
 Expected: `No issues found!`（或仅 info）；`All tests passed!`。
 
-- [ ] **Step 9: 提交**
+- [x] **Step 9: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -287,7 +287,7 @@ flutter test test/data/export_service_test.dart test/widget/settings_page_test.d
 
 Expected: `All tests passed!`。
 
-- [ ] **Step 8: 提交**
+- [x] **Step 8: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -354,7 +354,7 @@ flutter build windows --debug
 
 Expected: 构建成功；`Test-Path build\windows\x64\runner\Debug\settle_app.exe` → `True`。
 
-- [ ] **Step 5: 提交 Windows 侧**
+- [x] **Step 5: 提交 Windows 侧**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -401,7 +401,7 @@ git grep -n "gtd_app\|dev\.gtd" -- android
 
 Expected: 无输出（0 匹配）。可选冒烟（不强制）：`flutter build apk --debug` 成功。
 
-- [ ] **Step 10: 提交 Android 侧**
+- [x] **Step 10: 提交 Android 侧**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -502,7 +502,7 @@ git grep -n "gtd_app\|dev\.gtd\|GTD" -- windows/installer/setup.iss docs/release
 
 Expected: 无输出（0 匹配）。
 
-- [ ] **Step 5: 提交（安装包 + 文档分开两个提交）**
+- [x] **Step 5: 提交（安装包 + 文档分开两个提交）**
 
 ```powershell
 cd D:\Project\gtd-project
