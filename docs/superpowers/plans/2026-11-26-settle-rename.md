@@ -523,7 +523,7 @@ git commit -m "docs(release): windows.md/README 同步安顿 Settle（旧版卸�
 
 **Files:** 无新增改动（纯验证；若验证暴露问题，修复走独立提交）。
 
-- [ ] **Step 1: 全量回归（验证层 2）**
+- [x] **Step 1: 全量回归（验证层 2）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -532,7 +532,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: `All tests passed!`（基线 200/200，以实际输出计数为准，须全部通过）。
 
-- [ ] **Step 2: 全仓 analyze（验证层 1）**
+- [x] **Step 2: 全仓 analyze（验证层 1）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -541,7 +541,7 @@ flutter analyze 2>&1 | Select-Object -Last 3
 
 Expected: `No issues found!`；若出现汇总行，必须 0 error 且 0 warning（仅允许既有 SDK 弃用 info）。
 
-- [ ] **Step 3: grep 审计（验证层 1）**
+- [x] **Step 3: grep 审计（验证层 1）**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -552,7 +552,7 @@ git status --short docs/superpowers test/acceptance/milestone1_checklist.md
 
 Expected: 前两条命令均无输出（0 匹配；git grep 无匹配退出码为 1，属预期）；`docs/release/windows.md` 豁免——其中「旧版 gtd_app / gtd_app-setup-0.1.1.exe / dev.gtd\gtd_app\gtd_app.db」为 Task 5 指定的有意卸载/断代说明（协调者裁定，见 Task 5 Step 4 门禁修正）；README「GTD」为方法论术语（spec 明确保留），不匹配第二条模式。第三条仅允许显示本计划文件 `docs/superpowers/plans/2026-11-26-settle-rename.md`（计划文档自身的正常提交状态），历史计划/规格文档与 `milestone1_checklist.md` 必须零改动。
 
-- [ ] **Step 4: release 构建（验证层 3）**
+- [x] **Step 4: release 构建（验证层 3）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -562,7 +562,7 @@ Test-Path build\windows\x64\runner\Release\settle_app.exe
 
 Expected: 构建成功；`Test-Path` 输出 `True`。
 
-- [ ] **Step 5: ISCC 编译安装包（验证层 3）**
+- [x] **Step 5: ISCC 编译安装包（验证层 3）**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -572,7 +572,7 @@ Test-Path dist\settle_app-setup-0.1.1.exe
 
 Expected: 输出末尾含 `Successful compile of windows\installer\setup.iss`；`Test-Path` 输出 `True`。
 
-- [ ] **Step 6: 静默安装 + 首启冒烟（验证层 3，半自动——UAC 可能需人工点「是」）**
+- [x] **Step 6: 静默安装 + 首启冒烟（验证层 3，半自动——UAC 可能需人工点「是」）**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -582,7 +582,7 @@ Test-Path "C:\Program Files\Settle\settle_app.exe"
 
 Expected: 安装完成；`Test-Path` 输出 `True`。注意：机器级安装触发 UAC 提权——若当前终端未提权且弹出 UAC 提示，需人工点「是」（或将本步放在管理员终端执行）。
 
-- [ ] **Step 7: 首启验证窗口标题（验证层 3，半自动——标题随系统语言）**
+- [x] **Step 7: 首启验证窗口标题（验证层 3，半自动——标题随系统语言）**
 
 ```powershell
 Start-Process "C:\Program Files\Settle\settle_app.exe"
@@ -592,7 +592,7 @@ Start-Sleep -Seconds 6
 
 Expected: 进程存活、`MainWindowTitle` 非空；zh 系统为「安顿」、en 系统为「Settle」（首帧前初值来自 main.cpp `L"Settle"`）。随后人工冒烟（可选）：在应用内「设置」切语言，窗口标题随之在 安顿↔Settle 间切换。验证完执行 `Stop-Process -Name settle_app`。
 
-- [ ] **Step 8: 数据目录验证（验证层 4，首启前先记录旧路径状态）**
+- [x] **Step 8: 数据目录验证（验证层 4，首启前先记录旧路径状态）**
 
 ```powershell
 $oldDb = "$env:APPDATA\dev.gtd\gtd_app\gtd_app.db"
@@ -608,7 +608,7 @@ $oldStamp2 = if ($oldAfter) { (Get-Item $oldDb).LastWriteTimeUtc } else { $null 
 
 Expected: `new_path_exists=True`（`%APPDATA%\dev.settle\settle_app\settle_app.db` 已创建）；`old_unchanged=True`（旧路径存在性未变、LastWriteTime 未变——旧库未被触碰/删除）。
 
-- [ ] **Step 9: 工作区与提交记录确认**
+- [x] **Step 9: 工作区与提交记录确认**
 
 ```powershell
 cd D:\Project\gtd-project
