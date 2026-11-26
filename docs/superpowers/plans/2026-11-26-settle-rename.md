@@ -307,7 +307,7 @@ git commit -m "refactor(backup): 备份格式标识 gtd→settle（对话框/文
 - Modify: `android/app/src/main/AndroidManifest.xml`（1 处）
 - Move + Modify: `android/app/src/main/kotlin/dev/gtd/gtd_app/MainActivity.kt` → `android/app/src/main/kotlin/dev/settle/settle_app/MainActivity.kt`（spec 盘点遗漏项：包路径必须随 namespace 同步，否则未来 Android 构建 `.MainActivity` 解析失败）
 
-- [ ] **Step 1: 改 `windows/CMakeLists.txt` 工程名与 exe 名**
+- [x] **Step 1: 改 `windows/CMakeLists.txt` 工程名与 exe 名**
 
 改前（第 3 行）：`project(gtd_app LANGUAGES CXX)`
 改后：`project(settle_app LANGUAGES CXX)`
@@ -317,13 +317,13 @@ git commit -m "refactor(backup): 备份格式标识 gtd→settle（对话框/文
 
 （`windows/runner/CMakeLists.txt` 使用 `${BINARY_NAME}` 变量，无需改动。）
 
-- [ ] **Step 2: 改 `windows/runner/main.cpp` 窗口标题初值**
+- [x] **Step 2: 改 `windows/runner/main.cpp` 窗口标题初值**
 
 改前（第 30 行）：`  if (!window.Create(L"gtd_app", origin, size)) {`
 改后：`  if (!window.Create(L"Settle", origin, size)) {`
 （ASCII 安全；首帧后由 l10n `appTitle` 覆盖为 安顿/Settle。）
 
-- [ ] **Step 3: 改 `windows/runner/Runner.rc` 版本资源 6 值**
+- [x] **Step 3: 改 `windows/runner/Runner.rc` 版本资源 6 值**
 
 改前（第 92 行）：`            VALUE "CompanyName", "dev.gtd" "\0"`
 改后：`            VALUE "CompanyName", "dev.settle" "\0"`
@@ -345,7 +345,7 @@ git commit -m "refactor(backup): 备份格式标识 gtd→settle（对话框/文
 
 > **数据目录三处协同说明**：本步 `CompanyName "dev.settle"` + `ProductName "settle_app"` 与 Task 2 的 `settle_app.db` 共同决定 `%APPDATA%\dev.settle\settle_app\settle_app.db`；Task 6 第 4 层验证兜底核对（新路径落盘 + 旧路径未动）。
 
-- [ ] **Step 4: Windows debug 构建门禁（提前暴露 C++/RC 编译错误）**
+- [x] **Step 4: Windows debug 构建门禁（提前暴露 C++/RC 编译错误）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -354,7 +354,7 @@ flutter build windows --debug
 
 Expected: 构建成功；`Test-Path build\windows\x64\runner\Debug\settle_app.exe` → `True`。
 
-- [ ] **Step 5: 提交 Windows 侧**
+- [x] **Step 5: 提交 Windows 侧**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -363,7 +363,7 @@ git commit -m 'feat(windows): exe 身份改名 settle_app（BINARY_NAME/窗口�
 ```
 （消息用单引号包裹，PowerShell 双引号字符串不识别 `\"` 转义。）
 
-- [ ] **Step 6: 改 `android/app/build.gradle.kts` namespace 与 applicationId**
+- [x] **Step 6: 改 `android/app/build.gradle.kts` namespace 与 applicationId**
 
 改前（第 8 行）：`    namespace = "dev.gtd.gtd_app"`
 改后：`    namespace = "dev.settle.settle_app"`
@@ -371,13 +371,13 @@ git commit -m 'feat(windows): exe 身份改名 settle_app（BINARY_NAME/窗口�
 改前（第 19 行）：`        applicationId = "dev.gtd.gtd_app"`
 改后：`        applicationId = "dev.settle.settle_app"`
 
-- [ ] **Step 7: 改 `android/app/src/main/AndroidManifest.xml` label**
+- [x] **Step 7: 改 `android/app/src/main/AndroidManifest.xml` label**
 
 改前（第 3 行）：`        android:label="gtd_app"`
 改后：`        android:label="Settle"`
 （本轮不发布 Android、不引入 values-zh 多语言 label，留待 Android 里程碑。）
 
-- [ ] **Step 8: 移动并改写 MainActivity.kt 包路径**
+- [x] **Step 8: 移动并改写 MainActivity.kt 包路径**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -392,7 +392,7 @@ Remove-Item android\app\src\main\kotlin\dev\gtd -Recurse -Force
 
 （manifest 中 `android:name=".MainActivity"` 相对 namespace 解析，包路径必须与 namespace 一致。）
 
-- [ ] **Step 9: Android 一致性门禁**
+- [x] **Step 9: Android 一致性门禁**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -401,7 +401,7 @@ git grep -n "gtd_app\|dev\.gtd" -- android
 
 Expected: 无输出（0 匹配）。可选冒烟（不强制）：`flutter build apk --debug` 成功。
 
-- [ ] **Step 10: 提交 Android 侧**
+- [x] **Step 10: 提交 Android 侧**
 
 ```powershell
 cd D:\Project\gtd-project
