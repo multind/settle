@@ -1,3 +1,3 @@
-# gtd_app
+# 安顿 Settle
 
-A new Flutter project.
+本地优先的 GTD 个人任务管理应用（Flutter，Windows 桌面优先）。
