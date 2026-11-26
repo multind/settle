@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/tables.dart';
 import '../test_utils.dart';
 
 void main() {

@@ -4,25 +4,25 @@ import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/features/anytime/anytime_page.dart';
-import 'package:gtd_app/features/contexts/contexts_page.dart';
-import 'package:gtd_app/features/inbox/collect_dialog.dart';
-import 'package:gtd_app/features/inbox/inbox_page.dart';
-import 'package:gtd_app/features/logbook/logbook_page.dart';
-import 'package:gtd_app/features/projects/projects_page.dart';
-import 'package:gtd_app/features/review/review_page.dart';
-import 'package:gtd_app/features/settings/settings_page.dart';
-import 'package:gtd_app/features/someday/someday_page.dart';
-import 'package:gtd_app/features/task/reminder_service.dart';
-import 'package:gtd_app/features/task/task_edit_dialog.dart';
-import 'package:gtd_app/features/today/today_page.dart';
-import 'package:gtd_app/features/upcoming/upcoming_page.dart';
-import 'package:gtd_app/features/waiting/waiting_page.dart';
+import 'package:settle_app/features/anytime/anytime_page.dart';
+import 'package:settle_app/features/contexts/contexts_page.dart';
+import 'package:settle_app/features/inbox/collect_dialog.dart';
+import 'package:settle_app/features/inbox/inbox_page.dart';
+import 'package:settle_app/features/logbook/logbook_page.dart';
+import 'package:settle_app/features/projects/projects_page.dart';
+import 'package:settle_app/features/review/review_page.dart';
+import 'package:settle_app/features/settings/settings_page.dart';
+import 'package:settle_app/features/someday/someday_page.dart';
+import 'package:settle_app/features/task/reminder_service.dart';
+import 'package:settle_app/features/task/task_edit_dialog.dart';
+import 'package:settle_app/features/today/today_page.dart';
+import 'package:settle_app/features/upcoming/upcoming_page.dart';
+import 'package:settle_app/features/waiting/waiting_page.dart';
 
 /// 响应式外壳（规格 §2）：LayoutBuilder 600px 断点。
 /// 宽屏：自定义可滚动分组侧边栏（11 项三组：时间/组织/系统，替换 NavigationRail）；

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/app/app.dart';
+import 'package:settle_app/app/app.dart';
 import 'widget_utils.dart';
 
 void main() {

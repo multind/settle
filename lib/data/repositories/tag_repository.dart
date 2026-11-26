@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/tables.dart';
 
 class TagRepository {
   TagRepository(this._db);

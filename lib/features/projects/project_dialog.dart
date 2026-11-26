@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/app/glass.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/glass.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
 
 /// 新建/编辑项目。
 class ProjectDialog extends ConsumerStatefulWidget {

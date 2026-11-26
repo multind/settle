@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/app/theme.dart';
+import 'package:settle_app/app/theme.dart';
 
 /// Things 3 化可复用组件（v0.2 视觉规范）。
 ///

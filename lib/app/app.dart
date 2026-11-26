@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/app/responsive_shell.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/features/settings/settings_controller.dart';
+import 'package:settle_app/app/responsive_shell.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/features/settings/settings_controller.dart';
 
 /// 整应用入口（规格 §7.1 / §7.4）：双主题跟随系统 + 响应式外壳。
 class GtdApp extends ConsumerWidget {

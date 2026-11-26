@@ -4,13 +4,13 @@
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/app/responsive_shell.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/core/models/task_draft.dart';
-import 'package:gtd_app/data/repositories/task_repository.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/reminder_service.dart';
-import 'package:gtd_app/features/task/task_edit_dialog.dart';
+import 'package:settle_app/app/responsive_shell.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/core/models/task_draft.dart';
+import 'package:settle_app/data/repositories/task_repository.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/task/reminder_service.dart';
+import 'package:settle_app/features/task/task_edit_dialog.dart';
 import '../test_utils.dart';
 import 'widget_utils.dart';
 

@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:gtd_app/data/migrations/migration_steps.dart';
+import 'package:settle_app/data/migrations/migration_steps.dart';
 
 part 'tables.g.dart';
 

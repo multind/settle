@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/app/glass.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/glass.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/core/models/clarify_decision.dart';
-import 'package:gtd_app/core/models/task_draft.dart';
-import 'package:gtd_app/core/workflow/clarify_service.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/task_form_fields.dart';
+import 'package:settle_app/core/models/clarify_decision.dart';
+import 'package:settle_app/core/models/task_draft.dart';
+import 'package:settle_app/core/workflow/clarify_service.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/task/task_form_fields.dart';
 
 /// 理清向导（规格 §7.2）：行动 / 项目 / 删除 三选一，确认后走 ClarifyService。
 class ClarifyDialog extends ConsumerStatefulWidget {

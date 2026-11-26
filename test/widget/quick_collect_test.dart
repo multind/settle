@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/features/inbox/collect_dialog.dart';
-import 'package:gtd_app/features/inbox/quick_collect_bar.dart';
+import 'package:settle_app/features/inbox/collect_dialog.dart';
+import 'package:settle_app/features/inbox/quick_collect_bar.dart';
 import 'widget_utils.dart';
 
 void main() {

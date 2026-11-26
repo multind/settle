@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/task_list_view.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/task/task_list_view.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 将来也许视图（验收⑤）：tasks.status = someday 的过滤视图。

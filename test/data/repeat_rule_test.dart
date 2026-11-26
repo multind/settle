@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/core/models/repeat_rule.dart';
+import 'package:settle_app/core/models/repeat_rule.dart';
 
 void main() {
   group('RepeatRule.parse', () {

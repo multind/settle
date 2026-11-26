@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/core/models/task_draft.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/core/models/task_draft.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
 
 /// 项目/情境/标签选项流：由仓库暴露的 watchAll() 转为 StreamProvider
 /// （与 contexts_page/review_page 同一模式；providers.dart 仅提供仓库本身）。

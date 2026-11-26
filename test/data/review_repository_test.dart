@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/data/repositories/review_repository.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/repositories/review_repository.dart';
+import 'package:settle_app/data/tables.dart';
 import '../test_utils.dart';
 
 void main() {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/data/providers.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/data/providers.dart';
 
 /// 收件箱顶部常驻快速收集框（规格 §7.1：只要求"写一句话"）。
 ///

@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/task_edit_dialog.dart';
-import 'package:gtd_app/features/task/task_list_view.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/task/task_edit_dialog.dart';
+import 'package:settle_app/features/task/task_list_view.dart';
 import 'widget_utils.dart';
 
 /// 文件级私有 StreamProvider（仓库测试惯例）：实时喂 TaskListView 的任务。

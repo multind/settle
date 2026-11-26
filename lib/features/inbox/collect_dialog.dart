@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/app/glass.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/glass.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/data/providers.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/data/providers.dart';
 
 /// 全局快速收集对话框（shell FAB 复用，任意界面 1 步发起收集，规格 §7.3）。
 ///

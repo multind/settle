@@ -1,10 +1,10 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/core/models/task_draft.dart';
-import 'package:gtd_app/data/repositories/tag_repository.dart';
-import 'package:gtd_app/data/repositories/task_repository.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/core/models/task_draft.dart';
+import 'package:settle_app/data/repositories/tag_repository.dart';
+import 'package:settle_app/data/repositories/task_repository.dart';
+import 'package:settle_app/data/tables.dart';
 import '../test_utils.dart';
 
 void main() {

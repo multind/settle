@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/app/glass.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/task_edit_dialog.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/glass.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/task/task_edit_dialog.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 
 /// 批量移动对话框用的项目列表（与 task_form_fields 同款文件级 StreamProvider）。
 final _projectsProvider = StreamProvider<List<Project>>(

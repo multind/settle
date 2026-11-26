@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:gtd_app/app/glass.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/glass.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/inbox/clarify_dialog.dart';
-import 'package:gtd_app/features/inbox/quick_collect_bar.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/inbox/clarify_dialog.dart';
+import 'package:settle_app/features/inbox/quick_collect_bar.dart';
 
 /// 收件箱条目流（仓库约定：普通 Provider 无 watchAll 成员，改文件级 StreamProvider）。
 final _inboxItemsProvider =

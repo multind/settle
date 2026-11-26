@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/projects/projects_page.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/projects/projects_page.dart';
 import 'widget_utils.dart';
 
 void main() {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/core/enums.dart';
+import 'package:settle_app/core/enums.dart';
 
 void main() {
   test('InboxStatus 存储名符合规格 §5.1', () {

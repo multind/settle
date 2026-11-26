@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/someday/someday_page.dart';
-import 'package:gtd_app/features/waiting/waiting_page.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/someday/someday_page.dart';
+import 'package:settle_app/features/waiting/waiting_page.dart';
 import 'widget_utils.dart';
 
 void main() {

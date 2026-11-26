@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/core/models/task_draft.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/task_form_fields.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/core/models/task_draft.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/task/task_form_fields.dart';
 import 'widget_utils.dart';
 
 void main() {

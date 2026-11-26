@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
-import 'package:gtd_app/core/enums.dart';
-import 'package:gtd_app/core/models/repeat_rule.dart';
-import 'package:gtd_app/core/models/task_draft.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/core/enums.dart';
+import 'package:settle_app/core/models/repeat_rule.dart';
+import 'package:settle_app/core/models/task_draft.dart';
+import 'package:settle_app/data/tables.dart';
 
 class TaskRepository {
   /// [now] 为可注入时钟（测试用固定时刻消除跨午夜竞态）；缺省用 `DateTime.now`。

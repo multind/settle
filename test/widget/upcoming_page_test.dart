@@ -2,10 +2,10 @@ import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter/gestures.dart' show kLongPressTimeout, kPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/repositories/task_repository.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/upcoming/upcoming_page.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/repositories/task_repository.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/upcoming/upcoming_page.dart';
 import 'widget_utils.dart';
 
 void main() {

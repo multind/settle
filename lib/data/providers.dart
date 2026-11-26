@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/data/export_service.dart';
-import 'package:gtd_app/data/repositories/context_repository.dart';
-import 'package:gtd_app/data/repositories/inbox_repository.dart';
-import 'package:gtd_app/data/repositories/project_repository.dart';
-import 'package:gtd_app/data/repositories/review_repository.dart';
-import 'package:gtd_app/data/repositories/tag_repository.dart';
-import 'package:gtd_app/data/repositories/task_repository.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/export_service.dart';
+import 'package:settle_app/data/repositories/context_repository.dart';
+import 'package:settle_app/data/repositories/inbox_repository.dart';
+import 'package:settle_app/data/repositories/project_repository.dart';
+import 'package:settle_app/data/repositories/review_repository.dart';
+import 'package:settle_app/data/repositories/tag_repository.dart';
+import 'package:settle_app/data/repositories/task_repository.dart';
+import 'package:settle_app/data/tables.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 数据库实例由 main() 打开后 override 注入（无全局单例，M3 多账户可加作用域）。

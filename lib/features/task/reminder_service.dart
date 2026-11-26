@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:gtd_app/data/repositories/task_repository.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/repositories/task_repository.dart';
+import 'package:settle_app/data/tables.dart';
 
 /// 应用内到点提醒服务（主规格 §2 非目标：不做系统级通知）。
 ///

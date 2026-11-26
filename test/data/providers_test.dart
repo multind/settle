@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/repositories/inbox_repository.dart';
-import 'package:gtd_app/data/repositories/project_repository.dart';
-import 'package:gtd_app/data/repositories/task_repository.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/repositories/inbox_repository.dart';
+import 'package:settle_app/data/repositories/project_repository.dart';
+import 'package:settle_app/data/repositories/task_repository.dart';
 import '../test_utils.dart';
 
 void main() {

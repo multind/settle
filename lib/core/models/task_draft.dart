@@ -1,4 +1,4 @@
-import 'package:gtd_app/core/enums.dart';
+import 'package:settle_app/core/enums.dart';
 
 /// Task 创建/编辑表单的载体。所有字段可空，[title] 必填。
 class TaskDraft {

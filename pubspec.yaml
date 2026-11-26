@@ -1,5 +1,5 @@
-name: gtd_app
-description: "A new Flutter project."
+name: settle_app
+description: "安顿 Settle — 本地优先的 GTD 个人任务管理应用"
 publish_to: 'none'
 version: 0.1.1+2
 

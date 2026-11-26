@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/app/responsive_shell.dart';
-import 'package:gtd_app/features/someday/someday_page.dart';
-import 'package:gtd_app/features/today/today_page.dart';
+import 'package:settle_app/app/responsive_shell.dart';
+import 'package:settle_app/features/someday/someday_page.dart';
+import 'package:settle_app/features/today/today_page.dart';
 import 'widget_utils.dart';
 
 void main() {

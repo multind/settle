@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gtd_app/app/theme.dart';
-import 'package:gtd_app/data/providers.dart';
-import 'package:gtd_app/data/tables.dart';
-import 'package:gtd_app/features/task/task_list_view.dart';
-import 'package:gtd_app/i18n/l10n/app_localizations.dart';
+import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/data/providers.dart';
+import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/task/task_list_view.dart';
+import 'package:settle_app/i18n/l10n/app_localizations.dart';
 
 /// 即将视图（index 2）：`watchUpcoming`（next_action 且 scheduled 或 dueDate > 今日末），
 /// 按生效日期（scheduled ?? dueDate）的日分组升序时间线。

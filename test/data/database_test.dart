@@ -1,6 +1,6 @@
 import 'package:drift/native.dart' show SqliteException;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/tables.dart';
 import '../test_utils.dart';
 
 void main() {

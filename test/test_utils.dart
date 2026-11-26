@@ -1,5 +1,5 @@
 import 'package:drift/native.dart';
-import 'package:gtd_app/data/tables.dart';
+import 'package:settle_app/data/tables.dart';
 
 /// 测试用内存数据库。
 ///

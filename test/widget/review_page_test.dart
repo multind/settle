@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gtd_app/features/review/review_page.dart';
+import 'package:settle_app/features/review/review_page.dart';
 import 'widget_utils.dart';
 
 void main() {
