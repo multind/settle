@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/features/anytime/anytime_page.dart';
 import 'package:settle_app/features/contexts/contexts_page.dart';
 import 'package:settle_app/features/guide/gtd_guide_page.dart';
+import 'package:settle_app/features/guide/onboarding_card.dart';
 import 'package:settle_app/features/inbox/collect_dialog.dart';
 import 'package:settle_app/features/inbox/inbox_page.dart';
 import 'package:settle_app/features/logbook/logbook_page.dart';
@@ -51,9 +52,15 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   ReminderService? _reminderService;
   StreamSubscription<List<Task>>? _reminderSub;
 
+  /// 首启引导卡显隐（GTD 指南单元二）：initState 同步读 prefs `gtd_guide_seen`
+  /// 初始化（缺省未看过 → 展示）。
+  bool _showGuideCard = false;
+
   @override
   void initState() {
     super.initState();
+    _showGuideCard =
+        !(ref.read(sharedPreferencesProvider).getBool('gtd_guide_seen') ?? false);
     _pages = [
       const InboxPage(), // 0 收件箱
       const TodayPage(), // 1 今日
@@ -140,10 +147,10 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
               ? Row(
                   children: [
                     _buildSidebar(l10n, tokens),
-                    Expanded(child: _pages[_index]),
+                    Expanded(child: _pageColumn()),
                   ],
                 )
-              : _pages[_index],
+              : _pageColumn(),
           bottomNavigationBar: isWide
               ? null
               : Container(
@@ -367,6 +374,40 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
       final pos = _navSpecs.indexWhere((s) => s.inNarrow && s.index == index);
       if (pos != -1) _narrowIndex = pos;
     });
+  }
+
+  /// 关闭引导卡（右上角 ×）：隐藏卡片并持久化已看过（fire-and-forget）。
+  void _dismissGuideCard() {
+    setState(() => _showGuideCard = false);
+    unawaited(
+        ref.read(sharedPreferencesProvider).setBool('gtd_guide_seen', true));
+  }
+
+  /// 打开完整指南：视为已看过（置位 + 隐藏卡片）并切到指南页 index 11。
+  /// 决策点：CTA 视为「已看过」——用户已主动进入完整指南，卡片不再滞留。
+  void _openGuide() {
+    setState(() => _showGuideCard = false);
+    unawaited(
+        ref.read(sharedPreferencesProvider).setBool('gtd_guide_seen', true));
+    _switchTo(11);
+  }
+
+  /// 内容列：引导卡显示时以 in-flow 布局置于页面之上（页面 AppBar 之上、
+  /// 全局 FAB 与底部导航之外），从结构上杜绝遮挡任何 FAB/导航元素。
+  Widget _pageColumn() {
+    if (!_showGuideCard) return _pages[_index];
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          child: OnboardingCard(
+            onDismiss: _dismissGuideCard,
+            onOpenGuide: _openGuide,
+          ),
+        ),
+        Expanded(child: _pages[_index]),
+      ],
+    );
   }
 
   /// 「更多」抽屉（规格 §2.3）：由 [_navSpecs] 派生 inMore 项，
