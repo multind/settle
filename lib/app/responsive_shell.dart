@@ -217,7 +217,25 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
             },
           ),
         },
-        child: shell,
+        // 启动默认焦点（M-6 修复）：Shortcuts 按键事件自
+        // FocusManager.instance.primaryFocus 所在节点沿祖先链冒泡查找；
+        // ShortcutManager.handleKeypress 也以 primaryFocus.context 定位
+        // Actions。应用启动后未点击/未 Tab 时 primaryFocus 为 null，按键
+        // 不进入本子树 → 快捷键全部失效。此 Focus(autofocus: true) 在首帧
+        // 取得主焦点（位于 Shortcuts/Actions 子树内），启动即按 N /
+        // Ctrl+数字即可冒泡触发。skipTraversal 使该不可见锚点不成为 Tab
+        // 停靠点，Tab 遍历仍直达真实控件（不改变既有键盘遍历行为）。
+        //
+        // 空白点击评估（M-6）：Flutter 点击不可聚焦区域（Container/Text
+        // 空白处）不会清除 primary focus（widget 测试实证），无需额外
+        // 恢复焦点逻辑。已知残余限制：焦点所在控件被销毁时（如快捷键切页
+        // 移除带焦点的控件）primary focus 可能回 null，autofocus 不重复
+        // 触发，需再次点击/Tab 恢复——超出本次启动焦点修复范围。
+        child: Focus(
+          autofocus: true,
+          skipTraversal: true,
+          child: shell,
+        ),
       ),
     );
   }

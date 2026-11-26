@@ -129,11 +129,26 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(env.wrap(const ResponsiveShell()));
     await tester.pump();
-    // M-6 前提：桌面启动时无默认焦点节点，快捷键事件需从 shell 子树内的
-    // 焦点节点冒泡至此——先 Tab 聚焦侧边栏首项建立焦点（真实桌面用户点按
-    // 任一控件后即满足此前提；启动后不聚焦时快捷键不响应属预期行为）。
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('collect_dialog_field')), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('桌面快捷键：启动即用——无任何点击/Tab 直接按 N 打开收集（M-6 修复）',
+      (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    await tester.binding.setSurfaceSize(const Size(1000, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(const ResponsiveShell()));
+    await tester.pump();
+    // 修复前提：启动后 primary focus 落在 shell 内 Focus 锚点（autofocus），
+    // 而非 null——否则按键不进入 Shortcuts 子树，快捷键全部失效。
+    expect(FocusManager.instance.primaryFocus, isNotNull);
+    // 不做任何点击/Tab，直接按 N → 收集对话框弹出。
     await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('collect_dialog_field')), findsOneWidget);
