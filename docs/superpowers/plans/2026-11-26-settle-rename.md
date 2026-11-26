@@ -354,7 +354,7 @@ flutter build windows --debug
 
 Expected: 构建成功；`Test-Path build\windows\x64\runner\Debug\settle_app.exe` → `True`。
 
-- [x] **Step 5: 提交 Windows 侧**
+- [ ] **Step 5: 提交 Windows 侧**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -401,7 +401,7 @@ git grep -n "gtd_app\|dev\.gtd" -- android
 
 Expected: 无输出（0 匹配）。可选冒烟（不强制）：`flutter build apk --debug` 成功。
 
-- [x] **Step 10: 提交 Android 侧**
+- [ ] **Step 10: 提交 Android 侧**
 
 ```powershell
 cd D:\Project\gtd-project
