@@ -1,4 +1,4 @@
-package dev.gtd.gtd_app
+package dev.settle.settle_app
 
 import io.flutter.embedding.android.FlutterActivity
 
