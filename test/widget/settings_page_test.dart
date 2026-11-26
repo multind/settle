@@ -7,7 +7,7 @@ import 'widget_utils.dart';
 void main() {
   testWidgets('语言切换写入偏好设置（验收⑦⑧）', (tester) async {
     final env = await TestEnv.create();
-    await tester.pumpWidget(env.wrap(const SettingsPage()));
+    await tester.pumpWidget(env.wrap(SettingsPage(onOpenGuide: () {})));
     await tester.tap(find.byKey(const Key('locale_dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('中文').last);
@@ -29,7 +29,7 @@ void main() {
       createdAt: 1,
       updatedAt: 1,
     ));
-    await tester.pumpWidget(env.wrap(const SettingsPage()));
+    await tester.pumpWidget(env.wrap(SettingsPage(onOpenGuide: () {})));
     await tester.tap(find.byKey(const Key('export_backup_tile')));
     await tester.pumpAndSettle();
     final map = await env.decodeSavedJson();
@@ -43,7 +43,7 @@ void main() {
         '"inbox_items":[],"projects":[],'
         '"contexts":[{"id":1,"name":"@电脑","icon":null,"sort":0}],'
         '"tags":[],"tasks":[],"task_tags":[],"reviews":[]}';
-    await tester.pumpWidget(env.wrap(const SettingsPage()));
+    await tester.pumpWidget(env.wrap(SettingsPage(onOpenGuide: () {})));
     await tester.tap(find.byKey(const Key('import_backup_tile')));
     await tester.pumpAndSettle();
     expect(await env.db.select(env.db.contexts).get(), hasLength(1));
@@ -52,7 +52,7 @@ void main() {
   testWidgets('恢复非法备份提示无效且不动数据（§9.1）', (tester) async {
     final env = await TestEnv.create();
     env.backup.pickedJson = '{"app":"x"}';
-    await tester.pumpWidget(env.wrap(const SettingsPage()));
+    await tester.pumpWidget(env.wrap(SettingsPage(onOpenGuide: () {})));
     await tester.tap(find.byKey(const Key('import_backup_tile')));
     await tester.pumpAndSettle();
     expect(find.text('Invalid backup file'), findsOneWidget);
@@ -61,7 +61,19 @@ void main() {
 
   testWidgets('AI 模型配置为占位入口（M1 范围，规格 §8.1）', (tester) async {
     final env = await TestEnv.create();
-    await tester.pumpWidget(env.wrap(const SettingsPage()));
+    await tester.pumpWidget(env.wrap(SettingsPage(onOpenGuide: () {})));
     expect(find.text('AI model config (available in M2)'), findsOneWidget);
+  });
+
+  testWidgets('设置页显示 GTD 指南入口（tile）且回调可点', (tester) async {
+    var opened = false;
+    final env = await TestEnv.create();
+    await tester.pumpWidget(
+        env.wrap(SettingsPage(onOpenGuide: () => opened = true)));
+    expect(find.byKey(const Key('settings_guide_tile')), findsOneWidget);
+    expect(find.text('View GTD Guide'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('settings_guide_tile')));
+    expect(opened, isTrue);
+    await env.db.close();
   });
 }

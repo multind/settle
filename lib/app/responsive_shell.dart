@@ -11,6 +11,7 @@ import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/features/anytime/anytime_page.dart';
 import 'package:settle_app/features/contexts/contexts_page.dart';
+import 'package:settle_app/features/guide/gtd_guide_page.dart';
 import 'package:settle_app/features/inbox/collect_dialog.dart';
 import 'package:settle_app/features/inbox/inbox_page.dart';
 import 'package:settle_app/features/logbook/logbook_page.dart';
@@ -25,7 +26,7 @@ import 'package:settle_app/features/upcoming/upcoming_page.dart';
 import 'package:settle_app/features/waiting/waiting_page.dart';
 
 /// 响应式外壳（规格 §2）：LayoutBuilder 600px 断点。
-/// 宽屏：自定义可滚动分组侧边栏（11 项三组：时间/组织/系统，替换 NavigationRail）；
+/// 宽屏：自定义可滚动分组侧边栏（12 项三组：时间/组织/系统，替换 NavigationRail）；
 /// 窄屏：底部 NavigationBar 5 项（收件箱/今日/即将/随时/更多）+「更多」抽屉。
 class ResponsiveShell extends ConsumerStatefulWidget {
   const ResponsiveShell({super.key});
@@ -53,6 +54,20 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   @override
   void initState() {
     super.initState();
+    _pages = [
+      const InboxPage(), // 0 收件箱
+      const TodayPage(), // 1 今日
+      const UpcomingPage(), // 2 即将
+      const AnytimePage(), // 3 随时
+      const SomedayPage(), // 4 将来也许
+      const ProjectsPage(), // 5 项目
+      const ContextsPage(), // 6 情境
+      const WaitingPage(), // 7 等待
+      const LogbookPage(), // 8 日志
+      const ReviewPage(), // 9 回顾
+      SettingsPage(onOpenGuide: () => _switchTo(11)), // 10 设置（闭包非 const）
+      const GtdGuidePage(), // 11 GTD 指南
+    ];
     final service = ReminderService(ref.read(taskRepositoryProvider));
     _reminderService = service;
     service.start();
@@ -109,19 +124,8 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 
   /// 全局视图索引表（规格 §2.1）：index i ↔ [_navSpecs][i] ↔ `_pages[i]`，
   /// 侧边栏 / 底部 / 「更多」抽屉三处渲染共用此顺序。
-  static const List<Widget> _pages = [
-    InboxPage(), // 0 收件箱
-    TodayPage(), // 1 今日
-    UpcomingPage(), // 2 即将（占位，Task 4 填充）
-    AnytimePage(), // 3 随时（占位，Task 3 填充）
-    SomedayPage(), // 4 将来也许
-    ProjectsPage(), // 5 项目
-    ContextsPage(), // 6 情境
-    WaitingPage(), // 7 等待
-    LogbookPage(), // 8 日志（占位，Task 5 填充）
-    ReviewPage(), // 9 回顾
-    SettingsPage(), // 10 设置
-  ];
+  /// 非 const：SettingsPage 需外壳注入回调（onOpenGuide → _switchTo(11)）。
+  late final List<Widget> _pages;
 
   @override
   Widget build(BuildContext context) {
@@ -440,7 +444,7 @@ class _NavSpec {
     this.inMore = false,
   });
 
-  /// 全局视图索引（0..10，对应 [_ResponsiveShellState._pages]）。
+  /// 全局视图索引（0..11，对应 [_ResponsiveShellState._pages]）。
   final int index;
   final IconData icon;
   final IconData selectedIcon;
@@ -457,12 +461,12 @@ class _NavSpec {
   /// 是否直接出现在窄屏底部栏（收件箱/今日/即将/随时）。
   final bool inNarrow;
 
-  /// 是否出现在「更多」抽屉（项目/情境/等待/日志/回顾/设置）。
+  /// 是否出现在「更多」抽屉（项目/情境/等待/日志/回顾/设置/GTD 指南）。
   final bool inMore;
 }
 
-/// 导航目的地规范表（唯一事实源）：侧边栏 11 项 / 底部栏 / 更多抽屉 / FAB 显隐
-/// 全部由此派生。底部 4 项 + 抽屉 6 项 + 侧边栏专属（将来也许）覆盖全部 11 页。
+/// 导航目的地规范表（唯一事实源）：侧边栏 12 项 / 底部栏 / 更多抽屉 / FAB 显隐
+/// 全部由此派生。底部 4 项 + 抽屉 7 项 + 侧边栏专属（将来也许）覆盖全部 12 页。
 const List<_NavSpec> _navSpecs = [
   _NavSpec(
     index: 0,
@@ -561,6 +565,15 @@ const List<_NavSpec> _navSpecs = [
     group: _NavGroup.system,
     inMore: true,
   ),
+  _NavSpec(
+    index: 11,
+    icon: Icons.menu_book_outlined,
+    selectedIcon: Icons.menu_book_outlined,
+    labelKey: 'navGuide',
+    collectFab: false,
+    group: _NavGroup.system,
+    inMore: true,
+  ),
 ];
 
 /// 快捷键数字键表（Ctrl/Cmd+1..9，按侧边栏项序；下标 n ↔ 第 n+1 项）。
@@ -601,6 +614,8 @@ String _labelOf(AppLocalizations l10n, String key) {
       return l10n.navReview;
     case 'navSettings':
       return l10n.navSettings;
+    case 'navGuide':
+      return l10n.navGuide;
     case 'navMore':
       return l10n.navMore;
     case 'navGroupTime':
@@ -647,7 +662,7 @@ class _CollectIntent extends Intent {
 class _SwitchViewIntent extends Intent {
   const _SwitchViewIntent(this.index);
 
-  /// 目标全局视图索引（0..10，对应 [_navSpecs]）。
+  /// 目标全局视图索引（0..11，对应 [_navSpecs]）。
   final int index;
 }
 

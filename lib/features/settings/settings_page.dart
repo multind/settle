@@ -8,9 +8,12 @@ import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/features/settings/backup_file_gateway.dart';
 import 'package:settle_app/features/settings/settings_controller.dart';
 
-/// 设置页（验收⑦⑧）：语言切换、全库 JSON 导出/恢复、AI 模型配置占位（M2 填充）。
+/// 设置页（验收⑦⑧）：语言切换、GTD 指南入口、全库 JSON 导出/恢复、AI 模型配置占位（M2 填充）。
 class SettingsPage extends ConsumerWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, required this.onOpenGuide});
+
+  /// 打开 GTD 指南页（外壳注入：切到导航 index 11）。
+  final VoidCallback onOpenGuide;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,6 +74,14 @@ class SettingsPage extends ConsumerWidget {
               enabled: false,
               leading: const Icon(Icons.smart_toy_outlined),
               title: Text(l10n.aiPlaceholder),
+            ),
+          ),
+          glassRow(
+            child: ListTile(
+              key: const Key('settings_guide_tile'),
+              leading: const Icon(Icons.menu_book_outlined),
+              title: Text(l10n.settingsGuide),
+              onTap: onOpenGuide,
             ),
           ),
           glassRow(

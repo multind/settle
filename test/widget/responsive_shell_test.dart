@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:settle_app/app/responsive_shell.dart';
+import 'package:settle_app/features/logbook/logbook_page.dart';
+import 'package:settle_app/features/review/review_page.dart';
 import 'package:settle_app/features/someday/someday_page.dart';
 import 'package:settle_app/features/today/today_page.dart';
 import 'widget_utils.dart';
@@ -26,7 +28,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('宽屏（≥600）：自定义侧边栏 3 组 11 项，无底部导航（规格 §2.2）', (tester) async {
+  testWidgets('宽屏（≥600）：自定义侧边栏 3 组 12 项，无底部导航（规格 §2.2）', (tester) async {
     final env = await TestEnv.create();
     await tester.binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -39,8 +41,8 @@ void main() {
     expect(find.text('Time'), findsOneWidget);
     expect(find.text('Organize'), findsOneWidget);
     expect(find.text('System'), findsOneWidget);
-    // 11 项（全局索引 0..10）
-    for (var i = 0; i <= 10; i++) {
+    // 12 项（全局索引 0..11）
+    for (var i = 0; i <= 11; i++) {
       expect(find.byKey(Key('nav_item_$i')), findsOneWidget);
     }
     await env.db.close();
@@ -81,7 +83,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('窄屏「更多」抽屉：6 项，点项目切到项目页（规格 §2.3）', (tester) async {
+  testWidgets('窄屏「更多」抽屉：7 项，点项目切到项目页（规格 §2.3）', (tester) async {
     final env = await TestEnv.create();
     await tester.binding.setSurfaceSize(const Size(400, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -90,8 +92,8 @@ void main() {
     // 打开「更多」抽屉
     await tester.tap(find.text('More'));
     await tester.pumpAndSettle();
-    // 抽屉 6 项：项目/情境/等待/日志/回顾/设置（Key 用全局索引）
-    for (final i in [5, 6, 7, 8, 9, 10]) {
+    // 抽屉 7 项：项目/情境/等待/日志/回顾/设置/GTD 指南（Key 用全局索引）
+    for (final i in [5, 6, 7, 8, 9, 10, 11]) {
       expect(find.byKey(Key('nav_more_item_$i')), findsOneWidget);
     }
     // 点「项目」→ 切到项目页并关抽屉
@@ -174,6 +176,27 @@ void main() {
     await sendCtrlKey(tester, LogicalKeyboardKey.digit5);
     await tester.pumpAndSettle();
     expect(find.byType(SomedayPage), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('桌面快捷键回归：追加 index 11 后 Ctrl+9 → 日志、Ctrl+0 → 回顾不受影响',
+      (tester) async {
+    useDesktop();
+    final env = await TestEnv.create();
+    await tester.binding.setSurfaceSize(const Size(1000, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(const ResponsiveShell()));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    // Ctrl+9 → 侧边栏第 9 项 = 日志（index 8）。
+    await sendCtrlKey(tester, LogicalKeyboardKey.digit9);
+    await tester.pumpAndSettle();
+    expect(find.byType(LogbookPage), findsOneWidget);
+    // Ctrl+0 → _digitKeys 之后首项 = _navSpecs[9] = 回顾（index 9）。
+    await sendCtrlKey(tester, LogicalKeyboardKey.digit0);
+    await tester.pumpAndSettle();
+    expect(find.byType(ReviewPage), findsOneWidget);
     await env.db.close();
   });
 
