@@ -1,21 +1,21 @@
-; GTD App Windows 安装脚本 — Inno Setup 6
-#define MyAppName "gtd_app"
+; 安顿 Settle Windows 安装脚本 — Inno Setup 6
+#define MyAppName "Settle"
 #define MyAppVersion "0.1.1"
-#define MyAppPublisher "gtd"
-#define MyAppExeName "gtd_app.exe"
+#define MyAppPublisher "Settle"
+#define MyAppExeName "settle_app.exe"
 
 [Setup]
-AppId={{9F8E2C31-5A1D-4C0B-9E6A-2B7D4F3A8C21}
+AppId={{49571859-C0F3-42B4-96BE-9F2832C8B373}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\gtd_app
+DefaultDirName={autopf}\Settle
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\..\dist
-OutputBaseFilename=gtd_app-setup-{#MyAppVersion}
+OutputBaseFilename=settle_app-setup-{#MyAppVersion}
 SetupIconFile=..\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2
