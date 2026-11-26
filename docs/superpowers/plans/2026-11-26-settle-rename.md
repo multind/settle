@@ -227,7 +227,7 @@ git commit -m "feat(brand): 安顿 Settle 品牌落地（SettleApp 类名/l10n a
 - Modify: `test/widget/widget_utils.dart`（fake 路径 + 注释）
 - Modify: `test/data/migration_test.dart`（2 处 createTemp）
 
-- [ ] **Step 1: 改 `lib/data/export_service.dart` 格式标识与错误文案**
+- [x] **Step 1: 改 `lib/data/export_service.dart` 格式标识与错误文案**
 
 改前（第 31 行）：`      'app': 'gtd',`
 改后：`      'app': 'settle',`
@@ -238,7 +238,7 @@ git commit -m "feat(brand): 安顿 Settle 品牌落地（SettleApp 类名/l10n a
 改前（第 47 行）：`      throw const FormatException('Not a valid GTD backup');`
 改后：`      throw const FormatException('Not a valid Settle backup');`
 
-- [ ] **Step 2: 改 `lib/features/settings/backup_file_gateway.dart` 对话框与文件名**
+- [x] **Step 2: 改 `lib/features/settings/backup_file_gateway.dart` 对话框与文件名**
 
 改前（第 21 行）：`      dialogTitle: 'Export GTD backup',`
 改后：`      dialogTitle: 'Export Settle backup',`
@@ -246,7 +246,7 @@ git commit -m "feat(brand): 安顿 Settle 品牌落地（SettleApp 类名/l10n a
 改前（第 22 行）：`      fileName: 'gtd_backup_${DateTime.now().millisecondsSinceEpoch}.json',`
 改后：`      fileName: 'settle_backup_${DateTime.now().millisecondsSinceEpoch}.json',`
 
-- [ ] **Step 3: 改 `test/data/export_service_test.dart` 断言与夹具**
+- [x] **Step 3: 改 `test/data/export_service_test.dart` 断言与夹具**
 
 改前（第 46 行）：`    expect(map['app'], 'gtd');`
 改后：`    expect(map['app'], 'settle');`
@@ -258,7 +258,7 @@ git commit -m "feat(brand): 安顿 Settle 品牌落地（SettleApp 类名/l10n a
 改后：`      'app': 'settle',`
 （夹具仍保留「缺新字段」语义，继续验证缺字段按缺省还原。）
 
-- [ ] **Step 4: 改 `test/widget/settings_page_test.dart`**
+- [x] **Step 4: 改 `test/widget/settings_page_test.dart`**
 
 改前（第 36 行）：`    expect(map['app'], 'gtd');`
 改后：`    expect(map['app'], 'settle');`
@@ -266,7 +266,7 @@ git commit -m "feat(brand): 安顿 Settle 品牌落地（SettleApp 类名/l10n a
 改前（第 42 行）：`    env.backup.pickedJson = '{"app":"gtd","version":1,"exported_at":1,'`
 改后：`    env.backup.pickedJson = '{"app":"settle","version":1,"exported_at":1,'`
 
-- [ ] **Step 5: 改 `test/widget/widget_utils.dart` fake 路径与注释**
+- [x] **Step 5: 改 `test/widget/widget_utils.dart` fake 路径与注释**
 
 改前（第 18 行）：`    return '/fake/gtd_backup.json';`
 改后：`    return '/fake/settle_backup.json';`
@@ -274,11 +274,11 @@ git commit -m "feat(brand): 安顿 Settle 品牌落地（SettleApp 类名/l10n a
 改前（第 26 行）：`/// 注意：不 import app.dart（GtdApp 到 Task 33 才创建）；`
 改后：`/// 注意：不 import app.dart（SettleApp 由 app_smoke_test.dart 内自行组装）；`
 
-- [ ] **Step 6: 改 `test/data/migration_test.dart` createTemp（2 处）**
+- [x] **Step 6: 改 `test/data/migration_test.dart` createTemp（2 处）**
 
 第 13 行与第 43 行均：`Directory.systemTemp.createTemp('gtd_migration_test')` → `Directory.systemTemp.createTemp('settle_migration_test')`（逐行替换，共 2 处）。
 
-- [ ] **Step 7: 受影响测试**
+- [x] **Step 7: 受影响测试**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
