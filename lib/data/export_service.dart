@@ -28,7 +28,7 @@ class ExportService {
 
   Future<String> exportJson() async {
     return jsonEncode({
-      'app': 'gtd',
+      'app': 'settle',
       'version': 1,
       'exported_at': DateTime.now().millisecondsSinceEpoch,
       'inbox_items': await _inbox.getAll(),
@@ -43,8 +43,8 @@ class ExportService {
 
   Future<void> importJson(String raw) async {
     final data = jsonDecode(raw) as Map<String, dynamic>;
-    if (data['app'] != 'gtd' || data['version'] != 1) {
-      throw const FormatException('Not a valid GTD backup');
+    if (data['app'] != 'settle' || data['version'] != 1) {
+      throw const FormatException('Not a valid Settle backup');
     }
     await _db.transaction(() async {
       await _db.delete(_db.reviews).go();

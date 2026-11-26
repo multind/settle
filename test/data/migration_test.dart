@@ -10,7 +10,7 @@ void main() {
   // Dart native assets（sqlite3 3.x）在 flutter test 时自动提供（见 test_utils.dart）。
 
   test('v1 库关闭后重开数据保留，schemaVersion 不变（迁移机制基线）', () async {
-    final dir = await Directory.systemTemp.createTemp('gtd_migration_test');
+    final dir = await Directory.systemTemp.createTemp('settle_migration_test');
     final file = File('${dir.path}${Platform.pathSeparator}test.db');
 
     final db1 = AppDatabase(NativeDatabase(file));
@@ -40,7 +40,7 @@ void main() {
   });
 
   test('v1 库（旧版 tasks 表）打开触发 v1→v2 迁移：4 新列 + sortOrder 回填 + 数据保留', () async {
-    final dir = await Directory.systemTemp.createTemp('gtd_migration_test');
+    final dir = await Directory.systemTemp.createTemp('settle_migration_test');
     final file = File('${dir.path}${Platform.pathSeparator}test.db');
 
     // 用禁用迁移的连接手写 v1 schema（避免触发 onCreate/onUpgrade）。

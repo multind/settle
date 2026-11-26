@@ -43,7 +43,7 @@ void main() {
     await seedAll();
     final json = await service.exportJson();
     final map = jsonDecode(json) as Map<String, dynamic>;
-    expect(map['app'], 'gtd');
+    expect(map['app'], 'settle');
     expect(map['version'], 1);
     expect(map['inbox_items'], hasLength(1));
     expect(map['projects'], hasLength(1));
@@ -79,7 +79,7 @@ void main() {
 
   test('import 拒绝非法备份', () async {
     expect(() => service.importJson('{"app":"x","version":1}'), throwsFormatException);
-    expect(() => service.importJson('{"app":"gtd","version":99}'), throwsFormatException);
+    expect(() => service.importJson('{"app":"settle","version":99}'), throwsFormatException);
   });
 
   test('任务新字段（completedAt/sortOrder/repeatRule/reminderAt）导出→导入逐字段还原', () async {
@@ -121,7 +121,7 @@ void main() {
 
   test('import 兼容旧备份（任务缺新字段不报错，按缺省还原）', () async {
     final oldJson = jsonEncode({
-      'app': 'gtd',
+      'app': 'settle',
       'version': 1,
       'exported_at': 1,
       'inbox_items': <Object>[],

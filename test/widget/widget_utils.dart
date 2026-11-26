@@ -15,7 +15,7 @@ class FakeBackupGateway implements BackupFileGateway {
   @override
   Future<String?> saveBackup(String json) async {
     savedJson = json;
-    return '/fake/gtd_backup.json';
+    return '/fake/settle_backup.json';
   }
 
   @override
@@ -23,7 +23,7 @@ class FakeBackupGateway implements BackupFileGateway {
 }
 
 /// Widget 测试环境：内存库 + mock prefs + Fake 备份网关。
-/// 注意：不 import app.dart（SettleApp 到 Task 33 才创建）；
+/// 注意：不 import app.dart（SettleApp 由 app_smoke_test.dart 内自行组装）；
 /// 整应用测试在 app_smoke_test.dart 内自行用 [overrides] 组装 ProviderScope。
 class TestEnv {
   TestEnv._(this.db, this.prefs);

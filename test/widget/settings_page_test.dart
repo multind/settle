@@ -33,13 +33,13 @@ void main() {
     await tester.tap(find.byKey(const Key('export_backup_tile')));
     await tester.pumpAndSettle();
     final map = await env.decodeSavedJson();
-    expect(map['app'], 'gtd');
+    expect(map['app'], 'settle');
     expect(map['inbox_items'], hasLength(1));
   });
 
   testWidgets('恢复：Fake 返回 JSON 后数据入库（验收⑦）', (tester) async {
     final env = await TestEnv.create();
-    env.backup.pickedJson = '{"app":"gtd","version":1,"exported_at":1,'
+    env.backup.pickedJson = '{"app":"settle","version":1,"exported_at":1,'
         '"inbox_items":[],"projects":[],'
         '"contexts":[{"id":1,"name":"@电脑","icon":null,"sort":0}],'
         '"tags":[],"tasks":[],"task_tags":[],"reviews":[]}';

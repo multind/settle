@@ -18,8 +18,8 @@ class FilePickerBackupGateway implements BackupFileGateway {
   Future<String?> saveBackup(String json) async {
     final bytes = Uint8List.fromList(utf8.encode(json));
     final path = await FilePicker.platform.saveFile(
-      dialogTitle: 'Export GTD backup',
-      fileName: 'gtd_backup_${DateTime.now().millisecondsSinceEpoch}.json',
+      dialogTitle: 'Export Settle backup',
+      fileName: 'settle_backup_${DateTime.now().millisecondsSinceEpoch}.json',
       bytes: bytes, // 保留：Android/iOS 平台由插件写入
     );
     if (path == null) return null; // 用户取消
