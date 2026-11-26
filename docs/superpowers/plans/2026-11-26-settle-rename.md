@@ -418,7 +418,7 @@ git commit -m "refactor(android): 包名 dev.gtd.gtd_app→dev.settle.settle_app
 - Modify: `docs/release/windows.md`（全文重写）
 - Modify: `README.md`（全文重写）
 
-- [ ] **Step 1: 改 `windows/installer/setup.iss`（7 行）**
+- [x] **Step 1: 改 `windows/installer/setup.iss`（7 行）**
 
 改前（第 1 行）：`; GTD App Windows 安装脚本 — Inno Setup 6`
 改后：`; 安顿 Settle Windows 安装脚本 — Inno Setup 6`
@@ -443,7 +443,7 @@ git commit -m "refactor(android): 包名 dev.gtd.gtd_app→dev.settle.settle_app
 
 （`DefaultGroupName={#MyAppName}` 自动变 `Settle`；快捷方式随之 `Settle.lnk`。ISCC 编译验证在 Task 6——依赖 release 构建产物。）
 
-- [ ] **Step 2: 全文重写 `docs/release/windows.md`**
+- [x] **Step 2: 全文重写 `docs/release/windows.md`**
 
 写入以下完整内容（覆盖原 28 行）：
 
@@ -483,7 +483,7 @@ git commit -m "refactor(android): 包名 dev.gtd.gtd_app→dev.settle.settle_app
   本次改名直接换新路径，旧数据冷启动弃用。
 ```
 
-- [ ] **Step 3: 全文重写 `README.md`**
+- [x] **Step 3: 全文重写 `README.md`**
 
 写入以下完整内容（覆盖原 3 行）：
 
@@ -493,7 +493,7 @@ git commit -m "refactor(android): 包名 dev.gtd.gtd_app→dev.settle.settle_app
 本地优先的 GTD 个人任务管理应用（Flutter，Windows 桌面优先）。
 ```
 
-- [ ] **Step 4: setup.iss grep 门禁（纯改名产物零残留）**
+- [x] **Step 4: setup.iss grep 门禁（纯改名产物零残留）**
 
 ```powershell
 cd D:\Project\gtd-project
