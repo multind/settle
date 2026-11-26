@@ -40,8 +40,8 @@ void main() {
   });
 }
 
-/// 整应用测试宿主：ProviderScope 注入内存库/mock prefs/Fake 网关 + GtdApp。
+/// 整应用测试宿主：ProviderScope 注入内存库/mock prefs/Fake 网关 + SettleApp。
 Widget _app(TestEnv env) => ProviderScope(
       overrides: env.overrides,
-      child: const GtdApp(),
+      child: const SettleApp(),
     );

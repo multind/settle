@@ -596,7 +596,7 @@ String _labelOf(AppLocalizations l10n, String key) {
   }
 }
 
-/// 品牌字「GTD」（preview `.brand`）：普通 `text` 粗体文字，无渐变。
+/// 品牌字「安顿/Settle」（preview `.brand`）：普通 `text` 粗体文字，无渐变。
 class _BrandMark extends StatelessWidget {
   const _BrandMark();
 
@@ -607,7 +607,7 @@ class _BrandMark extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 12, 12),
       child: Text(
-        'GTD',
+        AppLocalizations.of(context)!.appTitle,
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w800,

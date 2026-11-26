@@ -14,6 +14,6 @@ Future<void> main() async {
       databaseProvider.overrideWithValue(db),
       sharedPreferencesProvider.overrideWithValue(prefs),
     ],
-    child: const GtdApp(),
+    child: const SettleApp(),
   ));
 }

@@ -10,7 +10,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'GTD';
+  String get appTitle => '安顿';
 
   @override
   String get navInbox => '收件箱';

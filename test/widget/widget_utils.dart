@@ -23,7 +23,7 @@ class FakeBackupGateway implements BackupFileGateway {
 }
 
 /// Widget 测试环境：内存库 + mock prefs + Fake 备份网关。
-/// 注意：不 import app.dart（GtdApp 到 Task 33 才创建）；
+/// 注意：不 import app.dart（SettleApp 到 Task 33 才创建）；
 /// 整应用测试在 app_smoke_test.dart 内自行用 [overrides] 组装 ProviderScope。
 class TestEnv {
   TestEnv._(this.db, this.prefs);

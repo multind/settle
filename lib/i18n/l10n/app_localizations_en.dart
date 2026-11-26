@@ -10,7 +10,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'GTD';
+  String get appTitle => 'Settle';
 
   @override
   String get navInbox => 'Inbox';

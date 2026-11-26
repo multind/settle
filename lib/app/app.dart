@@ -6,14 +6,14 @@ import 'package:settle_app/app/theme.dart';
 import 'package:settle_app/features/settings/settings_controller.dart';
 
 /// 整应用入口（规格 §7.1 / §7.4）：双主题跟随系统 + 响应式外壳。
-class GtdApp extends ConsumerWidget {
-  const GtdApp({super.key});
+class SettleApp extends ConsumerWidget {
+  const SettleApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selection = ref.watch(settingsControllerProvider);
     return MaterialApp(
-      title: 'GTD',
+      title: 'Settle',
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       locale: selection.locale,
       supportedLocales: AppLocalizations.supportedLocales,
