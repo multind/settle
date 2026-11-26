@@ -117,7 +117,7 @@ Expected: 提交成功，`git status --short` 无该批残留。
 - Regenerate: `lib/i18n/l10n/app_localizations.dart`、`app_localizations_en.dart`、`app_localizations_zh.dart`（`flutter gen-l10n`，不改手写）
 - Modify: `lib/data/app_database.dart`（`gtd_app.db` → `settle_app.db`，与 Task 4 Runner.rc 构成数据目录三处协同）
 
-- [ ] **Step 1: 改 `lib/app/app.dart` 类名与兜底标题**
+- [x] **Step 1: 改 `lib/app/app.dart` 类名与兜底标题**
 
 改前：
 ```dart
@@ -133,12 +133,12 @@ class SettleApp extends ConsumerWidget {
 ```
 并将第 16 行 `title: 'GTD',` 改为 `title: 'Settle',`（`MaterialApp.title` 兜底，运行时标题由 `onGenerateTitle` → l10n `appTitle` 覆盖）。
 
-- [ ] **Step 2: 改 `lib/main.dart` 引用**
+- [x] **Step 2: 改 `lib/main.dart` 引用**
 
 改前：`    child: const GtdApp(),`
 改后：`    child: const SettleApp(),`
 
-- [ ] **Step 3: 改 `test/widget/app_smoke_test.dart` 引用与注释**
+- [x] **Step 3: 改 `test/widget/app_smoke_test.dart` 引用与注释**
 
 改前（第 43 行注释）：`/// 整应用测试宿主：ProviderScope 注入内存库/mock prefs/Fake 网关 + GtdApp。`
 改后：`/// 整应用测试宿主：ProviderScope 注入内存库/mock prefs/Fake 网关 + SettleApp。`
@@ -146,7 +146,7 @@ class SettleApp extends ConsumerWidget {
 改前（第 46 行）：`      child: const GtdApp(),`
 改后：`      child: const SettleApp(),`
 
-- [ ] **Step 4: 改 `lib/app/responsive_shell.dart` 品牌字 `_BrandMark`**
+- [x] **Step 4: 改 `lib/app/responsive_shell.dart` 品牌字 `_BrandMark`**
 
 改前（第 599 行注释）：
 ```dart
@@ -170,12 +170,12 @@ class SettleApp extends ConsumerWidget {
 ```
 （`AppLocalizations` 已在文件第 10 行 import，无需新增。）
 
-- [ ] **Step 5: 改两个 arb 的 appTitle**
+- [x] **Step 5: 改两个 arb 的 appTitle**
 
 `lib/i18n/l10n/app_zh.arb` 第 3 行：`"appTitle": "GTD",` → `"appTitle": "安顿",`
 `lib/i18n/l10n/app_en.arb` 第 3 行：`"appTitle": "GTD",` → `"appTitle": "Settle",`
 
-- [ ] **Step 6: 重新生成 l10n（不改手写生成文件）**
+- [x] **Step 6: 重新生成 l10n（不改手写生成文件）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -184,7 +184,7 @@ flutter gen-l10n
 
 Expected: 输出含 `Generated`；`lib/i18n/l10n/app_localizations_en.dart` 第 13 行变为 `String get appTitle => 'Settle';`、`app_localizations_zh.dart` 变为 `=> '安顿';`、`app_localizations.dart` 文档注释 `/// **'GTD'**` 变为 `/// **'Settle'**`。若生成文件整体格式有 SDK 版本差异属正常，照常提交。
 
-- [ ] **Step 7: 改 `lib/data/app_database.dart` 数据库文件名**
+- [x] **Step 7: 改 `lib/data/app_database.dart` 数据库文件名**
 
 改前（第 9 行）：
 ```dart
@@ -197,7 +197,7 @@ Expected: 输出含 `Generated`；`lib/i18n/l10n/app_localizations_en.dart` 第 
 
 > **数据目录三处协同说明**：本步（DB 文件名）与 Task 4 的 Runner.rc `CompanyName "dev.settle"` + `ProductName "settle_app"` 共同决定新路径 `%APPDATA%\dev.settle\settle_app\settle_app.db`。三处跨 Task 但同一里程碑完成，Task 6 第 4 层验证兜底核对。
 
-- [ ] **Step 8: analyze + 受影响测试**
+- [x] **Step 8: analyze + 受影响测试**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
