@@ -493,14 +493,19 @@ git commit -m "refactor(android): 包名 dev.gtd.gtd_app→dev.settle.settle_app
 本地优先的 GTD 个人任务管理应用（Flutter，Windows 桌面优先）。
 ```
 
-- [ ] **Step 4: 三个文件 grep 门禁**
+- [ ] **Step 4: setup.iss grep 门禁（纯改名产物零残留）**
 
 ```powershell
 cd D:\Project\gtd-project
-git grep -n "gtd_app\|dev\.gtd\|GTD" -- windows/installer/setup.iss docs/release/windows.md README.md
+git grep -n "gtd_app\|dev\.gtd\|GTD" -- windows/installer/setup.iss
 ```
 
 Expected: 无输出（0 匹配）。
+> **门禁修正（协调者裁定，2026-11-26）**：计划 Step 2-3 指定的 windows.md/README 内容**必须**点名
+> 旧版（「旧版 gtd_app 需先卸载」「旧库 `%APPDATA%\dev.gtd\gtd_app\gtd_app.db` 原样保留」）与 GTD
+> 方法论术语（README「本地优先的 GTD…」，spec 明确方法论名保留）——若对三文件统一执行 0 匹配门禁
+> 将与强制内容自相矛盾。故门禁收窄为**纯改名产物 setup.iss 零残留**；docs 中旧版引用视为有意的
+> 卸载/断代说明放行（Task 6 Step 3 审计已同步豁免 docs/release/windows.md）。
 
 - [x] **Step 5: 提交（安装包 + 文档分开两个提交）**
 
@@ -540,12 +545,12 @@ Expected: `No issues found!`；若出现汇总行，必须 0 error 且 0 warning
 
 ```powershell
 cd D:\Project\gtd-project
-git grep -n "gtd_app\|dev\.gtd" -- lib test windows android pubspec.yaml README.md docs/release/windows.md ":(exclude)test/acceptance/milestone1_checklist.md"
-git grep -n "'GTD'\|GTD backup\|gtd_backup\|Export GTD" -- lib test windows android pubspec.yaml README.md docs/release/windows.md ":(exclude)test/acceptance/milestone1_checklist.md"
+git grep -n "gtd_app\|dev\.gtd" -- lib test windows android pubspec.yaml README.md ":(exclude)test/acceptance/milestone1_checklist.md" ":(exclude)docs/release/windows.md"
+git grep -n "'GTD'\|GTD backup\|gtd_backup\|Export GTD" -- lib test windows android pubspec.yaml README.md ":(exclude)test/acceptance/milestone1_checklist.md" ":(exclude)docs/release/windows.md"
 git status --short docs/superpowers test/acceptance/milestone1_checklist.md
 ```
 
-Expected: 前两条命令均无输出（0 匹配；git grep 无匹配退出码为 1，属预期）；第三条仅允许显示本计划文件 `docs/superpowers/plans/2026-11-26-settle-rename.md`（计划文档自身的正常提交状态），历史计划/规格文档与 `milestone1_checklist.md` 必须零改动。
+Expected: 前两条命令均无输出（0 匹配；git grep 无匹配退出码为 1，属预期）；`docs/release/windows.md` 豁免——其中「旧版 gtd_app / gtd_app-setup-0.1.1.exe / dev.gtd\gtd_app\gtd_app.db」为 Task 5 指定的有意卸载/断代说明（协调者裁定，见 Task 5 Step 4 门禁修正）；README「GTD」为方法论术语（spec 明确保留），不匹配第二条模式。第三条仅允许显示本计划文件 `docs/superpowers/plans/2026-11-26-settle-rename.md`（计划文档自身的正常提交状态），历史计划/规格文档与 `milestone1_checklist.md` 必须零改动。
 
 - [ ] **Step 4: release 构建（验证层 3）**
 
