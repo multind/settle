@@ -364,4 +364,139 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reminderDismiss => '知道了';
+
+  @override
+  String get navGuide => 'GTD 指南';
+
+  @override
+  String get settingsGuide => '查看 GTD 指南';
+
+  @override
+  String get ruleInboxTitle => '只收集，不整理';
+
+  @override
+  String get ruleInboxMessage => '每条以动词开头，写清下一步动作。';
+
+  @override
+  String get ruleTodayTitle => '今日限量 1-3-5';
+
+  @override
+  String get ruleTodayMessage => '只放 1 件大任务、3 件中任务、5 件小任务，做完再放新的。';
+
+  @override
+  String get ruleUpcomingTitle => '只放硬时间';
+
+  @override
+  String get ruleUpcomingMessage => '只放会议、截止等硬时间；把任务拖到日期头可安排开始日期。';
+
+  @override
+  String get ruleAnytimeTitle => '随时可做';
+
+  @override
+  String get ruleAnytimeMessage => '近期要做的、不必排到某一天的任务，放这里。';
+
+  @override
+  String get ruleSomedayTitle => '以后再说';
+
+  @override
+  String get ruleSomedayMessage => '现在不做、以后可能的事；每周回顾时看一次。';
+
+  @override
+  String get ruleProjectsTitle => '项目要有下一步';
+
+  @override
+  String get ruleProjectsMessage => '每个项目必须有一个下一步动作；目标别写大词。';
+
+  @override
+  String get ruleContextsTitle => '按场景过滤';
+
+  @override
+  String get ruleContextsMessage => '按场景过滤（@工作 / @家…），到哪儿做哪样。';
+
+  @override
+  String get ruleWaitingTitle => '写清跟进日';
+
+  @override
+  String get ruleWaitingMessage => '每条等待都要写跟进日，否则会忘；每天扫一眼今天到跟进日的。';
+
+  @override
+  String get ruleLogbookTitle => '完成自动留存';
+
+  @override
+  String get ruleLogbookMessage => '完成的记录自动留存；每周回顾时清点一遍。';
+
+  @override
+  String get ruleReviewTitle => '每周一次，20 分钟';
+
+  @override
+  String get ruleReviewMessage => '清空收集箱、跟进等待、推进项目下一步、激活将来、检查硬时间冲突。';
+
+  @override
+  String get onboardingTitle => '欢迎使用安顿';
+
+  @override
+  String get ironRule1 => '想到就写进收件箱';
+
+  @override
+  String get ironRule2 => '两分钟能做完，立刻做';
+
+  @override
+  String get ironRule3 => '今日清单限量 1-3-5';
+
+  @override
+  String get dailyAction1 => '早上：看今日清单';
+
+  @override
+  String get dailyAction2 => '晚上：清空收集箱、勾完成、写下明日首要';
+
+  @override
+  String get dailyAction3 => '周日：20 分钟回顾';
+
+  @override
+  String get onboardingOpenGuide => '查看完整指南 →';
+
+  @override
+  String get onboardingClose => '关闭';
+
+  @override
+  String get guideSectionLaws => '三条铁律';
+
+  @override
+  String get guideSectionDaily => '每天固定动作';
+
+  @override
+  String get guideSectionLists => '各清单使用规则';
+
+  @override
+  String get guideSectionNotes => '注意事项';
+
+  @override
+  String get guideExampleInbox => '例：「给客户回邮件，确认报价」';
+
+  @override
+  String get guideExampleToday => '例：1 件大任务「写周报」+ 3 件中任务 + 5 件小任务';
+
+  @override
+  String get guideExampleWaiting => '例：「等供应商报价，周五跟进」';
+
+  @override
+  String get guideExampleProject => '例：项目「搬家」，下一步是「联系搬家公司询价」';
+
+  @override
+  String get guideExampleSomeday => '例：「学吉他」「去冰岛」';
+
+  @override
+  String get guideExampleUpcoming => '例：周三 14:00 会议、周五提交截止';
+
+  @override
+  String get guideNote1 => '提醒是应用内提示，重要的事请自己留意，别依赖系统级提醒。';
+
+  @override
+  String get guideNote2 => '重要截止日建议在日历里也记一份，双保险。';
+
+  @override
+  String get guideNote3 => '每周回顾不能省，它是系统不失控的开关。';
+
+  @override
+  String get guideNote4 => '数据可以随时导出 JSON 备份。';
 }

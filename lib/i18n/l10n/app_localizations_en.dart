@@ -364,4 +364,158 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reminderDismiss => 'OK';
+
+  @override
+  String get navGuide => 'GTD Guide';
+
+  @override
+  String get settingsGuide => 'View GTD Guide';
+
+  @override
+  String get ruleInboxTitle => 'Collect, don\'t organize';
+
+  @override
+  String get ruleInboxMessage =>
+      'Start each item with a verb and state the next action.';
+
+  @override
+  String get ruleTodayTitle => 'Today is 1-3-5';
+
+  @override
+  String get ruleTodayMessage =>
+      'Keep 1 big, 3 medium, and 5 small tasks. Add more only after finishing.';
+
+  @override
+  String get ruleUpcomingTitle => 'Hard time only';
+
+  @override
+  String get ruleUpcomingMessage =>
+      'Keep meetings and deadlines here. Drag a task onto a date header to schedule it.';
+
+  @override
+  String get ruleAnytimeTitle => 'Do anytime';
+
+  @override
+  String get ruleAnytimeMessage =>
+      'Tasks you\'ll do soon, without a fixed day, live here.';
+
+  @override
+  String get ruleSomedayTitle => 'Maybe later';
+
+  @override
+  String get ruleSomedayMessage =>
+      'Not now, maybe later — take a look during the weekly review.';
+
+  @override
+  String get ruleProjectsTitle => 'Every project needs a next action';
+
+  @override
+  String get ruleProjectsMessage =>
+      'Give each project a concrete next action and a specific goal.';
+
+  @override
+  String get ruleContextsTitle => 'Filter by context';
+
+  @override
+  String get ruleContextsMessage =>
+      'Filter by place or mood — @work, @home — and do what fits where you are.';
+
+  @override
+  String get ruleWaitingTitle => 'Set a follow-up date';
+
+  @override
+  String get ruleWaitingMessage =>
+      'Every waiting item needs a follow-up date; scan today\'s due follow-ups every day.';
+
+  @override
+  String get ruleLogbookTitle => 'Done stays here';
+
+  @override
+  String get ruleLogbookMessage =>
+      'Completed tasks are kept automatically — count them at your weekly review.';
+
+  @override
+  String get ruleReviewTitle => '20 minutes, every week';
+
+  @override
+  String get ruleReviewMessage =>
+      'Empty the inbox, follow up on waiting, advance projects, activate somedays, and check for hard-time conflicts.';
+
+  @override
+  String get onboardingTitle => 'Welcome to Settle';
+
+  @override
+  String get ironRule1 => 'Capture everything into the inbox';
+
+  @override
+  String get ironRule2 => 'Do it now if it takes two minutes';
+
+  @override
+  String get ironRule3 => 'Keep today to 1-3-5';
+
+  @override
+  String get dailyAction1 => 'Morning: review Today';
+
+  @override
+  String get dailyAction2 =>
+      'Evening: clear the inbox, check things off, set tomorrow\'s top task';
+
+  @override
+  String get dailyAction3 => 'Sunday: 20-minute review';
+
+  @override
+  String get onboardingOpenGuide => 'View the full guide →';
+
+  @override
+  String get onboardingClose => 'Close';
+
+  @override
+  String get guideSectionLaws => 'Three iron rules';
+
+  @override
+  String get guideSectionDaily => 'A daily rhythm';
+
+  @override
+  String get guideSectionLists => 'How to use each list';
+
+  @override
+  String get guideSectionNotes => 'Notes';
+
+  @override
+  String get guideExampleInbox =>
+      'e.g. \"Email the client to confirm the quote\"';
+
+  @override
+  String get guideExampleToday =>
+      'e.g. 1 big \"write the weekly report\" + 3 medium + 5 small';
+
+  @override
+  String get guideExampleWaiting =>
+      'e.g. \"Waiting on the vendor quote — follow up Friday\"';
+
+  @override
+  String get guideExampleProject =>
+      'e.g. project \"Moving\" → next action \"call movers for a quote\"';
+
+  @override
+  String get guideExampleSomeday => 'e.g. \"learn guitar\", \"visit Iceland\"';
+
+  @override
+  String get guideExampleUpcoming =>
+      'e.g. Wednesday 14:00 meeting, Friday submission deadline';
+
+  @override
+  String get guideNote1 =>
+      'Reminders are in-app only — rely on your own attention for what matters.';
+
+  @override
+  String get guideNote2 =>
+      'Keep important deadlines in your calendar too — belt and braces.';
+
+  @override
+  String get guideNote3 =>
+      'Never skip the weekly review — it\'s what keeps the system under control.';
+
+  @override
+  String get guideNote4 => 'Export a JSON backup anytime.';
 }

@@ -28,4 +28,35 @@ void main() {
     ));
     expect(find.text('Inbox'), findsOneWidget);
   });
+
+  testWidgets('guide keys load in zh and en', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: Builder(builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return Text(
+            '${l10n.navGuide}|${l10n.ruleInboxTitle}|${l10n.ruleInboxMessage}|${l10n.onboardingOpenGuide}');
+      }),
+    ));
+    expect(
+      find.text('GTD 指南|只收集，不整理|每条以动词开头，写清下一步动作。|查看完整指南 →'),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
+      home: Builder(builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return Text(
+            '${l10n.navGuide}|${l10n.ruleInboxTitle}|${l10n.ruleInboxMessage}|${l10n.onboardingOpenGuide}');
+      }),
+    ));
+    expect(
+      find.text('GTD Guide|Collect, don\'t organize|Start each item with a verb and state the next action.|View the full guide →'),
+      findsOneWidget,
+    );
+  });
 }

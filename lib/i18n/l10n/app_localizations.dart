@@ -793,6 +793,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get reminderDismiss;
+
+  /// No description provided for @navGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'GTD Guide'**
+  String get navGuide;
+
+  /// No description provided for @settingsGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'View GTD Guide'**
+  String get settingsGuide;
+
+  /// No description provided for @ruleInboxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect, don\'t organize'**
+  String get ruleInboxTitle;
+
+  /// No description provided for @ruleInboxMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Start each item with a verb and state the next action.'**
+  String get ruleInboxMessage;
+
+  /// No description provided for @ruleTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today is 1-3-5'**
+  String get ruleTodayTitle;
+
+  /// No description provided for @ruleTodayMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep 1 big, 3 medium, and 5 small tasks. Add more only after finishing.'**
+  String get ruleTodayMessage;
+
+  /// No description provided for @ruleUpcomingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard time only'**
+  String get ruleUpcomingTitle;
+
+  /// No description provided for @ruleUpcomingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep meetings and deadlines here. Drag a task onto a date header to schedule it.'**
+  String get ruleUpcomingMessage;
+
+  /// No description provided for @ruleAnytimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Do anytime'**
+  String get ruleAnytimeTitle;
+
+  /// No description provided for @ruleAnytimeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks you\'ll do soon, without a fixed day, live here.'**
+  String get ruleAnytimeMessage;
+
+  /// No description provided for @ruleSomedayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get ruleSomedayTitle;
+
+  /// No description provided for @ruleSomedayMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now, maybe later — take a look during the weekly review.'**
+  String get ruleSomedayMessage;
+
+  /// No description provided for @ruleProjectsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Every project needs a next action'**
+  String get ruleProjectsTitle;
+
+  /// No description provided for @ruleProjectsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Give each project a concrete next action and a specific goal.'**
+  String get ruleProjectsMessage;
+
+  /// No description provided for @ruleContextsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by context'**
+  String get ruleContextsTitle;
+
+  /// No description provided for @ruleContextsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by place or mood — @work, @home — and do what fits where you are.'**
+  String get ruleContextsMessage;
+
+  /// No description provided for @ruleWaitingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a follow-up date'**
+  String get ruleWaitingTitle;
+
+  /// No description provided for @ruleWaitingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Every waiting item needs a follow-up date; scan today\'s due follow-ups every day.'**
+  String get ruleWaitingMessage;
+
+  /// No description provided for @ruleLogbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Done stays here'**
+  String get ruleLogbookTitle;
+
+  /// No description provided for @ruleLogbookMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed tasks are kept automatically — count them at your weekly review.'**
+  String get ruleLogbookMessage;
+
+  /// No description provided for @ruleReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'20 minutes, every week'**
+  String get ruleReviewTitle;
+
+  /// No description provided for @ruleReviewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty the inbox, follow up on waiting, advance projects, activate somedays, and check for hard-time conflicts.'**
+  String get ruleReviewMessage;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Settle'**
+  String get onboardingTitle;
+
+  /// No description provided for @ironRule1.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture everything into the inbox'**
+  String get ironRule1;
+
+  /// No description provided for @ironRule2.
+  ///
+  /// In en, this message translates to:
+  /// **'Do it now if it takes two minutes'**
+  String get ironRule2;
+
+  /// No description provided for @ironRule3.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep today to 1-3-5'**
+  String get ironRule3;
+
+  /// No description provided for @dailyAction1.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning: review Today'**
+  String get dailyAction1;
+
+  /// No description provided for @dailyAction2.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening: clear the inbox, check things off, set tomorrow\'s top task'**
+  String get dailyAction2;
+
+  /// No description provided for @dailyAction3.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday: 20-minute review'**
+  String get dailyAction3;
+
+  /// No description provided for @onboardingOpenGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'View the full guide →'**
+  String get onboardingOpenGuide;
+
+  /// No description provided for @onboardingClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get onboardingClose;
+
+  /// No description provided for @guideSectionLaws.
+  ///
+  /// In en, this message translates to:
+  /// **'Three iron rules'**
+  String get guideSectionLaws;
+
+  /// No description provided for @guideSectionDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'A daily rhythm'**
+  String get guideSectionDaily;
+
+  /// No description provided for @guideSectionLists.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use each list'**
+  String get guideSectionLists;
+
+  /// No description provided for @guideSectionNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get guideSectionNotes;
+
+  /// No description provided for @guideExampleInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. \"Email the client to confirm the quote\"'**
+  String get guideExampleInbox;
+
+  /// No description provided for @guideExampleToday.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1 big \"write the weekly report\" + 3 medium + 5 small'**
+  String get guideExampleToday;
+
+  /// No description provided for @guideExampleWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. \"Waiting on the vendor quote — follow up Friday\"'**
+  String get guideExampleWaiting;
+
+  /// No description provided for @guideExampleProject.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. project \"Moving\" → next action \"call movers for a quote\"'**
+  String get guideExampleProject;
+
+  /// No description provided for @guideExampleSomeday.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. \"learn guitar\", \"visit Iceland\"'**
+  String get guideExampleSomeday;
+
+  /// No description provided for @guideExampleUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Wednesday 14:00 meeting, Friday submission deadline'**
+  String get guideExampleUpcoming;
+
+  /// No description provided for @guideNote1.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders are in-app only — rely on your own attention for what matters.'**
+  String get guideNote1;
+
+  /// No description provided for @guideNote2.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep important deadlines in your calendar too — belt and braces.'**
+  String get guideNote2;
+
+  /// No description provided for @guideNote3.
+  ///
+  /// In en, this message translates to:
+  /// **'Never skip the weekly review — it\'s what keeps the system under control.'**
+  String get guideNote3;
+
+  /// No description provided for @guideNote4.
+  ///
+  /// In en, this message translates to:
+  /// **'Export a JSON backup anytime.'**
+  String get guideNote4;
 }
 
 class _AppLocalizationsDelegate
