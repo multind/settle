@@ -89,7 +89,9 @@ void main() {
     expect(row.status, 'next_action');
     expect(row.completedAt, isNull);
     expect(find.text('已完成任务'), findsNothing);
-    expect(find.text('No completed tasks yet.'), findsOneWidget);
+    expect(
+        find.text('Completed tasks are kept automatically — count them at your weekly review.'),
+        findsOneWidget);
     await env.db.close();
   });
 
@@ -106,7 +108,9 @@ void main() {
     await tester.tap(find.byKey(const Key('logbook_confirm_delete')));
     await tester.pumpAndSettle();
     expect(find.text('待删除任务'), findsNothing);
-    expect(find.text('No completed tasks yet.'), findsOneWidget);
+    expect(
+        find.text('Completed tasks are kept automatically — count them at your weekly review.'),
+        findsOneWidget);
     final remaining =
         await (env.db.select(env.db.tasks)..where((t) => t.id.equals(id))).get();
     expect(remaining, isEmpty);
@@ -148,7 +152,9 @@ void main() {
     final env = await TestEnv.create();
     await tester.pumpWidget(env.wrap(const LogbookPage()));
     await tester.pump();
-    expect(find.text('No completed tasks yet.'), findsOneWidget);
+    expect(
+        find.text('Completed tasks are kept automatically — count them at your weekly review.'),
+        findsOneWidget);
     await env.db.close();
   });
 }

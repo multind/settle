@@ -34,7 +34,6 @@
   "statusClarified": "Clarified",
   "clarify": "Clarify",
   "clearDate": "Clear",
-  "emptyInbox": "Inbox is empty. Capture your first thought above.",
   "emptyTasks": "Nothing here yet.",
   "taskTitle": "Title",
   "taskNotes": "Notes",
@@ -97,9 +96,6 @@
       }
     }
   },
-  "todayEmpty": "Nothing scheduled today.",
-  "anytimeEmpty": "No tasks anytime.",
-  "upcomingEmpty": "No upcoming tasks.",
   "upcomingTomorrow": "Tomorrow",
   "upcomingDayAfter": "Day after tomorrow",
   "weekdayMon": "Mon",
@@ -123,7 +119,6 @@
       }
     }
   },
-  "logbookEmpty": "No completed tasks yet.",
   "logbookSearchEmpty": "No matching tasks.",
   "logbookSearchHint": "Search",
   "logbookDeleteConfirm": "Delete this task?",

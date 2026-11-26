@@ -61,7 +61,9 @@ void main() {
     final env = await TestEnv.create();
     await tester.pumpWidget(env.wrap(const InboxPage()));
     await tester.pump();
-    expect(find.text('Inbox is empty. Capture your first thought above.'), findsOneWidget);
+    expect(
+        find.text('Start each item with a verb and state the next action.'),
+        findsOneWidget);
     await env.db.close();
   });
 }

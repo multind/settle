@@ -6,6 +6,7 @@ import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 
 /// 回顾页（验收⑥）：手动填写总结与统计并保存（每周一条）。
 final _reviewsProvider = StreamProvider<List<Review>>(
@@ -33,7 +34,13 @@ class ReviewPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (rows) => rows.isEmpty
-            ? Center(child: Text(l10n.emptyTasks))
+            ? Center(
+                child: PageRuleHint(
+                  icon: Icons.history,
+                  title: l10n.ruleReviewTitle,
+                  message: l10n.ruleReviewMessage,
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: rows.length,

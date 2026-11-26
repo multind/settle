@@ -126,7 +126,9 @@ void main() {
     await pumpPage(tester, env);
     expect(find.text('今日任务'), findsNothing);
     expect(find.text('昨日任务'), findsNothing);
-    expect(find.text('No upcoming tasks.'), findsOneWidget);
+    expect(
+        find.text('Keep meetings and deadlines here. Drag a task onto a date header to schedule it.'),
+        findsOneWidget);
     await env.db.close();
   });
 
@@ -153,7 +155,9 @@ void main() {
   testWidgets('空态文案', (tester) async {
     final env = await TestEnv.create();
     await pumpPage(tester, env);
-    expect(find.text('No upcoming tasks.'), findsOneWidget);
+    expect(
+        find.text('Keep meetings and deadlines here. Drag a task onto a date header to schedule it.'),
+        findsOneWidget);
     await env.db.close();
   });
 

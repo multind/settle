@@ -5,6 +5,7 @@ import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 
 /// 情境列表流：由仓库暴露的 [ContextRepository.watchAll] 转为
 /// StreamProvider，供页面响应式监听（providers.dart 仅提供仓库本身）。
@@ -34,7 +35,13 @@ class ContextsPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (list) => list.isEmpty
-            ? Center(child: Text(l10n.emptyTasks))
+            ? Center(
+                child: PageRuleHint(
+                  icon: Icons.place_outlined,
+                  title: l10n.ruleContextsTitle,
+                  message: l10n.ruleContextsMessage,
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: list.length,

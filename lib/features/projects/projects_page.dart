@@ -5,6 +5,7 @@ import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 import 'package:settle_app/features/projects/project_dialog.dart';
 import 'package:settle_app/features/task/task_edit_dialog.dart';
 
@@ -36,7 +37,13 @@ class ProjectsPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (list) => list.isEmpty
-            ? Center(child: Text(l10n.emptyTasks))
+            ? Center(
+                child: PageRuleHint(
+                  icon: Icons.folder_outlined,
+                  title: l10n.ruleProjectsTitle,
+                  message: l10n.ruleProjectsMessage,
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: list.length,

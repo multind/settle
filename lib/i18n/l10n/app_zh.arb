@@ -34,7 +34,6 @@
   "statusClarified": "已理清",
   "clarify": "理清",
   "clearDate": "清除",
-  "emptyInbox": "收件箱是空的，在上方写下第一条想法。",
   "emptyTasks": "这里还没有内容。",
   "taskTitle": "标题",
   "taskNotes": "备注",
@@ -97,9 +96,6 @@
       }
     }
   },
-  "todayEmpty": "今日无安排",
-  "anytimeEmpty": "没有随时可做的任务",
-  "upcomingEmpty": "没有未来安排",
   "upcomingTomorrow": "明天",
   "upcomingDayAfter": "后天",
   "weekdayMon": "周一",
@@ -123,7 +119,6 @@
       }
     }
   },
-  "logbookEmpty": "暂无完成记录",
   "logbookSearchEmpty": "无匹配任务",
   "logbookSearchHint": "搜索",
   "logbookDeleteConfirm": "确认删除？",

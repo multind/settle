@@ -44,13 +44,15 @@ class TestEnv {
         backupFileGatewayProvider.overrideWithValue(backup),
       ];
 
-  /// 包单个页面（自带本地化 delegates）。
-  Widget wrap(Widget home, {List<Override> extraOverrides = const []}) {
+  /// 包单个页面（自带本地化 delegates；[locale] 用于中英双语断言，缺省跟随测试环境）。
+  Widget wrap(Widget home,
+      {List<Override> extraOverrides = const [], Locale? locale}) {
     return ProviderScope(
       overrides: [...overrides, ...extraOverrides],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: locale,
         home: home,
       ),
     );

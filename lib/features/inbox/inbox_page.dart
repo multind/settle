@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/core/enums.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 import 'package:settle_app/features/inbox/clarify_dialog.dart';
 import 'package:settle_app/features/inbox/quick_collect_bar.dart';
 
@@ -30,7 +31,13 @@ class InboxPage extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('$e')),
               data: (rows) => rows.isEmpty
-                  ? Center(child: Text(l10n.emptyInbox))
+                  ? Center(
+                      child: PageRuleHint(
+                        icon: Icons.inbox_outlined,
+                        title: l10n.ruleInboxTitle,
+                        message: l10n.ruleInboxMessage,
+                      ),
+                    )
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       itemCount: rows.length,

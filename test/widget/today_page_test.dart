@@ -56,7 +56,9 @@ void main() {
     await tester.pumpWidget(env.wrap(const TodayPage()));
     await tester.pump();
     expect(find.text('无日期任务'), findsNothing);
-    expect(find.text('Nothing scheduled today.'), findsOneWidget);
+    expect(
+        find.text('Keep 1 big, 3 medium, and 5 small tasks. Add more only after finishing.'),
+        findsOneWidget);
     await env.db.close();
   });
 
@@ -109,7 +111,9 @@ void main() {
     final env = await TestEnv.create();
     await tester.pumpWidget(env.wrap(const TodayPage()));
     await tester.pump();
-    expect(find.text('Nothing scheduled today.'), findsOneWidget);
+    expect(
+        find.text('Keep 1 big, 3 medium, and 5 small tasks. Add more only after finishing.'),
+        findsOneWidget);
     await env.db.close();
   });
 }

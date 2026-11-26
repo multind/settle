@@ -112,9 +112,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearDate => 'Clear';
 
   @override
-  String get emptyInbox => 'Inbox is empty. Capture your first thought above.';
-
-  @override
   String get emptyTasks => 'Nothing here yet.';
 
   @override
@@ -282,15 +279,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get todayEmpty => 'Nothing scheduled today.';
-
-  @override
-  String get anytimeEmpty => 'No tasks anytime.';
-
-  @override
-  String get upcomingEmpty => 'No upcoming tasks.';
-
-  @override
   String get upcomingTomorrow => 'Tomorrow';
 
   @override
@@ -321,9 +309,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String upcomingDateHeader(int month, int day, String weekday) {
     return '$month/$day $weekday';
   }
-
-  @override
-  String get logbookEmpty => 'No completed tasks yet.';
 
   @override
   String get logbookSearchEmpty => 'No matching tasks.';

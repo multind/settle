@@ -43,7 +43,8 @@ void main() {
     await tester.pump();
     expect(find.text('计划任务'), findsNothing);
     expect(find.text('截止任务'), findsNothing);
-    expect(find.text('No tasks anytime.'), findsOneWidget);
+    expect(find.text('Tasks you\'ll do soon, without a fixed day, live here.'),
+        findsOneWidget);
     await env.db.close();
   });
 
@@ -79,7 +80,8 @@ void main() {
         await (env.db.select(env.db.tasks)..where((t) => t.id.equals(id))).getSingle();
     expect(row.status, 'done');
     expect(find.text('随时任务'), findsNothing);
-    expect(find.text('No tasks anytime.'), findsOneWidget);
+    expect(find.text('Tasks you\'ll do soon, without a fixed day, live here.'),
+        findsOneWidget);
     await env.db.close();
   });
 
@@ -87,7 +89,8 @@ void main() {
     final env = await TestEnv.create();
     await tester.pumpWidget(env.wrap(const AnytimePage()));
     await tester.pump();
-    expect(find.text('No tasks anytime.'), findsOneWidget);
+    expect(find.text('Tasks you\'ll do soon, without a fixed day, live here.'),
+        findsOneWidget);
     await env.db.close();
   });
 }

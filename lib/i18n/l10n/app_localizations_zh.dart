@@ -112,9 +112,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearDate => '清除';
 
   @override
-  String get emptyInbox => '收件箱是空的，在上方写下第一条想法。';
-
-  @override
   String get emptyTasks => '这里还没有内容。';
 
   @override
@@ -282,15 +279,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get todayEmpty => '今日无安排';
-
-  @override
-  String get anytimeEmpty => '没有随时可做的任务';
-
-  @override
-  String get upcomingEmpty => '没有未来安排';
-
-  @override
   String get upcomingTomorrow => '明天';
 
   @override
@@ -321,9 +309,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String upcomingDateHeader(int month, int day, String weekday) {
     return '$month月$day日 $weekday';
   }
-
-  @override
-  String get logbookEmpty => '暂无完成记录';
 
   @override
   String get logbookSearchEmpty => '无匹配任务';

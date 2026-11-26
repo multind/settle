@@ -35,7 +35,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
     await tester.pumpAndSettle();
-    expect(find.text('Nothing here yet.'), findsOneWidget);
+    expect(
+        find.text('Empty the inbox, follow up on waiting, advance projects, activate somedays, and check for hard-time conflicts.'),
+        findsOneWidget);
     await env.db.close();
   });
 }

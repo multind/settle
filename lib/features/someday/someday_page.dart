@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:settle_app/core/enums.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 import 'package:settle_app/features/task/task_list_view.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +34,13 @@ class SomedayPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (rows) => rows.isEmpty
-            ? Center(child: Text(l10n.emptyTasks))
+            ? Center(
+                child: PageRuleHint(
+                  icon: Icons.nights_stay_outlined,
+                  title: l10n.ruleSomedayTitle,
+                  message: l10n.ruleSomedayMessage,
+                ),
+              )
             : TaskListView(
                 tasks: rows,
                 reorderEnabled: false,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/app/theme.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 import 'package:settle_app/features/task/task_list_view.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
 
@@ -41,7 +42,15 @@ class UpcomingPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (rows) {
-          if (rows.isEmpty) return Center(child: Text(l10n.upcomingEmpty));
+          if (rows.isEmpty) {
+            return Center(
+              child: PageRuleHint(
+                icon: Icons.event_outlined,
+                title: l10n.ruleUpcomingTitle,
+                message: l10n.ruleUpcomingMessage,
+              ),
+            );
+          }
           // 今日 00:00（以注入时钟取「今日」，与数据层 watchUpcoming 口径一致）。
           final current = now();
           final today = DateTime(current.year, current.month, current.day);

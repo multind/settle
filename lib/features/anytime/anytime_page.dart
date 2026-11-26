@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 import 'package:settle_app/features/task/task_list_view.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
 
@@ -34,7 +35,15 @@ class AnytimePage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (rows) {
-          if (rows.isEmpty) return Center(child: Text(l10n.anytimeEmpty));
+          if (rows.isEmpty) {
+            return Center(
+              child: PageRuleHint(
+                icon: Icons.all_inclusive_outlined,
+                title: l10n.ruleAnytimeTitle,
+                message: l10n.ruleAnytimeMessage,
+              ),
+            );
+          }
           return TaskListView(
             tasks: rows,
             reorderEnabled: true,

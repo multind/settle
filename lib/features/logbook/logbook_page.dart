@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:settle_app/app/theme.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 import 'package:settle_app/features/task/task_list_view.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// 顶部搜索按标题过滤（大小写不敏感，本地内存过滤）；行 = 标题 + 完成时间
 /// （`yyyy-MM-dd HH:mm` 本地时间）+ [恢复]（reopen 清 completedAt）+
 /// [删除]（确认对话框 → delete）。已完成任务不再提供 complete（无完成钮）；
-/// 行只读不做编辑，保持极简。空态 `logbookEmpty`。
+/// 行只读不做编辑，保持极简。归档空态为规则提示 ruleLogbook*（搜索无匹配仍用 logbookSearchEmpty）。
 /// 公共组件 `TaskListView`：reverseChronological 排序（completedAt 倒序）、
 /// logbook 行变体（无完成钮，保留恢复/删除 Keys）；批量操作 = 恢复/删除子集。
 /// 仓库约定：普通 Provider 无 watchByStatus 成员，改文件级 StreamProvider。
@@ -62,12 +63,16 @@ class _LogbookPageState extends ConsumerState<LogbookPage> {
                   .where((t) => t.title.toLowerCase().contains(_query))
                   .toList();
               if (filtered.isEmpty) {
-                // 空串（未搜索）→ 归档空态；搜索无匹配 → 独立「无匹配任务」文案。
-                return Center(
-                  child: Text(_query.isEmpty
-                      ? l10n.logbookEmpty
-                      : l10n.logbookSearchEmpty),
-                );
+                // 空串（未搜索）→ 归档规则提示；搜索无匹配 → 独立「无匹配任务」文案。
+                return _query.isEmpty
+                    ? Center(
+                        child: PageRuleHint(
+                          icon: Icons.book_outlined,
+                          title: l10n.ruleLogbookTitle,
+                          message: l10n.ruleLogbookMessage,
+                        ),
+                      )
+                    : Center(child: Text(l10n.logbookSearchEmpty));
               }
               return TaskListView(
                 tasks: filtered,

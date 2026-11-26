@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:settle_app/app/theme.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/guide/page_rule_hint.dart';
 import 'package:settle_app/features/task/task_list_view.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +38,15 @@ class TodayPage extends ConsumerWidget {
         error: (e, _) => Center(child: Text('$e')),
         data: (rows) {
           // 两区都空 → 整体空态（逾期区非空时仅显示逾期区，不出整体空态）。
-          if (rows.isEmpty) return Center(child: Text(l10n.todayEmpty));
+          if (rows.isEmpty) {
+            return Center(
+              child: PageRuleHint(
+                icon: Icons.today,
+                title: l10n.ruleTodayTitle,
+                message: l10n.ruleTodayMessage,
+              ),
+            );
+          }
           final todayStart = _todayStart();
           bool isOverdue(Task t) {
             final d = t.dueDate;

@@ -302,12 +302,6 @@ abstract class AppLocalizations {
   /// **'Clear'**
   String get clearDate;
 
-  /// No description provided for @emptyInbox.
-  ///
-  /// In en, this message translates to:
-  /// **'Inbox is empty. Capture your first thought above.'**
-  String get emptyInbox;
-
   /// No description provided for @emptyTasks.
   ///
   /// In en, this message translates to:
@@ -638,24 +632,6 @@ abstract class AppLocalizations {
   /// **'{count} overdue'**
   String todayOverdue(int count);
 
-  /// No description provided for @todayEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing scheduled today.'**
-  String get todayEmpty;
-
-  /// No description provided for @anytimeEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No tasks anytime.'**
-  String get anytimeEmpty;
-
-  /// No description provided for @upcomingEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No upcoming tasks.'**
-  String get upcomingEmpty;
-
   /// No description provided for @upcomingTomorrow.
   ///
   /// In en, this message translates to:
@@ -715,12 +691,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month}/{day} {weekday}'**
   String upcomingDateHeader(int month, int day, String weekday);
-
-  /// No description provided for @logbookEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No completed tasks yet.'**
-  String get logbookEmpty;
 
   /// No description provided for @logbookSearchEmpty.
   ///
