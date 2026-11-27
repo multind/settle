@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/core/enums.dart';
 import 'package:settle_app/data/providers.dart';
@@ -25,5 +26,25 @@ class SettingsController extends StateNotifier<LocaleSelection> {
 
 final settingsControllerProvider =
     StateNotifierProvider<SettingsController, LocaleSelection>(
-  (ref) => SettingsController(ref.watch(sharedPreferencesProvider)),
+      (ref) => SettingsController(ref.watch(sharedPreferencesProvider)),
+    );
+
+class ThemeModeController extends StateNotifier<ThemeMode> {
+  ThemeModeController(this._prefs)
+    : super(switch (_prefs.getString('theme_mode')) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      });
+
+  final SharedPreferences _prefs;
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    state = mode;
+    await _prefs.setString('theme_mode', mode.name);
+  }
+}
+
+final themeModeProvider = StateNotifierProvider<ThemeModeController, ThemeMode>(
+  (ref) => ThemeModeController(ref.watch(sharedPreferencesProvider)),
 );

@@ -250,6 +250,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get newReview => '新建回顾';
 
   @override
+  String get appearance => '外观';
+
+  @override
+  String get themeLight => '日间模式';
+
+  @override
+  String get themeDark => '夜间模式';
+
+  @override
   String get language => '语言';
 
   @override

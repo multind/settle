@@ -250,6 +250,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newReview => 'New review';
 
   @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get themeLight => 'Light mode';
+
+  @override
+  String get themeDark => 'Dark mode';
+
+  @override
   String get language => 'Language';
 
   @override

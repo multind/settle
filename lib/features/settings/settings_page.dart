@@ -19,6 +19,7 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final selection = ref.watch(settingsControllerProvider);
+    final themeMode = ref.watch(themeModeProvider);
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
 
@@ -64,6 +65,35 @@ class SettingsPage extends ConsumerWidget {
                 onChanged: (v) {
                   if (v != null) {
                     ref.read(settingsControllerProvider.notifier).setLocale(v);
+                  }
+                },
+              ),
+            ),
+          ),
+          glassRow(
+            child: ListTile(
+              leading: const Icon(Icons.brightness_6_outlined),
+              title: Text(l10n.appearance),
+              trailing: DropdownButton<ThemeMode>(
+                key: const Key('theme_mode_dropdown'),
+                value: themeMode,
+                items: [
+                  DropdownMenuItem(
+                    value: ThemeMode.system,
+                    child: Text(l10n.langSystem),
+                  ),
+                  DropdownMenuItem(
+                    value: ThemeMode.light,
+                    child: Text(l10n.themeLight),
+                  ),
+                  DropdownMenuItem(
+                    value: ThemeMode.dark,
+                    child: Text(l10n.themeDark),
+                  ),
+                ],
+                onChanged: (mode) {
+                  if (mode != null) {
+                    ref.read(themeModeProvider.notifier).setThemeMode(mode);
                   }
                 },
               ),

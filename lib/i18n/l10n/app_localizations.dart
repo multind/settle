@@ -578,6 +578,24 @@ abstract class AppLocalizations {
   /// **'New review'**
   String get newReview;
 
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light mode'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get themeDark;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
