@@ -1033,6 +1033,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export a JSON backup anytime.'**
   String get guideNote4;
+
+  /// No description provided for @settingsShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard Shortcuts'**
+  String get settingsShortcuts;
+
+  /// No description provided for @settingsAlwaysOnTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Always on Top'**
+  String get settingsAlwaysOnTop;
+
+  /// No description provided for @settingsAlwaysOnTopHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the window above others'**
+  String get settingsAlwaysOnTopHint;
+
+  /// No description provided for @shortcutsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard Shortcuts'**
+  String get shortcutsTitle;
+
+  /// No description provided for @shortcutsGroupGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get shortcutsGroupGlobal;
+
+  /// No description provided for @shortcutsGroupList.
+  ///
+  /// In en, this message translates to:
+  /// **'Lists'**
+  String get shortcutsGroupList;
+
+  /// No description provided for @shortcutsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Defaults'**
+  String get shortcutsReset;
+
+  /// No description provided for @shortcutsResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all shortcuts to their defaults?'**
+  String get shortcutsResetConfirm;
+
+  /// No description provided for @actionCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect'**
+  String get actionCollect;
+
+  /// No description provided for @actionNavInbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get actionNavInbox;
+
+  /// No description provided for @actionNavToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get actionNavToday;
+
+  /// No description provided for @actionNavUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get actionNavUpcoming;
+
+  /// No description provided for @actionNavAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Anytime'**
+  String get actionNavAnytime;
+
+  /// No description provided for @actionNavSomeday.
+  ///
+  /// In en, this message translates to:
+  /// **'Someday'**
+  String get actionNavSomeday;
+
+  /// No description provided for @actionNavProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get actionNavProjects;
+
+  /// No description provided for @actionNavContexts.
+  ///
+  /// In en, this message translates to:
+  /// **'Contexts'**
+  String get actionNavContexts;
+
+  /// No description provided for @actionNavWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get actionNavWaiting;
+
+  /// No description provided for @actionNavLogbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Logbook'**
+  String get actionNavLogbook;
+
+  /// No description provided for @actionNavReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get actionNavReview;
+
+  /// No description provided for @actionListUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Up'**
+  String get actionListUp;
+
+  /// No description provided for @actionListDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Down'**
+  String get actionListDown;
+
+  /// No description provided for @actionListComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Focused Task'**
+  String get actionListComplete;
+
+  /// No description provided for @actionListDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Focused Task'**
+  String get actionListDelete;
+
+  /// No description provided for @actionToggleAlwaysOnTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Always on Top'**
+  String get actionToggleAlwaysOnTop;
+
+  /// No description provided for @capturePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Press new shortcut…'**
+  String get capturePrompt;
+
+  /// No description provided for @captureEscHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Esc to cancel'**
+  String get captureEscHint;
+
+  /// Conflict message shown when a captured shortcut is already bound to another action.
+  ///
+  /// In en, this message translates to:
+  /// **'This shortcut is already used by {action}'**
+  String captureConflict(String action);
+
+  /// No description provided for @captureModifiersOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Include at least one non-modifier key'**
+  String get captureModifiersOnlyHint;
+
+  /// No description provided for @keyCtrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl'**
+  String get keyCtrl;
+
+  /// No description provided for @keyCmd.
+  ///
+  /// In en, this message translates to:
+  /// **'Cmd'**
+  String get keyCmd;
+
+  /// No description provided for @keyShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get keyShift;
+
+  /// No description provided for @keyAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt'**
+  String get keyAlt;
 }
 
 class _AppLocalizationsDelegate

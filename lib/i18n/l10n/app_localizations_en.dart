@@ -503,4 +503,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guideNote4 => 'Export a JSON backup anytime.';
+
+  @override
+  String get settingsShortcuts => 'Keyboard Shortcuts';
+
+  @override
+  String get settingsAlwaysOnTop => 'Always on Top';
+
+  @override
+  String get settingsAlwaysOnTopHint => 'Keep the window above others';
+
+  @override
+  String get shortcutsTitle => 'Keyboard Shortcuts';
+
+  @override
+  String get shortcutsGroupGlobal => 'Global';
+
+  @override
+  String get shortcutsGroupList => 'Lists';
+
+  @override
+  String get shortcutsReset => 'Reset to Defaults';
+
+  @override
+  String get shortcutsResetConfirm => 'Reset all shortcuts to their defaults?';
+
+  @override
+  String get actionCollect => 'Collect';
+
+  @override
+  String get actionNavInbox => 'Inbox';
+
+  @override
+  String get actionNavToday => 'Today';
+
+  @override
+  String get actionNavUpcoming => 'Upcoming';
+
+  @override
+  String get actionNavAnytime => 'Anytime';
+
+  @override
+  String get actionNavSomeday => 'Someday';
+
+  @override
+  String get actionNavProjects => 'Projects';
+
+  @override
+  String get actionNavContexts => 'Contexts';
+
+  @override
+  String get actionNavWaiting => 'Waiting';
+
+  @override
+  String get actionNavLogbook => 'Logbook';
+
+  @override
+  String get actionNavReview => 'Review';
+
+  @override
+  String get actionListUp => 'Focus Up';
+
+  @override
+  String get actionListDown => 'Focus Down';
+
+  @override
+  String get actionListComplete => 'Complete Focused Task';
+
+  @override
+  String get actionListDelete => 'Delete Focused Task';
+
+  @override
+  String get actionToggleAlwaysOnTop => 'Toggle Always on Top';
+
+  @override
+  String get capturePrompt => 'Press new shortcut…';
+
+  @override
+  String get captureEscHint => 'Press Esc to cancel';
+
+  @override
+  String captureConflict(String action) {
+    return 'This shortcut is already used by $action';
+  }
+
+  @override
+  String get captureModifiersOnlyHint =>
+      'Include at least one non-modifier key';
+
+  @override
+  String get keyCtrl => 'Ctrl';
+
+  @override
+  String get keyCmd => 'Cmd';
+
+  @override
+  String get keyShift => 'Shift';
+
+  @override
+  String get keyAlt => 'Alt';
 }

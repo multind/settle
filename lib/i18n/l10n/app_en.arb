@@ -189,5 +189,46 @@
   "guideNote1": "Reminders are in-app only — rely on your own attention for what matters.",
   "guideNote2": "Keep important deadlines in your calendar too — belt and braces.",
   "guideNote3": "Never skip the weekly review — it's what keeps the system under control.",
-  "guideNote4": "Export a JSON backup anytime."
+  "guideNote4": "Export a JSON backup anytime.",
+  "settingsShortcuts": "Keyboard Shortcuts",
+  "settingsAlwaysOnTop": "Always on Top",
+  "settingsAlwaysOnTopHint": "Keep the window above others",
+  "shortcutsTitle": "Keyboard Shortcuts",
+  "shortcutsGroupGlobal": "Global",
+  "shortcutsGroupList": "Lists",
+  "shortcutsReset": "Reset to Defaults",
+  "shortcutsResetConfirm": "Reset all shortcuts to their defaults?",
+  "actionCollect": "Collect",
+  "actionNavInbox": "Inbox",
+  "actionNavToday": "Today",
+  "actionNavUpcoming": "Upcoming",
+  "actionNavAnytime": "Anytime",
+  "actionNavSomeday": "Someday",
+  "actionNavProjects": "Projects",
+  "actionNavContexts": "Contexts",
+  "actionNavWaiting": "Waiting",
+  "actionNavLogbook": "Logbook",
+  "actionNavReview": "Review",
+  "actionListUp": "Focus Up",
+  "actionListDown": "Focus Down",
+  "actionListComplete": "Complete Focused Task",
+  "actionListDelete": "Delete Focused Task",
+  "actionToggleAlwaysOnTop": "Toggle Always on Top",
+  "capturePrompt": "Press new shortcut…",
+  "captureEscHint": "Press Esc to cancel",
+  "captureConflict": "This shortcut is already used by {action}",
+  "@captureConflict": {
+    "description": "Conflict message shown when a captured shortcut is already bound to another action.",
+    "placeholders": {
+      "action": {
+        "type": "String",
+        "example": "Inbox"
+      }
+    }
+  },
+  "captureModifiersOnlyHint": "Include at least one non-modifier key",
+  "keyCtrl": "Ctrl",
+  "keyCmd": "Cmd",
+  "keyShift": "Shift",
+  "keyAlt": "Alt"
 }

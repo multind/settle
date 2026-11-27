@@ -59,4 +59,35 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('desktop settings keys load in zh and en', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
+      home: Builder(builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return Text(
+            '${l10n.settingsShortcuts}|${l10n.settingsAlwaysOnTop}|${l10n.actionCollect}|${l10n.actionToggleAlwaysOnTop}|${l10n.capturePrompt}|${l10n.captureConflict('收件箱')}|${l10n.keyCtrl}');
+      }),
+    ));
+    expect(
+      find.text('快捷键|窗口置顶|收集|切换窗口置顶|按下新快捷键…|该快捷键已被 收件箱 占用|Ctrl'),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
+      home: Builder(builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return Text(
+            '${l10n.settingsShortcuts}|${l10n.settingsAlwaysOnTop}|${l10n.actionCollect}|${l10n.actionToggleAlwaysOnTop}|${l10n.capturePrompt}|${l10n.captureConflict('Inbox')}|${l10n.keyCtrl}');
+      }),
+    ));
+    expect(
+      find.text('Keyboard Shortcuts|Always on Top|Collect|Toggle Always on Top|Press new shortcut…|This shortcut is already used by Inbox|Ctrl'),
+      findsOneWidget,
+    );
+  });
 }

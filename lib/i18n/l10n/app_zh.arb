@@ -189,5 +189,46 @@
   "guideNote1": "提醒是应用内提示，重要的事请自己留意，别依赖系统级提醒。",
   "guideNote2": "重要截止日建议在日历里也记一份，双保险。",
   "guideNote3": "每周回顾不能省，它是系统不失控的开关。",
-  "guideNote4": "数据可以随时导出 JSON 备份。"
+  "guideNote4": "数据可以随时导出 JSON 备份。",
+  "settingsShortcuts": "快捷键",
+  "settingsAlwaysOnTop": "窗口置顶",
+  "settingsAlwaysOnTopHint": "固定到桌面最前置",
+  "shortcutsTitle": "快捷键",
+  "shortcutsGroupGlobal": "全局",
+  "shortcutsGroupList": "列表",
+  "shortcutsReset": "恢复默认",
+  "shortcutsResetConfirm": "确定恢复所有快捷键为默认设置？",
+  "actionCollect": "收集",
+  "actionNavInbox": "收件箱",
+  "actionNavToday": "今日",
+  "actionNavUpcoming": "即将",
+  "actionNavAnytime": "随时",
+  "actionNavSomeday": "将来也许",
+  "actionNavProjects": "项目",
+  "actionNavContexts": "情境",
+  "actionNavWaiting": "等待",
+  "actionNavLogbook": "日志",
+  "actionNavReview": "回顾",
+  "actionListUp": "焦点上移",
+  "actionListDown": "焦点下移",
+  "actionListComplete": "完成焦点任务",
+  "actionListDelete": "删除焦点任务",
+  "actionToggleAlwaysOnTop": "切换窗口置顶",
+  "capturePrompt": "按下新快捷键…",
+  "captureEscHint": "按 Esc 取消",
+  "captureConflict": "该快捷键已被 {action} 占用",
+  "@captureConflict": {
+    "description": "录键冲突提示：该快捷键已被另一动作占用。",
+    "placeholders": {
+      "action": {
+        "type": "String",
+        "example": "收件箱"
+      }
+    }
+  },
+  "captureModifiersOnlyHint": "请至少包含一个非修饰键",
+  "keyCtrl": "Ctrl",
+  "keyCmd": "Cmd",
+  "keyShift": "Shift",
+  "keyAlt": "Alt"
 }

@@ -484,4 +484,102 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guideNote4 => '数据可以随时导出 JSON 备份。';
+
+  @override
+  String get settingsShortcuts => '快捷键';
+
+  @override
+  String get settingsAlwaysOnTop => '窗口置顶';
+
+  @override
+  String get settingsAlwaysOnTopHint => '固定到桌面最前置';
+
+  @override
+  String get shortcutsTitle => '快捷键';
+
+  @override
+  String get shortcutsGroupGlobal => '全局';
+
+  @override
+  String get shortcutsGroupList => '列表';
+
+  @override
+  String get shortcutsReset => '恢复默认';
+
+  @override
+  String get shortcutsResetConfirm => '确定恢复所有快捷键为默认设置？';
+
+  @override
+  String get actionCollect => '收集';
+
+  @override
+  String get actionNavInbox => '收件箱';
+
+  @override
+  String get actionNavToday => '今日';
+
+  @override
+  String get actionNavUpcoming => '即将';
+
+  @override
+  String get actionNavAnytime => '随时';
+
+  @override
+  String get actionNavSomeday => '将来也许';
+
+  @override
+  String get actionNavProjects => '项目';
+
+  @override
+  String get actionNavContexts => '情境';
+
+  @override
+  String get actionNavWaiting => '等待';
+
+  @override
+  String get actionNavLogbook => '日志';
+
+  @override
+  String get actionNavReview => '回顾';
+
+  @override
+  String get actionListUp => '焦点上移';
+
+  @override
+  String get actionListDown => '焦点下移';
+
+  @override
+  String get actionListComplete => '完成焦点任务';
+
+  @override
+  String get actionListDelete => '删除焦点任务';
+
+  @override
+  String get actionToggleAlwaysOnTop => '切换窗口置顶';
+
+  @override
+  String get capturePrompt => '按下新快捷键…';
+
+  @override
+  String get captureEscHint => '按 Esc 取消';
+
+  @override
+  String captureConflict(String action) {
+    return '该快捷键已被 $action 占用';
+  }
+
+  @override
+  String get captureModifiersOnlyHint => '请至少包含一个非修饰键';
+
+  @override
+  String get keyCtrl => 'Ctrl';
+
+  @override
+  String get keyCmd => 'Cmd';
+
+  @override
+  String get keyShift => 'Shift';
+
+  @override
+  String get keyAlt => 'Alt';
 }
