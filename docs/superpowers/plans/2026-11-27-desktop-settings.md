@@ -3054,7 +3054,7 @@ Expected: 提交成功；`git status --short` 无新增修改。
 
 **Files:** 无新增改动（纯验证；若验证暴露问题，修复走独立提交）。
 
-- [ ] **Step 1: 全量回归**
+- [x] **Step 1: 全量回归**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -3064,7 +3064,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: `All tests passed!`（217 基线 + 新增 7 个测试文件 + settings/l10n/contexts 扩展全部通过；以实际输出计数为准，须全部通过）。
 
-- [ ] **Step 2: 全仓 analyze**
+- [x] **Step 2: 全仓 analyze**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -3074,7 +3074,7 @@ flutter analyze 2>&1 | Select-Object -Last 3
 
 Expected: 汇总行 0 error 且 0 warning（仅允许既有 3 warning / 69 info 基线不动）。
 
-- [ ] **Step 3: Windows 原生构建终门禁（window_manager 原生侧编译/链接验证）**
+- [x] **Step 3: Windows 原生构建终门禁（window_manager 原生侧编译/链接验证）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -3084,7 +3084,7 @@ flutter build windows --release
 
 Expected: 构建成功（退出码 0，`build/windows/x64/runner/Release/` 生成可执行文件）。
 
-- [ ] **Step 4: grep 审计——平台判定残留**
+- [x] **Step 4: grep 审计——平台判定残留**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -3093,7 +3093,7 @@ git grep -n "kIsWeb\|defaultTargetPlatform" -- lib test
 
 Expected: 仅 `lib/core/platform/` 内命中（platform_bridge.dart 的 detect 工厂 + window_service_desktop.dart 的 `_isSupported` 守卫）——业务代码零平台判定。若 `lib/` 其他目录或 `test/` 有命中，逐条核验（应为注释/文档），残留判定引用需修复。
 
-- [ ] **Step 5: grep 审计——快捷键契约快照（回归锁死的三条映射仍在）**
+- [x] **Step 5: grep 审计——快捷键契约快照（回归锁死的三条映射仍在）**
 
 ```powershell
 cd D:\Project\gtd-project
@@ -3104,7 +3104,7 @@ git grep -n "KeyT, control: true, shift: true" -- lib/core/shortcuts/shortcut_ac
 
 Expected: 第一条命中 1 处（collect 默认绑定）；第二条命中 1 处（navInbox）；第三条命中 1 处（toggleAlwaysOnTop）。`_navSpecs` / `_digitKeys` 未被触碰（git status 确认两文件不在改动集）。
 
-- [ ] **Step 6: 可选 Windows 手动冒烟（半自动，非门禁）**
+- [x] **Step 6: 可选 Windows 手动冒烟（半自动，非门禁）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -3114,7 +3114,7 @@ flutter run -d windows
 
 人工核对：① 设置页出现「窗口置顶」开关与「快捷键」入口（仅桌面）；② 置顶开关实时置顶、关闭还原；③ 快捷键配置页 16 行 + 键帽（Windows 显 Ctrl、快捷键 Ctrl+Shift+T 显 Ctrl+Shift+T）；④ 点收集行录 Ctrl+X → 键帽变 Ctrl+X，应用内按 Ctrl+X 打开收集、N 失效；⑤ 录键弹窗 Esc 取消、冲突提示（含占用动作名）、纯修饰键提示；⑥ 恢复默认全表回默认；⑦ 重启应用：置顶状态恢复、自定义快捷键生效；⑧ 设置切中文 → 配置页/弹窗双语切换；⑨ 情境页点「@电脑」→ 情境任务页（AppBar 显示 @电脑）、空态显「该情境暂无任务」、有任务时行可批量完成/删除、桌面下 J/K 焦点移动可用，返回情境页删除入口仍在。验证完关闭应用。
 
-- [ ] **Step 7: 工作区与提交记录确认（可选：计划文档勾选回写）**
+- [x] **Step 7: 工作区与提交记录确认（可选：计划文档勾选回写）**
 
 ```powershell
 cd D:\Project\gtd-project
