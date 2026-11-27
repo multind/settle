@@ -656,3 +656,40 @@ final shortcuts = <ShortcutActivator, Intent>{
 3. **键帽对「control 与 meta 同时为真」边界**：已定为并列展示双修饰符（所见即所得）；该边界仅用户主动捕获 Windows 键 + Ctrl 才会出现，无默认绑定触发。
 4. **设置页 tile 位置**：两新 tile 置于 AI 占位与 GTD 指南之间为 spec 层布局决策，实施时如需调整属 UI 细节，不影响结构。
 5. **macOS/Linux 原生验证缺口**：window_manager 平台守卫覆盖三桌面平台，但仅 Windows 有构建门禁与手动冒烟；macOS/Linux 为守卫代码路径，无 CI 验证（后续里程碑如有 mac 目标再补）。
+
+---
+
+## 增补：情境视图（Contexts View）——并入本轮范围（用户确认 2026-11-27）
+
+> 背景：情境功能现状为「新增/删除情境 + 编辑任务打标签」，数据层 `watchByContext`/`setContext`/删除置空均已就绪但**无任何 UI 消费端**；情境页规则文案「按场景过滤」承诺了能力但未实现（文案与功能不一致）。本轮并入情境视图补全闭环。
+
+### ContextTasksPage（情境任务页）
+
+- **导航**：情境页 `_ContextTile` 点击 → `Navigator.push(ContextTasksPage(context))`；返回 pop。
+- **页面**：`Scaffold` + `AppBar(title: @情境名)`；body = 复用 `TaskListView`：
+  - `tasks: ref.watch(taskRepositoryProvider.watchByContext(contextId))`（数据层现成）
+  - `selectionEnabled: true`（多选批量）
+  - `focusEnabled: 桌面`（列表层 J/K/Enter/Delete 快捷键复用）
+  - `sortMode: TaskSortMode.standard`（统一比较器：优先级→sortOrder→id）
+  - `actions`: 仅「完成/删除」子集（跨视图动作如设日期/移动项目在过滤视角语义弱，裁剪精简）
+  - `reorderEnabled: false`（**重排关闭**——过滤视角，重排会与主视图排序冲突）
+- **空态**：`PageRuleHint`（`Icons.place_outlined` + 情境无任务文案）。
+- **删除情境**：仅情境页可删（ContextTasksPage 内无删除入口，防打开页指向已删情境——返回后删即可）。
+- **快捷键**：push 路由位于壳层 Shortcuts 子树内（Navigator 层级需 plan 时核实），列表层快捷键预期可用；壳层快捷键（N/Ctrl+数字）与弹窗同款隔离不拦截。
+
+### l10n 增补（+2 key）
+
+| key | zh | en |
+|---|---|---|
+| `contextTasksEmpty` | 该情境暂无任务 | No tasks in this context |
+
+（AppBar 标题复用情境名本身，无需额外 title key）
+
+### 测试增补
+
+- `context_tasks_page_test.dart`：情境页点 tile → 页面打开（AppBar @情境名）+ 任务列表渲染（watchByContext 数据）+ 空态 + 完成/删除生效 + 快捷键（桌面）可用
+- 情境页测试扩展：`_ContextTile` 点击导航断言
+
+### 增补红线
+
+- 不做「拖任务入情境」（跨区拖拽边界，与 v0.3 决策一致）；不做情境重排/排序；不改数据层（零 schema 改动）；移动端同样可用（情境视图非桌面专属）。
