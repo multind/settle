@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/core/platform/platform_bridge.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
@@ -351,11 +350,12 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   }
 
   /// 桌面平台判定（规格 §5）：快捷键仅桌面（含 Web）启用。
-  bool get _shortcutsEnabled =>
-      kIsWeb ||
-      defaultTargetPlatform == TargetPlatform.windows ||
-      defaultTargetPlatform == TargetPlatform.macOS ||
-      defaultTargetPlatform == TargetPlatform.linux;
+  /// 平台能力判定已收敛至 PlatformBridge（同一 defaultTargetPlatform + kIsWeb
+  /// 事实源，行为零变化）；getter 保留调用点命名语义。
+  bool get _shortcutsEnabled {
+    final PlatformBridge bridge = ref.read(platformBridgeProvider);
+    return bridge.supportsKeyboardShortcuts;
+  }
 
   /// 文本输入焦点判定：primary focus 落在 `EditableText`（TextField 底层）
   /// 上时不触发全局快捷键，让 N/数字键正常输入（规格 §5 不拦截约束）。

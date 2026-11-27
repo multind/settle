@@ -306,6 +306,8 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     var childIndex = 0;
     // 桌面平台（Windows/macOS/Linux）：行内拖拽手柄（ReorderableDragStartListener
     // 按下即拖，仅包手柄图标，不劫持整行点击/完成钮）；触屏：整行长按延迟拖拽。
+    // 平台判定收敛（桌面设置 spec）：本判定是主题驱动 UI 形态适配
+    // （Theme.of(context).platform），语义独立，不改调 PlatformBridge。
     final isDesktop = switch (Theme.of(context).platform) {
       TargetPlatform.windows ||
       TargetPlatform.macOS ||
@@ -375,11 +377,13 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         Expanded(child: list),
       ],
     );
-    // 列表层快捷键（规格 §5）：仅桌面（isDesktop）且 focusEnabled 时包裹
-    // Shortcuts/Actions；J/K 循环移动焦点、Enter 完成焦点任务、Delete 删除
-    // 焦点任务（确认对话框）。事件自焦点行冒泡至此层，经 [isEnabled] 门控
-    // 确保仅焦点行获焦（且非选择模式）时生效。
-    if (!widget.focusEnabled || !isDesktop) return column;
+    // 列表层快捷键（规格 §5）：仅桌面且 focusEnabled 时包裹 Shortcuts/Actions；
+    // J/K 循环移动焦点、Enter 完成焦点任务、Delete 删除焦点任务（确认对话框）。
+    // 桌面判定经 PlatformBridge 读取（同一 defaultTargetPlatform 事实源，行为
+    // 零变化；与上方拖拽形态判定互相独立）。事件自焦点行冒泡至此层，经
+    // [isEnabled] 门控确保仅焦点行获焦（且非选择模式）时生效。
+    final shortcutsEnabled = ref.watch(platformBridgeProvider).isDesktop;
+    if (!widget.focusEnabled || !shortcutsEnabled) return column;
     return Shortcuts(
       shortcuts: const {
         SingleActivator(LogicalKeyboardKey.keyJ):
