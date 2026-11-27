@@ -1693,7 +1693,7 @@ Expected: 提交成功。
 - Modify: `test/widget/settings_page_test.dart`（新增 3 用例）
 - Gate: `flutter build windows --release`
 
-- [ ] **Step 1: `widget_utils.dart` 新增 FakeWindowService + import**
+- [x] **Step 1: `widget_utils.dart` 新增 FakeWindowService + import**
 
 改前（文件头部 import 块 L1-9 的末尾两行）：
 
@@ -1766,7 +1766,7 @@ class FakeWindowService implements WindowService {
 }
 ```
 
-- [ ] **Step 2: 新建 `lib/app/window_controller.dart`（完整文件）**
+- [x] **Step 2: 新建 `lib/app/window_controller.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/foundation.dart' show ChangeNotifier;
@@ -1815,7 +1815,7 @@ final windowControllerProvider = ChangeNotifierProvider<WindowController>(
 );
 ```
 
-- [ ] **Step 3: `lib/main.dart` 接线（精确改前/改后）**
+- [x] **Step 3: `lib/main.dart` 接线（精确改前/改后）**
 
 改前（完整文件）：
 
@@ -1873,7 +1873,7 @@ Future<void> main() async {
 }
 ```
 
-- [ ] **Step 4: `settings_page.dart` 新增两桌面 tile（精确改前/改后）**
+- [x] **Step 4: `settings_page.dart` 新增两桌面 tile（精确改前/改后）**
 
 改前（import 块，L1-9 全文）：
 
@@ -1963,7 +1963,7 @@ import 'package:settle_app/features/settings/settings_controller.dart';
               key: const Key('settings_guide_tile'),
 ```
 
-- [ ] **Step 5: 新建 `test/core/window_controller_test.dart`（完整文件）**
+- [x] **Step 5: 新建 `test/core/window_controller_test.dart`（完整文件）**
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
@@ -2021,7 +2021,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 6: `settings_page_test.dart` 新增 3 用例**
+- [x] **Step 6: `settings_page_test.dart` 新增 3 用例**
 
 改前（文件末尾 main 收尾 `}` 前，最后一个用例收尾 `  });`）：
 
@@ -2118,7 +2118,7 @@ import 'package:settle_app/features/settings/shortcuts/shortcut_settings_page.da
 import 'widget_utils.dart';
 ```
 
-- [ ] **Step 7: analyze + 全量测试门禁**
+- [x] **Step 7: analyze + 全量测试门禁**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -2129,7 +2129,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: analyze 汇总行 0 error 且 0 warning；`flutter test` → `All tests passed!`（217 基线 + 本 Task 3 个单元 + 3 个 widget 测试全绿）。
 
-- [ ] **Step 8: Windows 原生构建冒烟（window_manager 硬门禁，本轮关键新增门禁）**
+- [x] **Step 8: Windows 原生构建冒烟（window_manager 硬门禁，本轮关键新增门禁）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -2139,7 +2139,7 @@ flutter build windows --release
 
 Expected: 构建成功（输出 `Building Windows application...` 后正常结束，退出码 0，`build/windows/x64/runner/Release/` 生成可执行文件）。若原生编译报错（window_manager 平台通道编译问题），停在本步修复后再提交。
 
-- [ ] **Step 9: 提交**
+- [x] **Step 9: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
