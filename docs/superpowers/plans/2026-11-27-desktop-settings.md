@@ -427,7 +427,7 @@ Expected: 提交成功。
 - Create: `lib/core/shortcuts/shortcut_bindings.dart` / `shortcut_actions.dart` / `shortcut_settings_controller.dart`
 - Create: `test/core/shortcut_settings_controller_test.dart`（新建 `test/core/` 目录）
 
-- [ ] **Step 1: 新建 `lib/core/shortcuts/shortcut_bindings.dart`（完整文件）**
+- [x] **Step 1: 新建 `lib/core/shortcuts/shortcut_bindings.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
@@ -615,7 +615,7 @@ const Map<String, LogicalKeyboardKey> _keysByName = {
 
 （键名 const 已对本机 SDK `keyboard_key.g.dart` 逐名核实：enter/delete/space/tab/backspace/escape/arrow*/home/end/pageUp/pageDown/insert/printScreen/capsLock/numLock/scrollLock/pause/period/comma/slash/backslash/semicolon/quote/bracketLeft/bracketRight/minus/equal/backquote/f1/numpadEnter/numpadAdd/numpadSubtract/numpadMultiply/numpadDivide/numpadDecimal/keyA/digit0 全部存在；KeyB..KeyZ / Digit1..9 / F2..12 / Numpad0..9 为同一命名序列。）
 
-- [ ] **Step 2: 新建 `lib/core/shortcuts/shortcut_actions.dart`（完整文件）**
+- [x] **Step 2: 新建 `lib/core/shortcuts/shortcut_actions.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/services.dart'
@@ -792,7 +792,7 @@ List<ShortcutActivator> activatorsFor(ShortcutBinding binding) {
 }
 ```
 
-- [ ] **Step 3: 新建 `lib/core/shortcuts/shortcut_settings_controller.dart`（完整文件）**
+- [x] **Step 3: 新建 `lib/core/shortcuts/shortcut_settings_controller.dart`（完整文件）**
 
 ```dart
 import 'dart:async';
@@ -897,7 +897,7 @@ final shortcutSettingsControllerProvider =
 );
 ```
 
-- [ ] **Step 4: 新建 `test/core/shortcut_settings_controller_test.dart`（完整文件）**
+- [x] **Step 4: 新建 `test/core/shortcut_settings_controller_test.dart`（完整文件）**
 
 ```dart
 import 'dart:convert';
@@ -1036,7 +1036,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 5: analyze + 全量测试门禁**
+- [x] **Step 5: analyze + 全量测试门禁**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -1047,7 +1047,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: analyze 汇总行 0 error 且 0 warning；`flutter test` → `All tests passed!`（217 基线 + 本 Task 10 个新单元测试全绿）。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
