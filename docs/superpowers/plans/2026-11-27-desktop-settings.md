@@ -2158,7 +2158,7 @@ Expected: 提交成功。
 
 #### 3.1 壳层接线（responsive_shell.dart）
 
-- [ ] **Step 1: imports 改（删除 foundation 平台 import，新增 4 个模块 import）**
+- [x] **Step 1: imports 改（删除 foundation 平台 import，新增 4 个模块 import）**
 
 改前：
 
@@ -2181,7 +2181,7 @@ import 'package:settle_app/core/shortcuts/shortcut_actions.dart';
 import 'package:settle_app/core/shortcuts/shortcut_settings_controller.dart';
 ```
 
-- [ ] **Step 2: build 中快捷键表改为动作表 + 配置驱动构建（精确改前/改后）**
+- [x] **Step 2: build 中快捷键表改为动作表 + 配置驱动构建（精确改前/改后）**
 
 改前（build L186-207）：
 
@@ -2231,7 +2231,7 @@ import 'package:settle_app/core/shortcuts/shortcut_settings_controller.dart';
     return Shortcuts(
 ```
 
-- [ ] **Step 3: Actions map 新增 `_ToggleAlwaysOnTopIntent` 动作（精确改前/改后）**
+- [x] **Step 3: Actions map 新增 `_ToggleAlwaysOnTopIntent` 动作（精确改前/改后）**
 
 改前：
 
@@ -2269,7 +2269,7 @@ import 'package:settle_app/core/shortcuts/shortcut_settings_controller.dart';
         },
 ```
 
-- [ ] **Step 4: 删除 `_shortcutsEnabled` getter，原位改放 `_intentFor`（精确改前/改后）**
+- [x] **Step 4: 删除 `_shortcutsEnabled` getter，原位改放 `_intentFor`（精确改前/改后）**
 
 改前：
 
@@ -2308,7 +2308,7 @@ import 'package:settle_app/core/shortcuts/shortcut_settings_controller.dart';
   /// 文本输入焦点判定：primary focus 落在 `EditableText`（TextField 底层）
 ```
 
-- [ ] **Step 5: 新增 `_ToggleAlwaysOnTopIntent` Intent 类（`_SwitchViewIntent` 类之后，精确改前/改后）**
+- [x] **Step 5: 新增 `_ToggleAlwaysOnTopIntent` Intent 类（`_SwitchViewIntent` 类之后，精确改前/改后）**
 
 改前：
 
@@ -2344,7 +2344,7 @@ class _ToggleAlwaysOnTopIntent extends Intent {
 
 #### 3.2 列表层接线（task_list_view.dart）
 
-- [ ] **Step 6: imports 改（LogicalKeyboardKey → ShortcutActivator，新增 3 个模块 import）**
+- [x] **Step 6: imports 改（LogicalKeyboardKey → ShortcutActivator，新增 3 个模块 import）**
 
 改前：
 
@@ -2371,7 +2371,7 @@ import 'package:settle_app/data/providers.dart';
 
 （`LogicalKeyboardKey` 在该文件仅用于旧快捷键表 L385-391，替换后无残留，故从 import 移除；`ShortcutActivator` 供新表类型标注。）
 
-- [ ] **Step 7: 拖拽形态 `isDesktop` 注释登记「不改」（精确改前/改后）**
+- [x] **Step 7: 拖拽形态 `isDesktop` 注释登记「不改」（精确改前/改后）**
 
 改前：
 
@@ -2391,7 +2391,7 @@ import 'package:settle_app/data/providers.dart';
     final isDesktop = switch (Theme.of(context).platform) {
 ```
 
-- [ ] **Step 8: 快捷键门禁与构建表（精确改前/改后）**
+- [x] **Step 8: 快捷键门禁与构建表（精确改前/改后）**
 
 改前：
 
@@ -2438,7 +2438,7 @@ import 'package:settle_app/data/providers.dart';
     };
 ```
 
-- [ ] **Step 9: 回归门禁——既有两个测试文件不改一行，先跑测试确认壳/列表层接线零回归**
+- [x] **Step 9: 回归门禁——既有两个测试文件不改一行，先跑测试确认壳/列表层接线零回归**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -2448,7 +2448,7 @@ flutter test test/widget/responsive_shell_test.dart test/widget/task_list_view_t
 
 Expected: `All tests passed!`（默认绑定逐键还原现状 + bridge 与 theme 判定同值 → 既有用例原样通过；若此处红，说明接线偏离契约，停下修复再继续）。
 
-- [ ] **Step 10: 新建 `test/widget/shortcut_wiring_test.dart`（完整文件）**
+- [x] **Step 10: 新建 `test/widget/shortcut_wiring_test.dart`（完整文件）**
 
 ```dart
 import 'dart:convert';
@@ -2557,7 +2557,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 11: 新建 `test/widget/task_list_wiring_test.dart`（完整文件）**
+- [x] **Step 11: 新建 `test/widget/task_list_wiring_test.dart`（完整文件）**
 
 ```dart
 import 'dart:convert';
@@ -2640,7 +2640,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 12: analyze + 全量测试门禁**
+- [x] **Step 12: analyze + 全量测试门禁**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -2651,7 +2651,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: analyze 汇总行 0 error 且 0 warning；`flutter test` → `All tests passed!`（217 基线零改动回归 + Task 1-5 新增 + 本 Task 4 个 wiring 测试全绿）。
 
-- [ ] **Step 13: 提交**
+- [x] **Step 13: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
