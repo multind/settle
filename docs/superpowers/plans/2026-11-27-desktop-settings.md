@@ -270,7 +270,7 @@ Expected: 提交成功；`git status --short` 无新增修改。
 - Modify: `pubspec.yaml`（新增 `window_manager: ^0.5.2`）+ `pubspec.lock`（pub get 更新）
 - Create: `lib/core/platform/platform_bridge.dart` / `window_service.dart` / `window_service_desktop.dart`
 
-- [ ] **Step 1: pubspec.yaml 新增 window_manager**
+- [x] **Step 1: pubspec.yaml 新增 window_manager**
 
 改前：
 
@@ -289,7 +289,7 @@ dev_dependencies:
 dev_dependencies:
 ```
 
-- [ ] **Step 2: pub get 解析依赖**
+- [x] **Step 2: pub get 解析依赖**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -299,7 +299,7 @@ flutter pub get
 
 Expected: `Got dependencies!`，输出含 `+ window_manager 0.5.2`。若 pub 解析失败（网络/版本不可达），停在本步报告，不继续。
 
-- [ ] **Step 3: 新建 `lib/core/platform/platform_bridge.dart`（完整文件）**
+- [x] **Step 3: 新建 `lib/core/platform/platform_bridge.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/foundation.dart'
@@ -335,7 +335,7 @@ final platformBridgeProvider =
     Provider<PlatformBridge>((ref) => PlatformBridge.detect());
 ```
 
-- [ ] **Step 4: 新建 `lib/core/platform/window_service.dart`（完整文件）**
+- [x] **Step 4: 新建 `lib/core/platform/window_service.dart`（完整文件）**
 
 ```dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -371,7 +371,7 @@ final windowServiceProvider = Provider<WindowService>(
 );
 ```
 
-- [ ] **Step 5: 新建 `lib/core/platform/window_service_desktop.dart`（完整文件，全仓唯一 import window_manager 的文件）**
+- [x] **Step 5: 新建 `lib/core/platform/window_service_desktop.dart`（完整文件，全仓唯一 import window_manager 的文件）**
 
 ```dart
 import 'package:flutter/foundation.dart'
@@ -401,7 +401,7 @@ class DesktopWindowService implements WindowService {
 }
 ```
 
-- [ ] **Step 6: analyze + 全量测试门禁（window_manager 依赖加入后必须先全绿再继续）**
+- [x] **Step 6: analyze + 全量测试门禁（window_manager 依赖加入后必须先全绿再继续）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -412,7 +412,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: analyze 汇总行 0 error 且 0 warning；`flutter test` → `All tests passed!`（217 基线不动，本 Task 无新增测试）。
 
-- [ ] **Step 7: 提交**
+- [x] **Step 7: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
