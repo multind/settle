@@ -24,7 +24,7 @@ class InboxPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final items = ref.watch(_inboxItemsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.navInbox)),
+      appBar: AppBar(titleSpacing: 20, title: Text(l10n.navInbox)),
       body: Column(
         children: [
           if (guide != null) guide!,

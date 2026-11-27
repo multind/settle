@@ -134,6 +134,7 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   bool _selectionMode = false;
   final Set<int> _selected = {};
   int _focusIndex = 0;
+  int? _hoveredTaskId;
 
   /// 行 id → 焦点节点（Task 4 用 [moveFocus]/[focusRow] 请求键盘焦点）。
   final Map<int, FocusNode> _focusNodes = {};
@@ -535,7 +536,7 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         child: row,
       );
     }
-    final rowWidget = Padding(
+    Widget rowWidget = Padding(
       key: Key('task_row_${t.id}'),
       padding: EdgeInsets.symmetric(
         horizontal: 12,
@@ -543,6 +544,15 @@ class TaskListViewState extends ConsumerState<TaskListView> {
       ),
       child: row,
     );
+    if (widget.compactRows && dragIndex != null) {
+      rowWidget = MouseRegion(
+        onEnter: (_) => setState(() => _hoveredTaskId = t.id),
+        onExit: (_) {
+          if (_hoveredTaskId == t.id) setState(() => _hoveredTaskId = null);
+        },
+        child: rowWidget,
+      );
+    }
     if (!widget.focusEnabled) return rowWidget;
     return Focus(
       key: Key('task_focus_${t.id}'),
@@ -551,7 +561,11 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         () => FocusNode(debugLabel: 'task_focus_${t.id}'),
       ),
       onFocusChange: (hasFocus) {
-        if (hasFocus && !_selectionMode) setState(() => _focusIndex = index);
+        if (hasFocus && !_selectionMode || widget.compactRows) {
+          setState(() {
+            if (hasFocus && !_selectionMode) _focusIndex = index;
+          });
+        }
       },
       child: rowWidget,
     );
@@ -617,7 +631,12 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     return ListTile(
       key: Key('task_tile_${t.id}'),
       dense: widget.compactRows,
-      title: Text(t.title),
+      title: Text(
+        t.title,
+        style: widget.compactRows
+            ? const TextStyle(fontWeight: FontWeight.w600)
+            : null,
+      ),
       subtitle: widget.subtitleBuilder?.call(context, t),
       leading: IconButton(
         key: Key('task_done_${t.id}'),
@@ -628,12 +647,21 @@ class TaskListViewState extends ConsumerState<TaskListView> {
       // 桌面重排行：行内拖拽手柄（仅任务行；组头无手柄）。
       trailing: dragIndex == null
           ? null
-          : ReorderableDragStartListener(
-              key: Key('task_handle_${t.id}'),
-              index: dragIndex,
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: Icon(Icons.drag_handle, size: 20, color: tokens.muted),
+          : Visibility(
+              visible:
+                  !widget.compactRows ||
+                  _hoveredTaskId == t.id ||
+                  (_focusNodes[t.id]?.hasFocus ?? false),
+              maintainState: true,
+              maintainAnimation: true,
+              maintainSize: true,
+              child: ReorderableDragStartListener(
+                key: Key('task_handle_${t.id}'),
+                index: dragIndex,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(Icons.drag_handle, size: 20, color: tokens.muted),
+                ),
               ),
             ),
       onTap: () => showDialog<void>(

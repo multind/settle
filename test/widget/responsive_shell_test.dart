@@ -46,6 +46,10 @@ void main() {
     for (var i = 0; i <= 11; i++) {
       expect(find.byKey(Key('nav_item_$i')), findsOneWidget);
     }
+    expect(tester.getSize(find.byType(AppBar)).width, 900);
+    await tester.tap(find.byKey(const Key('nav_item_1')));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AppBar)).width, 900);
     await env.db.close();
   });
 
@@ -60,6 +64,7 @@ void main() {
     await tester.tap(find.byKey(const Key('nav_item_1')));
     await tester.pumpAndSettle();
     expect(find.byType(TodayPage), findsOneWidget);
+    expect(tester.getSize(find.byType(AppBar)).width, 736);
     expect(tester.takeException(), isNull);
     await env.db.close();
   });

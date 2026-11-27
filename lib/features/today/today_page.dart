@@ -13,6 +13,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// 公共组件 `TaskListView` 内统一排序（优先级→sortOrder→id 终局 tiebreak），
 /// 逾期/今日两区经 `groupKey`（0/1）分组，区头由 `buildDateHeader` 注入。
 /// 仓库约定：普通 Provider 无 watchByStatus 成员，改文件级 StreamProvider。
+final _todayProjectsProvider = StreamProvider<Map<int, String>>(
+  (ref) => ref
+      .watch(projectRepositoryProvider)
+      .watchAll()
+      .map(
+        (projects) => {
+          for (final project in projects) project.id: project.name,
+        },
+      ),
+);
+
 final _todayProvider = StreamProvider<List<Task>>(
   (ref) => ref.watch(taskRepositoryProvider).watchToday(),
 );
@@ -34,8 +45,9 @@ class TodayPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final tasks = ref.watch(_todayProvider);
+    final projects = ref.watch(_todayProjectsProvider).asData?.value;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.todayTitle)),
+      appBar: AppBar(titleSpacing: 20, title: Text(l10n.todayTitle)),
       body: Column(
         children: [
           if (guide != null) guide!,
@@ -92,19 +104,36 @@ class TodayPage extends ConsumerWidget {
                       : const SizedBox.shrink(),
                   isOverdue: isOverdue,
                   subtitleBuilder: (context, t) {
-                    final d = t.dueDate;
-                    if (d == null) return null;
+                    final date = t.dueDate ?? t.scheduled;
+                    final project = projects?[t.projectId];
+                    if (date == null && project == null) return null;
                     final isLight =
                         Theme.of(context).brightness == Brightness.light;
                     final tokens = isLight ? AppTokens.light : AppTokens.dark;
-                    return Text(
-                      DateTime.fromMillisecondsSinceEpoch(d)
-                          .toString()
-                          .substring(0, 10),
-                      style: TextStyle(
-                        color: isOverdue(t) ? tokens.danger : tokens.muted,
-                        fontSize: 12,
-                      ),
+                    return Wrap(
+                      spacing: 10,
+                      runSpacing: 2,
+                      children: [
+                        if (date != null)
+                          Text(
+                            MaterialLocalizations.of(context).formatShortDate(
+                              DateTime.fromMillisecondsSinceEpoch(date),
+                            ),
+                            style: TextStyle(
+                              color: isOverdue(t)
+                                  ? tokens.danger
+                                  : tokens.muted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        if (project != null)
+                          Text(
+                            project,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: tokens.muted, fontSize: 12),
+                          ),
+                      ],
                     );
                   },
                 );

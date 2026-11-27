@@ -34,6 +34,7 @@ class ResponsiveShell extends ConsumerStatefulWidget {
 
   static const double breakpoint = 600;
   static const double expandedSidebarBreakpoint = 960;
+  static const double workspaceMaxWidth = 900;
 
   @override
   ConsumerState<ResponsiveShell> createState() => _ResponsiveShellState();
@@ -447,11 +448,20 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
             ),
           )
         : null;
-    return switch (_index) {
+    final page = switch (_index) {
       0 => InboxPage(guide: guide),
       1 => TodayPage(guide: guide),
       _ => _pages[_index],
     };
+    if (_index > 1) return page;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: ResponsiveShell.workspaceMaxWidth,
+        ),
+        child: SizedBox.expand(child: page),
+      ),
+    );
   }
 
   /// 「更多」抽屉（规格 §2.3）：由 [_navSpecs] 派生 inMore 项，

@@ -1,3 +1,5 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,6 +50,28 @@ void main() {
     expect(find.text('1 overdue'), findsNothing);
     await env.db.close();
   });
+
+  testWidgets('今日拖拽手柄随鼠标悬停和键盘焦点显示', (tester) async {
+    final env = await TestEnv.create();
+    final id = await insertTask(env, '写周报', 'next_action', dueDate: todayNoonMs());
+    await tester.pumpWidget(env.wrap(const TodayPage()));
+    await tester.pump();
+    final handle = find.byKey(Key('task_handle_$id'));
+    final visibility = find.ancestor(of: handle, matching: find.byType(Visibility));
+    bool visible() => tester.widget<Visibility>(visibility.first).visible;
+    expect(visible(), isFalse);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: tester.getCenter(find.byKey(Key('task_tile_$id'))));
+    await tester.pump();
+    expect(visible(), isTrue);
+    await mouse.removePointer();
+    await tester.pump();
+    expect(visible(), isFalse);
+    tester.widget<Focus>(find.byKey(Key('task_focus_$id'))).focusNode!.requestFocus();
+    await tester.pumpAndSettle();
+    expect(visible(), isTrue);
+    await env.db.close();
+  }, variant: TargetPlatformVariant({TargetPlatform.macOS}));
 
   testWidgets('无日期 next_action 不再出现在今日（进随时，由 anytime_page_test 覆盖）',
       (tester) async {
