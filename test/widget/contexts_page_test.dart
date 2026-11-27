@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/contexts/context_tasks_page.dart';
 import 'package:settle_app/features/contexts/contexts_page.dart';
 import 'widget_utils.dart';
 
@@ -40,5 +41,26 @@ void main() {
     final row = await (env.db.select(env.db.tasks)..where((t) => t.id.equals(taskId))).getSingle();
     expect(row.contextId, isNull);
     await env.db.close(); // 关闭 drift 流，避免测试收尾时残留 Timer
+  });
+
+  testWidgets('点击情境 tile → 打开情境任务页（AppBar @情境名）', (tester) async {
+    final env = await TestEnv.create();
+    await tester.pumpWidget(env.wrap(const ContextsPage()));
+    await tester.pump(); // 等待 contexts 流首帧数据
+    await tester.tap(find.text('@电脑'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ContextTasksPage), findsOneWidget);
+    // AppBar 标题 = 情境名（@ 前缀随输入原样展示）；情境页 tile 已离屏
+    // （offstage）不入匹配，find.descendant 限定 AppBar 内唯一命中。
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('@电脑'),
+      ),
+      findsOneWidget,
+    );
+    // 种子情境无任务 → 空态文案（contextTasksEmpty）。
+    expect(find.text('No tasks in this context'), findsOneWidget);
+    await env.db.close();
   });
 }

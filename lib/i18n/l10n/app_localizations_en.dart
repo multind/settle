@@ -602,4 +602,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keyAlt => 'Alt';
+
+  @override
+  String get contextTasksEmpty => 'No tasks in this context';
 }

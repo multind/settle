@@ -582,4 +582,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get keyAlt => 'Alt';
+
+  @override
+  String get contextTasksEmpty => '该情境暂无任务';
 }

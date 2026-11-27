@@ -230,5 +230,6 @@
   "keyCtrl": "Ctrl",
   "keyCmd": "Cmd",
   "keyShift": "Shift",
-  "keyAlt": "Alt"
+  "keyAlt": "Alt",
+  "contextTasksEmpty": "No tasks in this context"
 }

@@ -5,6 +5,7 @@ import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
+import 'package:settle_app/features/contexts/context_tasks_page.dart';
 import 'package:settle_app/features/guide/page_rule_hint.dart';
 
 /// 情境列表流：由仓库暴露的 [ContextRepository.watchAll] 转为
@@ -73,6 +74,16 @@ class _ContextTile extends ConsumerWidget {
         child: ListTile(
           leading: const Icon(Icons.place),
           title: Text(this.context.name),
+          // 整行点击 → 情境任务页（spec 增补）。用 ListTile.onTap 而非
+          // GestureDetector/InkWell 包裹：ListTile 自带点击水波纹，且 trailing
+          // IconButton 持有独立手势识别器，点击按钮时在手势竞技场胜出——
+          // 删除按钮与整行点击互不干扰（Flutter 标准模式，无需额外嵌套）。
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (_) => ContextTasksPage(context: this.context),
+            ),
+          ),
           trailing: IconButton(
             key: Key('delete_context_${this.context.id}'),
             icon: const Icon(Icons.delete_outline),

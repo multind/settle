@@ -230,5 +230,6 @@
   "keyCtrl": "Ctrl",
   "keyCmd": "Cmd",
   "keyShift": "Shift",
-  "keyAlt": "Alt"
+  "keyAlt": "Alt",
+  "contextTasksEmpty": "该情境暂无任务"
 }

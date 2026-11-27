@@ -1225,6 +1225,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Alt'**
   String get keyAlt;
+
+  /// No description provided for @contextTasksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks in this context'**
+  String get contextTasksEmpty;
 }
 
 class _AppLocalizationsDelegate
