@@ -2673,7 +2673,7 @@ Expected: 提交成功。
 
 > **l10n 落位决策**：`contextTasksEmpty` **不并入 Task 1**（Task 1 已审计定稿 32 key，其 arb diff / 计数 / 提交消息保持不动），改在本 Task 内追加 + 重跑 gen-l10n——本 Task 自包含（1 key 的 arb diff + 生成文件随本 Task 提交）；Task 1 的 `l10n_smoke_test.dart` 只断言其 32 key 各自生成，不枚举全量 key，不因后续新增 key 失效。
 
-- [ ] **Step 1: `app_en.arb` 末尾追加 `contextTasksEmpty`**
+- [x] **Step 1: `app_en.arb` 末尾追加 `contextTasksEmpty`**
 
 改前（文件末尾两行）：
 
@@ -2690,7 +2690,7 @@ Expected: 提交成功。
 }
 ```
 
-- [ ] **Step 2: `app_zh.arb` 末尾追加 `contextTasksEmpty`**
+- [x] **Step 2: `app_zh.arb` 末尾追加 `contextTasksEmpty`**
 
 改前（文件末尾两行）：
 
@@ -2707,7 +2707,7 @@ Expected: 提交成功。
 }
 ```
 
-- [ ] **Step 3: 重新生成 l10n 并确认 3 个 dart 文件更新**
+- [x] **Step 3: 重新生成 l10n 并确认 3 个 dart 文件更新**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -2718,7 +2718,7 @@ git status --short lib/i18n/l10n
 
 Expected: `flutter gen-l10n` 退出码 0；`git status --short` 显示 `app_localizations.dart` / `app_localizations_en.dart` / `app_localizations_zh.dart` 三个生成文件被修改（连同两个 arb）。
 
-- [ ] **Step 4: 新建 `lib/features/contexts/context_tasks_page.dart`（完整文件）**
+- [x] **Step 4: 新建 `lib/features/contexts/context_tasks_page.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -2788,7 +2788,7 @@ class ContextTasksPage extends ConsumerWidget {
 
 （空态：title = `contextTasksEmpty`（新 key，spec 增补文案表），message 复用既有 `ruleContextsMessage`（描述「按场景过滤」概念）——仅新增 1 key，AppBar 标题复用情境名本身，无额外 title key。）
 
-- [ ] **Step 5: `contexts_page.dart` 接线（精确改前/改后）**
+- [x] **Step 5: `contexts_page.dart` 接线（精确改前/改后）**
 
 改前（import 块，L6-8）：
 
@@ -2835,7 +2835,7 @@ import 'package:settle_app/features/guide/page_rule_hint.dart';
           trailing: IconButton(
 ```
 
-- [ ] **Step 6: 新建 `test/widget/context_tasks_page_test.dart`（完整文件）**
+- [x] **Step 6: 新建 `test/widget/context_tasks_page_test.dart`（完整文件）**
 
 ```dart
 import 'package:drift/drift.dart' hide isNull;
@@ -2957,7 +2957,7 @@ void main() {
 
 （注：J 为默认 listMoveUp → `_ListMoveFocusIntent(1)`，焦点 0→1（与 task_list_wiring_test 断言方向一致）；键盘用例须 `useDesktop()` 使 `focusEnabled` 为真，否则无 Shortcuts 子树。断言文案按 en default locale。）
 
-- [ ] **Step 7: `contexts_page_test.dart` 新增导航用例（精确改前/改后）**
+- [x] **Step 7: `contexts_page_test.dart` 新增导航用例（精确改前/改后）**
 
 改前（import 块，L4-6）：
 
@@ -3017,7 +3017,7 @@ import 'widget_utils.dart';
 }
 ```
 
-- [ ] **Step 8: 定向测试门禁（本 Task 两个测试文件）**
+- [x] **Step 8: 定向测试门禁（本 Task 两个测试文件）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -3027,7 +3027,7 @@ flutter test test/widget/context_tasks_page_test.dart test/widget/contexts_page_
 
 Expected: `All tests passed!`（5 个新页面用例 + 1 个导航用例 + 既有 2 个情境页用例零回归全绿）。
 
-- [ ] **Step 9: analyze + 全量测试门禁**
+- [x] **Step 9: analyze + 全量测试门禁**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -3038,7 +3038,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: analyze 汇总行 0 error 且 0 warning（仅既有 3 warning / 69 info 基线不动）；`flutter test` → `All tests passed!`（217 基线 + Task 1-6 新增 + 本 Task 6 个新 widget 用例全绿）。
 
-- [ ] **Step 10: 提交**
+- [x] **Step 10: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
