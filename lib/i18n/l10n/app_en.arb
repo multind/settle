@@ -89,6 +89,7 @@
   "langEn": "English",
   "exportBackup": "Export backup (JSON)",
   "importBackup": "Restore backup (JSON)",
+  "backupExportFailed": "Could not export the backup. Choose a writable location and try again.",
   "exportedTo": "Backup exported",
   "importedFrom": "Backup restored",
   "backupInvalid": "Invalid backup file",

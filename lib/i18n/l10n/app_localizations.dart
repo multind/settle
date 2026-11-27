@@ -632,6 +632,12 @@ abstract class AppLocalizations {
   /// **'Restore backup (JSON)'**
   String get importBackup;
 
+  /// No description provided for @backupExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export the backup. Choose a writable location and try again.'**
+  String get backupExportFailed;
+
   /// No description provided for @exportedTo.
   ///
   /// In en, this message translates to:

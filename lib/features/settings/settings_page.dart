@@ -137,13 +137,24 @@ class SettingsPage extends ConsumerWidget {
 
   Future<void> _export(
       BuildContext context, WidgetRef ref, AppLocalizations l10n) async {
-    final json = await ref.read(exportServiceProvider).exportJson();
+    final service = ref.read(exportServiceProvider);
     final gateway = ref.read(backupFileGatewayProvider);
-    final path = await gateway.saveBackup(json);
-    if (path != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.exportedTo)),
-      );
+    try {
+      final json = await service.exportJson();
+      if (!context.mounted) return;
+      final path = await gateway.saveBackup(json);
+      if (path != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.exportedTo)),
+        );
+      }
+    } catch (error) {
+      debugPrint('Settle backup export failed: ${error.runtimeType}');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupExportFailed)),
+        );
+      }
     }
   }
 

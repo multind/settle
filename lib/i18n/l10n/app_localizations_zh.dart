@@ -277,6 +277,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importBackup => '恢复备份（JSON）';
 
   @override
+  String get backupExportFailed => '备份导出失败，请选择可写入的位置后重试。';
+
+  @override
   String get exportedTo => '备份已导出';
 
   @override

@@ -277,6 +277,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importBackup => 'Restore backup (JSON)';
 
   @override
+  String get backupExportFailed =>
+      'Could not export the backup. Choose a writable location and try again.';
+
+  @override
   String get exportedTo => 'Backup exported';
 
   @override

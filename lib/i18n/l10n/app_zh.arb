@@ -89,6 +89,7 @@
   "langEn": "English",
   "exportBackup": "导出备份（JSON）",
   "importBackup": "恢复备份（JSON）",
+  "backupExportFailed": "备份导出失败，请选择可写入的位置后重试。",
   "exportedTo": "备份已导出",
   "importedFrom": "备份已恢复",
   "backupInvalid": "备份文件无效",
