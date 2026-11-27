@@ -410,6 +410,30 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get statusDone;
 
+  /// No description provided for @clarifyOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original note'**
+  String get clarifyOriginal;
+
+  /// No description provided for @clarifyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Task details'**
+  String get clarifyDetails;
+
+  /// No description provided for @clarifyCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create action'**
+  String get clarifyCreateAction;
+
+  /// No description provided for @clarifyCreateProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Create project'**
+  String get clarifyCreateProject;
+
   /// No description provided for @decisionAction.
   ///
   /// In en, this message translates to:

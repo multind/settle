@@ -166,6 +166,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusDone => 'Done';
 
   @override
+  String get clarifyOriginal => 'Original note';
+
+  @override
+  String get clarifyDetails => 'Task details';
+
+  @override
+  String get clarifyCreateAction => 'Create action';
+
+  @override
+  String get clarifyCreateProject => 'Create project';
+
+  @override
   String get decisionAction => 'Turn into action';
 
   @override

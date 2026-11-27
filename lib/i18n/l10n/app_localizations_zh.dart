@@ -166,6 +166,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statusDone => '完成';
 
   @override
+  String get clarifyOriginal => '收集原文';
+
+  @override
+  String get clarifyDetails => '任务详情';
+
+  @override
+  String get clarifyCreateAction => '创建行动';
+
+  @override
+  String get clarifyCreateProject => '创建项目';
+
+  @override
   String get decisionAction => '转为行动';
 
   @override
