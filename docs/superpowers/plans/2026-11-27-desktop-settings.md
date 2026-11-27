@@ -1,4 +1,4 @@
-# 安顿 Settle「桌面设置增强」实施计划（可配置快捷键 + 窗口置顶 + 平台能力分离）
+﻿# 安顿 Settle「桌面设置增强」实施计划（可配置快捷键 + 窗口置顶 + 平台能力分离）
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers-subagent-driven-development (recommended) or superpowers-executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -63,7 +63,7 @@
 - Regenerate: `lib/i18n/l10n/app_localizations.dart` / `app_localizations_en.dart` / `app_localizations_zh.dart`（`flutter gen-l10n`，不改手写）
 - Test: `test/widget/l10n_smoke_test.dart`（新增桌面设置 keys 双语冒烟）
 
-- [ ] **Step 1: 先写双语冒烟测试（红）**
+- [x] **Step 1: 先写双语冒烟测试（红）**
 
 在 `test/widget/l10n_smoke_test.dart` 末尾 `}`（文件最后一行，main 收尾）之前追加：
 
@@ -102,7 +102,7 @@
 
 （注：`captureConflict` 生成签名 `String captureConflict(String action)`——zh 文案「该快捷键已被 收件箱 占用」中 `{action}` 被替换为「收件箱」，与占位符声明一致。）
 
-- [ ] **Step 2: 运行冒烟测试确认失败**
+- [x] **Step 2: 运行冒烟测试确认失败**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -111,7 +111,7 @@ flutter test test/widget/l10n_smoke_test.dart 2>&1 | Select-Object -Last 3
 
 Expected: 编译失败（`settingsShortcuts` getter 不存在 / `desktop settings keys load in zh and en` 用例报错）——证明测试先行。
 
-- [ ] **Step 3: `app_en.arb` 末尾追加 32 key（含 captureConflict 占位符声明）**
+- [x] **Step 3: `app_en.arb` 末尾追加 32 key（含 captureConflict 占位符声明）**
 
 改前（文件末尾两行 + 收尾 `}`）：
 
@@ -168,7 +168,7 @@ Expected: 编译失败（`settingsShortcuts` getter 不存在 / `desktop setting
 }
 ```
 
-- [ ] **Step 4: `app_zh.arb` 末尾追加 32 key（含 captureConflict 占位符声明）**
+- [x] **Step 4: `app_zh.arb` 末尾追加 32 key（含 captureConflict 占位符声明）**
 
 改前（文件末尾两行 + 收尾 `}`）：
 
@@ -227,7 +227,7 @@ Expected: 编译失败（`settingsShortcuts` getter 不存在 / `desktop setting
 
 （zh/en 的键帽四 key 均为「Ctrl/Cmd/Shift/Alt」拉丁原词，spec 文案表如此。）
 
-- [ ] **Step 5: 重新生成 l10n 并确认 3 个 dart 文件更新**
+- [x] **Step 5: 重新生成 l10n 并确认 3 个 dart 文件更新**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -237,7 +237,7 @@ git status --short lib/i18n/l10n
 
 Expected: `flutter gen-l10n` 退出码 0；`git status --short` 显示 `app_localizations.dart` / `app_localizations_en.dart` / `app_localizations_zh.dart` 三个文件被修改（还有两个 arb 文件）。
 
-- [ ] **Step 6: 冒烟测试通过（绿）**
+- [x] **Step 6: 冒烟测试通过（绿）**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -246,7 +246,7 @@ flutter test test/widget/l10n_smoke_test.dart 2>&1 | Select-Object -Last 1
 
 Expected: `All tests passed!`。
 
-- [ ] **Step 7: analyze 门禁**
+- [x] **Step 7: analyze 门禁**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -255,7 +255,7 @@ flutter analyze 2>&1 | Select-Object -Last 3
 
 Expected: 汇总行 0 error 且 0 warning（仅既有 3 warning / 69 info 基线不动）。
 
-- [ ] **Step 8: 提交**
+- [x] **Step 8: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
