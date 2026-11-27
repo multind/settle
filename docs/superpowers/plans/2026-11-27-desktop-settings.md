@@ -1062,7 +1062,7 @@ Expected: 提交成功。
 - Create: `lib/features/settings/shortcuts/shortcut_labels.dart` / `shortcut_settings_page.dart` / `capture_binding_dialog.dart`
 - Create: `test/widget/shortcut_settings_page_test.dart` / `test/widget/capture_binding_dialog_test.dart`
 
-- [ ] **Step 1: 新建 `lib/features/settings/shortcuts/shortcut_labels.dart`（完整文件）**
+- [x] **Step 1: 新建 `lib/features/settings/shortcuts/shortcut_labels.dart`（完整文件）**
 
 ```dart
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
@@ -1109,7 +1109,7 @@ String actionLabel(AppLocalizations l10n, String labelKey) {
 }
 ```
 
-- [ ] **Step 2: 新建 `lib/features/settings/shortcuts/shortcut_settings_page.dart`（完整文件）**
+- [x] **Step 2: 新建 `lib/features/settings/shortcuts/shortcut_settings_page.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1284,7 +1284,7 @@ String _keyLabel(String keyName) {
 }
 ```
 
-- [ ] **Step 3: 新建 `lib/features/settings/shortcuts/capture_binding_dialog.dart`（完整文件）**
+- [x] **Step 3: 新建 `lib/features/settings/shortcuts/capture_binding_dialog.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1414,7 +1414,7 @@ class _CaptureBindingDialogState extends ConsumerState<CaptureBindingDialog> {
 }
 ```
 
-- [ ] **Step 4: 新建 `test/widget/capture_binding_dialog_test.dart`（完整文件）**
+- [x] **Step 4: 新建 `test/widget/capture_binding_dialog_test.dart`（完整文件）**
 
 ```dart
 import 'package:flutter/material.dart';
@@ -1544,7 +1544,7 @@ void main() {
 
 （注：default locale 为 en——冲突文案与纯修饰键提示按英文断言；prefs seed 必须在 `pumpWidget` 之前（控制器构造时读入）。`dart:convert` 未用到（断言用 contains 字符串），无需引入。）
 
-- [ ] **Step 5: 新建 `test/widget/shortcut_settings_page_test.dart`（完整文件）**
+- [x] **Step 5: 新建 `test/widget/shortcut_settings_page_test.dart`（完整文件）**
 
 ```dart
 import 'dart:convert';
@@ -1663,7 +1663,7 @@ void main() {
 
 （注：default locale 为 en——键帽与确认框文案按英文断言；prefs seed 必须在 `pumpWidget` 之前（控制器构造时读入）；`flutter/services.dart` 提供 `LogicalKeyboardKey` 供录键测试序列使用。）
 
-- [ ] **Step 6: analyze + 全量测试门禁**
+- [x] **Step 6: analyze + 全量测试门禁**
 
 ```powershell
 $env:PATH = "C:\flutter\bin;$env:PATH"
@@ -1674,7 +1674,7 @@ flutter test 2>&1 | Select-Object -Last 1
 
 Expected: analyze 汇总行 0 error 且 0 warning；`flutter test` → `All tests passed!`（217 基线 + 本 Task 10 个新 widget 测试全绿）。
 
-- [ ] **Step 7: 提交**
+- [x] **Step 7: 提交**
 
 ```powershell
 cd D:\Project\gtd-project
