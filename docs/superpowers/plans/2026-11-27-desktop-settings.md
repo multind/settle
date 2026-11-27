@@ -2673,6 +2673,8 @@ Expected: 提交成功。
 
 > **l10n 落位决策**：`contextTasksEmpty` **不并入 Task 1**（Task 1 已审计定稿 32 key，其 arb diff / 计数 / 提交消息保持不动），改在本 Task 内追加 + 重跑 gen-l10n——本 Task 自包含（1 key 的 arb diff + 生成文件随本 Task 提交）；Task 1 的 `l10n_smoke_test.dart` 只断言其 32 key 各自生成，不枚举全量 key，不因后续新增 key 失效。
 
+> **方案 A 裁决（主代理 2026-11-27，实施时生效）**：实施中发现计划内部矛盾——`watchByContext` 只按 contextId 过滤、`complete()` 不清 contextId，而本 Task 测试断言「批量完成后离场 + 空态」。主代理裁决 **方案 A：页面层过滤 done**（`_contextTasksProvider` 追加 `.map((rows) => rows.where((t) => t.status != TaskStatus.done.storage).toList())`），测试按计划原样通过；理由：① 已批准计划的测试是契约；② GTD 语义——情境 =「此刻此场景可行动」，done 离场；③ 红线保持——过滤只在 UI 层 provider，数据层零改动；④ 与 today/anytime/upcoming（仓库层按 next_action 过滤 done）语义一致，projects 页显示 done 是项目归档容器语义、非反例。**以下 Step 4 的页面代码以裁决版为准（含 status 过滤）**；文件顶部注释已登记。
+
 - [x] **Step 1: `app_en.arb` 末尾追加 `contextTasksEmpty`**
 
 改前（文件末尾两行）：
