@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:settle_app/app/glass.dart';
 import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/app/window_controller.dart';
+import 'package:settle_app/features/settings/shortcuts/shortcut_settings_page.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/core/enums.dart';
@@ -76,6 +78,33 @@ class SettingsPage extends ConsumerWidget {
               title: Text(l10n.aiPlaceholder),
             ),
           ),
+          // 桌面专属设置（桌面设置 spec）：bridge.isDesktop 门控，移动端不渲染；
+          // 置顶开关与快捷键配置入口，置于 AI 占位与 GTD 指南之间。
+          if (ref.watch(platformBridgeProvider).isDesktop) ...[
+            glassRow(
+              child: SwitchListTile(
+                key: const Key('settings_always_on_top_tile'),
+                secondary: const Icon(Icons.push_pin_outlined),
+                title: Text(l10n.settingsAlwaysOnTop),
+                subtitle: Text(l10n.settingsAlwaysOnTopHint),
+                value: ref.watch(windowControllerProvider).alwaysOnTop,
+                onChanged: (_) => ref.read(windowControllerProvider).toggle(),
+              ),
+            ),
+            glassRow(
+              child: ListTile(
+                key: const Key('settings_shortcuts_tile'),
+                leading: const Icon(Icons.keyboard_outlined),
+                title: Text(l10n.settingsShortcuts),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ShortcutSettingsPage(),
+                  ),
+                ),
+              ),
+            ),
+          ],
           glassRow(
             child: ListTile(
               key: const Key('settings_guide_tile'),

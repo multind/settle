@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
 import 'package:settle_app/features/settings/backup_file_gateway.dart';
+import 'package:settle_app/core/platform/window_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../test_utils.dart';
 
@@ -20,6 +21,24 @@ class FakeBackupGateway implements BackupFileGateway {
 
   @override
   Future<String?> pickBackupJson() async => pickedJson;
+}
+
+/// Fake 窗口服务（桌面设置 spec 测试）：记录调用，不触真实插件。
+/// 凡触发置顶 toggle 的 widget 用例必须 override windowServiceProvider 为此
+/// fake，否则 DesktopWindowService 会调真实插件抛 MissingPluginException。
+class FakeWindowService implements WindowService {
+  int ensureInitializedCalls = 0;
+  final List<bool> setAlwaysOnTopCalls = [];
+
+  @override
+  Future<void> ensureInitialized() async {
+    ensureInitializedCalls++;
+  }
+
+  @override
+  Future<void> setAlwaysOnTop(bool value) async {
+    setAlwaysOnTopCalls.add(value);
+  }
 }
 
 /// Widget 测试环境：内存库 + mock prefs + Fake 备份网关。

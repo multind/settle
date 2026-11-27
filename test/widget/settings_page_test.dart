@@ -1,7 +1,12 @@
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:settle_app/core/platform/platform_bridge.dart';
+import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
 import 'package:settle_app/features/settings/settings_page.dart';
+import 'package:settle_app/features/settings/shortcuts/shortcut_settings_page.dart';
 import 'widget_utils.dart';
 
 void main() {
@@ -74,6 +79,56 @@ void main() {
     expect(find.text('View GTD Guide'), findsOneWidget);
     await tester.tap(find.byKey(const Key('settings_guide_tile')));
     expect(opened, isTrue);
+    await env.db.close();
+  });
+
+  testWidgets('桌面：置顶开关与快捷键入口两 tile 存在，开关交互落 fake + prefs',
+      (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    final env = await TestEnv.create();
+    final fake = FakeWindowService();
+    await tester.pumpWidget(env.wrap(
+      SettingsPage(onOpenGuide: () {}),
+      extraOverrides: [windowServiceProvider.overrideWithValue(fake)],
+    ));
+    expect(find.byKey(const Key('settings_always_on_top_tile')), findsOneWidget);
+    expect(find.byKey(const Key('settings_shortcuts_tile')), findsOneWidget);
+    // 置顶开关：点 → fake 记录 setAlwaysOnTop(true) + prefs；再点 → false。
+    await tester.tap(find.byKey(const Key('settings_always_on_top_tile')));
+    await tester.pumpAndSettle();
+    expect(fake.setAlwaysOnTopCalls, [true]);
+    expect(env.prefs.getBool('always_on_top'), true);
+    await tester.tap(find.byKey(const Key('settings_always_on_top_tile')));
+    await tester.pumpAndSettle();
+    expect(fake.setAlwaysOnTopCalls, [true, false]);
+    expect(env.prefs.getBool('always_on_top'), false);
+    await env.db.close();
+  });
+
+  testWidgets('桌面：快捷键入口导航到配置页（AppBar shortcutsTitle）', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    final env = await TestEnv.create();
+    await tester.pumpWidget(env.wrap(SettingsPage(onOpenGuide: () {})));
+    await tester.tap(find.byKey(const Key('settings_shortcuts_tile')));
+    await tester.pumpAndSettle();
+    expect(find.byType(ShortcutSettingsPage), findsOneWidget);
+    expect(find.text('Keyboard Shortcuts'), findsOneWidget);
+    await env.db.close();
+  });
+
+  testWidgets('移动（bridge override 非桌面）：两 tile 不渲染', (tester) async {
+    final env = await TestEnv.create();
+    await tester.pumpWidget(env.wrap(
+      SettingsPage(onOpenGuide: () {}),
+      extraOverrides: [
+        platformBridgeProvider.overrideWithValue(
+            const PlatformBridge(isDesktop: false, isMacOS: false)),
+      ],
+    ));
+    expect(find.byKey(const Key('settings_always_on_top_tile')), findsNothing);
+    expect(find.byKey(const Key('settings_shortcuts_tile')), findsNothing);
     await env.db.close();
   });
 }
