@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:settle_app/app/glass.dart';
 import 'package:settle_app/app/theme.dart';
+import 'package:settle_app/core/shortcuts/shortcut_actions.dart';
+import 'package:settle_app/core/shortcuts/shortcut_settings_controller.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
 import 'package:settle_app/features/task/task_edit_dialog.dart';
@@ -377,24 +378,27 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         Expanded(child: list),
       ],
     );
-    // 列表层快捷键（规格 §5）：仅桌面且 focusEnabled 时包裹 Shortcuts/Actions；
-    // J/K 循环移动焦点、Enter 完成焦点任务、Delete 删除焦点任务（确认对话框）。
-    // 桌面判定经 PlatformBridge 读取（同一 defaultTargetPlatform 事实源，行为
-    // 零变化；与上方拖拽形态判定互相独立）。事件自焦点行冒泡至此层，经
-    // [isEnabled] 门控确保仅焦点行获焦（且非选择模式）时生效。
+    // 列表层快捷键（桌面设置 spec 功能一 §5）：仅桌面且 focusEnabled 时包裹
+    // Shortcuts/Actions；默认 J/K 移动焦点、Enter 完成、Delete 删除（用户可
+    // 改绑，经配置控制器构建表，与壳层共用 16 动作规范表）。事件自焦点行
+    // 冒泡至此层，经 [isEnabled] 门控确保仅焦点行获焦（且非选择模式）时生效。
     final shortcutsEnabled = ref.watch(platformBridgeProvider).isDesktop;
     if (!widget.focusEnabled || !shortcutsEnabled) return column;
+    final bindings = ref.watch(shortcutSettingsControllerProvider);
+    final shortcuts = <ShortcutActivator, Intent>{
+      for (final action in shortcutActions
+          .where((a) => a.layer == ShortcutLayer.list))
+        for (final activator in activatorsFor(bindings.bindingFor(action.id)))
+          activator: switch (action.id) {
+            'listMoveUp' => const _ListMoveFocusIntent(1),
+            'listMoveDown' => const _ListMoveFocusIntent(-1),
+            'listComplete' => const _CompleteFocusedIntent(),
+            'listDelete' => const _DeleteFocusedIntent(),
+            _ => throw StateError('未知列表层动作: ${action.id}'),
+          },
+    };
     return Shortcuts(
-      shortcuts: const {
-        SingleActivator(LogicalKeyboardKey.keyJ):
-            _ListMoveFocusIntent(1),
-        SingleActivator(LogicalKeyboardKey.keyK):
-            _ListMoveFocusIntent(-1),
-        SingleActivator(LogicalKeyboardKey.enter):
-            _CompleteFocusedIntent(),
-        SingleActivator(LogicalKeyboardKey.delete):
-            _DeleteFocusedIntent(),
-      },
+      shortcuts: shortcuts,
       child: Actions(
         actions: <Type, Action<Intent>>{
           _ListMoveFocusIntent: _ListShortcutAction<_ListMoveFocusIntent>(

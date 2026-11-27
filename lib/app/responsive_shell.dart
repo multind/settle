@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:settle_app/app/theme.dart';
-import 'package:settle_app/core/platform/platform_bridge.dart';
+import 'package:settle_app/app/window_controller.dart';
+import 'package:settle_app/core/shortcuts/shortcut_actions.dart';
+import 'package:settle_app/core/shortcuts/shortcut_settings_controller.dart';
 import 'package:settle_app/data/providers.dart';
 import 'package:settle_app/data/tables.dart';
 import 'package:settle_app/i18n/l10n/app_localizations.dart';
@@ -182,26 +184,20 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
         );
       },
     );
-    // 桌面平台全局快捷键（规格 §5）：N → 收集；Ctrl/Cmd+1..9 → 侧边栏第
-    // 1..9 项（收件箱..日志）；Ctrl/Cmd+0 → 回顾。仅桌面（含 Web）包裹
+    // 桌面平台全局快捷键（桌面设置 spec 功能一 §4）：16 动作表 + 用户配置构建
+    // （默认绑定与现状逐键一致：N → 收集；Ctrl/Cmd+1..9 → 侧边栏 1..9 项；
+    // Ctrl/Cmd+0 → 回顾；Ctrl+Shift+T → 置顶切换）。仅桌面包裹
     // Shortcuts/Actions；文本输入焦点时经 [isEnabled] 门控放行按键。
-    if (!_shortcutsEnabled) return shell;
-    final Map<ShortcutActivator, Intent> shortcuts = {
-      const SingleActivator(LogicalKeyboardKey.keyN): const _CollectIntent(),
-      // Ctrl/Cmd+0 → 回顾：索引由规范表派生（_digitKeys 9 项之后的首项，
-      // 即 _navSpecs[9] = 回顾），与下方 1..9 派生循环共用同一事实源。
-      const SingleActivator(LogicalKeyboardKey.digit0, control: true):
-          _SwitchViewIntent(_navSpecs[_digitKeys.length].index),
-      const SingleActivator(LogicalKeyboardKey.digit0, meta: true):
-          _SwitchViewIntent(_navSpecs[_digitKeys.length].index),
-    };
-    // Ctrl/Cmd+n → 侧边栏第 n 项（_navSpecs 项序即全局索引序，n-1 = 索引）。
-    for (var n = 0; n < _digitKeys.length; n++) {
-      final index = _navSpecs[n].index;
-      shortcuts[SingleActivator(_digitKeys[n], control: true)] =
-          _SwitchViewIntent(index);
-      shortcuts[SingleActivator(_digitKeys[n], meta: true)] =
-          _SwitchViewIntent(index);
+    final isDesktop = ref.watch(platformBridgeProvider).isDesktop;
+    if (!isDesktop) return shell;
+    final bindings = ref.watch(shortcutSettingsControllerProvider);
+    final Map<ShortcutActivator, Intent> shortcuts = {};
+    for (final action in shortcutActions) {
+      if (action.layer != ShortcutLayer.shell) continue;
+      final intent = _intentFor(action);
+      for (final activator in activatorsFor(bindings.bindingFor(action.id))) {
+        shortcuts[activator] = intent;
+      }
     }
     return Shortcuts(
       shortcuts: shortcuts,
@@ -223,6 +219,14 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
             onInvoke: (intent) {
               if (!mounted) return null;
               _switchTo(intent.index);
+              return true;
+            },
+          ),
+          _ToggleAlwaysOnTopIntent: _ShellAction<_ToggleAlwaysOnTopIntent>(
+            enabled: () => !_isTextEditingFocus(),
+            onInvoke: (_) {
+              if (!mounted) return null;
+              ref.read(windowControllerProvider).toggle();
               return true;
             },
           ),
@@ -349,12 +353,22 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     }
   }
 
-  /// 桌面平台判定（规格 §5）：快捷键仅桌面（含 Web）启用。
-  /// 平台能力判定已收敛至 PlatformBridge（同一 defaultTargetPlatform + kIsWeb
-  /// 事实源，行为零变化）；getter 保留调用点命名语义。
-  bool get _shortcutsEnabled {
-    final PlatformBridge bridge = ref.read(platformBridgeProvider);
-    return bridge.supportsKeyboardShortcuts;
+  /// 动作 → Intent（spec 功能一 §4）：collect → 收集对话框；toggleAlwaysOnTop →
+  /// 置顶切换；nav* → 经 navSpecIndex 构建期解析 `_navSpecs[i].index`
+  /// （与现状 Ctrl/0/1..9 派生循环同一事实源，追加式约束不破）。
+  Intent _intentFor(ShortcutAction action) {
+    switch (action.id) {
+      case 'collect':
+        return const _CollectIntent();
+      case 'toggleAlwaysOnTop':
+        return const _ToggleAlwaysOnTopIntent();
+      default:
+        final i = action.navSpecIndex;
+        if (i == null) {
+          throw StateError('未知壳层快捷键动作: ${action.id}');
+        }
+        return _SwitchViewIntent(_navSpecs[i].index);
+    }
   }
 
   /// 文本输入焦点判定：primary focus 落在 `EditableText`（TextField 底层）
@@ -705,6 +719,12 @@ class _SwitchViewIntent extends Intent {
 
   /// 目标全局视图索引（0..11，对应 [_navSpecs]）。
   final int index;
+}
+
+/// 全局快捷键 Intent：切换窗口置顶（Ctrl+Shift+T，桌面设置 spec 功能二）。
+/// onInvoke 汇于 WindowController.toggle()（设置开关同一写点，唯一状态源）。
+class _ToggleAlwaysOnTopIntent extends Intent {
+  const _ToggleAlwaysOnTopIntent();
 }
 
 /// 带 isEnabled 门控的 CallbackAction：文本输入焦点时禁用全局快捷键。
