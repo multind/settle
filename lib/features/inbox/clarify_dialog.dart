@@ -85,7 +85,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
         borderColor: tokens.stroke,
         borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
         shadow: tokens.shadow,
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,7 +95,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
               style: Theme.of(context).textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
@@ -108,7 +108,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -118,7 +118,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                                 color: tokens.muted,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 8),
                             Text(
                               widget.item.rawText,
                               maxLines: 2,
@@ -129,7 +129,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     SegmentedButton<_Decision>(
                       key: const Key('clarify_decision'),
                       segments: [
@@ -150,7 +150,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                       onSelectionChanged: (s) =>
                           setState(() => _decision = s.first),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
                     if (_decision == _Decision.task)
                       TaskFormFields(
                         key: _taskFormKey,
@@ -165,7 +165,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                           labelText: l10n.projectName,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       TextField(
                         key: const Key('clarify_project_goal'),
                         controller: _projectGoal,
@@ -184,9 +184,9 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             Divider(height: 1, color: tokens.stroke),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -194,7 +194,7 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l10n.cancel),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 FilledButton(
                   key: const Key('clarify_confirm'),
                   onPressed: _confirm,

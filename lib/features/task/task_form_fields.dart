@@ -238,9 +238,10 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
     final projects = ref.watch(_projectsProvider);
     final contexts = ref.watch(_contextsProvider);
     final tags = ref.watch(_tagsProvider);
+    final fieldGap = SizedBox(height: widget.collapseDetails ? 12 : 4);
     final details = <Widget>[
       if (widget.allowStatusChange) ...[
-        const SizedBox(height: 4),
+        fieldGap,
         DropdownButtonFormField<TaskStatus>(
           key: const Key('task_status_field'),
           initialValue: _status,
@@ -257,7 +258,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
         ),
       ],
       if (_status == TaskStatus.waiting) ...[
-        const SizedBox(height: 4),
+        fieldGap,
         TextFormField(
           key: const Key('task_waiting_on_field'),
           controller: _waitingOn,
@@ -266,14 +267,14 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
               (v == null || v.trim().isEmpty) ? l10n.waitingOnRequired : null,
         ),
       ],
-      const SizedBox(height: 4),
+      fieldGap,
       TextFormField(
         key: const Key('task_notes_field'),
         controller: _notes,
         decoration: InputDecoration(labelText: l10n.taskNotes),
         maxLines: 2,
       ),
-      const SizedBox(height: 4),
+      fieldGap,
       Row(
         children: [
           Expanded(
@@ -317,7 +318,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
           ),
         ],
       ),
-      const SizedBox(height: 4),
+      fieldGap,
       Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
@@ -362,7 +363,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
           ],
         ),
       ),
-      const SizedBox(height: 4),
+      fieldGap,
       DropdownButtonFormField<String?>(
         key: const Key('task_repeat_field'),
         initialValue: _repeatKind,
@@ -389,7 +390,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
         onChanged: (v) => setState(() => _repeatKind = v),
       ),
       if (_repeatKind == 'every') ...[
-        const SizedBox(height: 4),
+        fieldGap,
         TextFormField(
           key: const Key('task_repeat_interval'),
           controller: _repeatInterval,
@@ -403,7 +404,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
           },
         ),
       ],
-      const SizedBox(height: 4),
+      fieldGap,
       projects.when(
         data: (list) => DropdownButtonFormField<int?>(
           key: const Key('task_project_field'),
@@ -419,7 +420,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
         loading: () => const SizedBox.shrink(),
         error: (_, __) => const SizedBox.shrink(),
       ),
-      const SizedBox(height: 4),
+      fieldGap,
       contexts.when(
         data: (list) => DropdownButtonFormField<int?>(
           key: const Key('task_context_field'),
@@ -473,7 +474,8 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? l10n.taskTitle : null,
           ),
-          if (widget.collapseDetails)
+          if (widget.collapseDetails) ...[
+            const SizedBox(height: 12),
             ExpansionTile(
               key: const Key('task_details'),
               controller: _detailsController,
@@ -483,8 +485,8 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
               expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
               title: Text(l10n.clarifyDetails),
               children: details,
-            )
-          else
+            ),
+          ] else
             ...details,
         ],
       ),
