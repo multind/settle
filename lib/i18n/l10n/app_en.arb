@@ -88,6 +88,8 @@
   "aiPlaceholder": "AI model config (available in M2)",
   "waitingOnRequired": "Waiting on is required for waiting tasks.",
   "todayTitle": "Today",
+  "todayTaskCount": "{count, plural, =1{1 task} other{{count} tasks}}",
+  "@todayTaskCount": { "placeholders": { "count": { "type": "int" } } },
   "todayOverdue": "{count} overdue",
   "@todayOverdue": {
     "placeholders": {

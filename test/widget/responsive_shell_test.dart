@@ -8,6 +8,7 @@ import 'package:settle_app/features/logbook/logbook_page.dart';
 import 'package:settle_app/features/review/review_page.dart';
 import 'package:settle_app/features/someday/someday_page.dart';
 import 'package:settle_app/features/today/today_page.dart';
+
 import 'widget_utils.dart';
 
 void main() {
@@ -28,9 +29,9 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('宽屏（≥600）：自定义侧边栏 3 组 12 项，无底部导航（规格 §2.2）', (tester) async {
+  testWidgets('宽屏（1280）：自定义侧边栏 3 组 12 项，无底部导航（规格 §2.2）', (tester) async {
     final env = await TestEnv.create();
-    await tester.binding.setSurfaceSize(const Size(800, 800));
+    await tester.binding.setSurfaceSize(const Size(1280, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(env.wrap(const ResponsiveShell()));
     await tester.pump();
@@ -45,6 +46,21 @@ void main() {
     for (var i = 0; i <= 11; i++) {
       expect(find.byKey(Key('nav_item_$i')), findsOneWidget);
     }
+    await env.db.close();
+  });
+
+  testWidgets('800 宽使用紧凑侧栏，图标能切换到今日', (tester) async {
+    final env = await TestEnv.create();
+    await tester.binding.setSurfaceSize(const Size(800, 628));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(env.wrap(const ResponsiveShell()));
+    await tester.pump();
+    expect(tester.getSize(find.byKey(const Key('custom_sidebar'))).width, 64);
+    expect(find.byTooltip('Today'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('nav_item_1')));
+    await tester.pumpAndSettle();
+    expect(find.byType(TodayPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
     await env.db.close();
   });
 
@@ -76,7 +92,10 @@ void main() {
     expect(find.byKey(const Key('global_collect_fab')), findsOneWidget);
     await tester.tap(find.byKey(const Key('global_collect_fab')));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('collect_dialog_field')), '给客户回邮件');
+    await tester.enterText(
+      find.byKey(const Key('collect_dialog_field')),
+      '给客户回邮件',
+    );
     await tester.tap(find.byKey(const Key('collect_dialog_submit')));
     await tester.pumpAndSettle();
     expect(await env.db.select(env.db.inboxItems).get(), hasLength(1));
@@ -139,8 +158,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('桌面快捷键：启动即用——无任何点击/Tab 直接按 N 打开收集（M-6 修复）',
-      (tester) async {
+  testWidgets('桌面快捷键：启动即用——无任何点击/Tab 直接按 N 打开收集（M-6 修复）', (tester) async {
     useDesktop();
     final env = await TestEnv.create();
     await tester.binding.setSurfaceSize(const Size(1000, 800));
@@ -157,8 +175,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('桌面快捷键：Ctrl+2 → 今日、Ctrl+5 → 将来也许（侧边栏项序映射，规格 §5）',
-      (tester) async {
+  testWidgets('桌面快捷键：Ctrl+2 → 今日、Ctrl+5 → 将来也许（侧边栏项序映射，规格 §5）', (tester) async {
     useDesktop();
     final env = await TestEnv.create();
     await tester.binding.setSurfaceSize(const Size(1000, 800));
@@ -179,8 +196,9 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('桌面快捷键回归：追加 index 11 后 Ctrl+9 → 日志、Ctrl+0 → 回顾不受影响',
-      (tester) async {
+  testWidgets('桌面快捷键回归：追加 index 11 后 Ctrl+9 → 日志、Ctrl+0 → 回顾不受影响', (
+    tester,
+  ) async {
     useDesktop();
     final env = await TestEnv.create();
     await tester.binding.setSurfaceSize(const Size(1000, 800));
@@ -200,8 +218,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('移动端（非桌面）：N 不触发收集对话框（快捷键仅桌面启用，M-3）',
-      (tester) async {
+  testWidgets('移动端（非桌面）：N 不触发收集对话框（快捷键仅桌面启用，M-3）', (tester) async {
     // 不调 useDesktop()：widget 测试默认 Android/触屏，shell 不包裹
     // Shortcuts/Actions——若有人误删桌面门控，本用例即红。
     final env = await TestEnv.create();
@@ -217,8 +234,7 @@ void main() {
     await env.db.close();
   });
 
-  testWidgets('文本输入焦点时 N 不触发收集对话框（按键进输入框，规格 §5）',
-      (tester) async {
+  testWidgets('文本输入焦点时 N 不触发收集对话框（按键进输入框，规格 §5）', (tester) async {
     useDesktop();
     final env = await TestEnv.create();
     await tester.binding.setSurfaceSize(const Size(1000, 800));

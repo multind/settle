@@ -88,6 +88,8 @@
   "aiPlaceholder": "AI 模型配置（M2 启用）",
   "waitingOnRequired": "等待任务必须填写等待对象。",
   "todayTitle": "今日",
+  "todayTaskCount": "{count} 项待办",
+  "@todayTaskCount": { "placeholders": { "count": { "type": "int" } } },
   "todayOverdue": "逾期 {count} 项",
   "@todayOverdue": {
     "placeholders": {

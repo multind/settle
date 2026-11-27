@@ -274,6 +274,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayTitle => '今日';
 
   @override
+  String todayTaskCount(int count) {
+    return '$count 项待办';
+  }
+
+  @override
   String todayOverdue(int count) {
     return '逾期 $count 项';
   }

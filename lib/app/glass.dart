@@ -110,8 +110,8 @@ class GradientButton extends StatelessWidget {
           padding:
               padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: DefaultTextStyle.merge(
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: scheme.onPrimary,
               fontWeight: FontWeight.w600,
             ),
             child: child,
@@ -161,8 +161,8 @@ class GlassCheckbox extends StatelessWidget {
               : Border.all(color: scheme.primary, width: 1.5),
         ),
         child: value
-            ? const Center(
-                child: Icon(Icons.check, size: 12, color: Colors.white),
+            ? Center(
+                child: Icon(Icons.check, size: 12, color: scheme.onPrimary),
               )
             : null,
       ),

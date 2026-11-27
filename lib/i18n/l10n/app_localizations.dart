@@ -626,6 +626,12 @@ abstract class AppLocalizations {
   /// **'Today'**
   String get todayTitle;
 
+  /// No description provided for @todayTaskCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 task} other{{count} tasks}}'**
+  String todayTaskCount(int count);
+
   /// No description provided for @todayOverdue.
   ///
   /// In en, this message translates to:

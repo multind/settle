@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 /// 阴影/渐变/玻璃元素已全部移除，靠 hairline 分隔与留白组织界面。
 abstract final class AppTokens {
   static const AppTokenSet light = AppTokenSet(
-    // —— 主色（Things 3 蓝）——
-    primary: Color(0xFF3D7CFB),
-    primary2: Color(0xFF3D7CFB),
-    accent2: Color(0xFF3D7CFB),
-    accent: Color(0xFF3D7CFB),
-    ai2: Color(0xFF3D7CFB),
-    ai: Color(0xFF3D7CFB),
+    // —— 主色（靛蓝）——
+    primary: Color(0xFF5148BD),
+    primary2: Color(0xFF5148BD),
+    accent2: Color(0xFF5148BD),
+    accent: Color(0xFF5148BD),
+    ai2: Color(0xFF5148BD),
+    ai: Color(0xFF5148BD),
     // —— 文字 ——
     text: Color(0xFF1A1A1A),
     muted: Color(0xFF8A8A8E),
@@ -21,7 +21,7 @@ abstract final class AppTokens {
     // —— 表面（纯色，非半透明）——
     card: Color(0xFFFFFFFF),
     cardSolid: Color(0xFFFFFFFF),
-    selectedBg: Color(0xFFF2F4FA), // 浅色：浅蓝灰
+    selectedBg: Color(0xFFEDEBFB), // 浅色：浅靛蓝
     stroke: Color(0xFFE5E5EA),
     nav: Color(0xFFFFFFFF),
     sidebar: Color(0xFFFFFFFF),
@@ -42,13 +42,13 @@ abstract final class AppTokens {
   );
 
   static const AppTokenSet dark = AppTokenSet(
-    // —— 主色（Things 3 蓝，深色提亮）——
-    primary: Color(0xFF4D8CFF),
-    primary2: Color(0xFF4D8CFF),
-    accent2: Color(0xFF4D8CFF),
-    accent: Color(0xFF4D8CFF),
-    ai2: Color(0xFF4D8CFF),
-    ai: Color(0xFF4D8CFF),
+    // —— 主色（靛蓝，深色提亮）——
+    primary: Color(0xFFAAA5FF),
+    primary2: Color(0xFFAAA5FF),
+    accent2: Color(0xFFAAA5FF),
+    accent: Color(0xFFAAA5FF),
+    ai2: Color(0xFFAAA5FF),
+    ai: Color(0xFFAAA5FF),
     // —— 文字 ——
     text: Color(0xFFF5F5F7),
     muted: Color(0xFF8E8E93),
@@ -57,7 +57,7 @@ abstract final class AppTokens {
     // —— 表面（纯黑系）——
     card: Color(0xFF000000),
     cardSolid: Color(0xFF000000),
-    selectedBg: Color(0xFF1C1C1E),
+    selectedBg: Color(0xFF282541),
     stroke: Color(0xFF2C2C2E),
     nav: Color(0xFF000000),
     sidebar: Color(0xFF000000),
@@ -243,19 +243,19 @@ class ColorSchemeExtension extends ThemeExtension<ColorSchemeExtension> {
 
   @override
   int get hashCode => Object.hashAll([
-        primary2,
-        accent2,
-        ai,
-        ai2,
-        aiShadow,
-        aiGlow,
-        chipBg,
-        chipText,
-        bg1,
-        bg2,
-        muted,
-        text,
-      ]);
+    primary2,
+    accent2,
+    ai,
+    ai2,
+    aiShadow,
+    aiGlow,
+    chipBg,
+    chipText,
+    bg1,
+    bg2,
+    muted,
+    text,
+  ]);
 }
 
 /// 按 token 手工构造浅 / 深两套 `ThemeData`（规格 §7.4.4，非 `ColorScheme.fromSeed`）。
@@ -280,13 +280,13 @@ ThemeData buildAppTheme(Brightness brightness) {
   final scheme = ColorScheme(
     brightness: brightness,
     primary: tokens.primary,
-    onPrimary: Colors.white,
+    onPrimary: isLight ? Colors.white : const Color(0xFF201B45),
     primaryContainer: tokens.primary2,
-    onPrimaryContainer: Colors.white,
+    onPrimaryContainer: isLight ? Colors.white : const Color(0xFF201B45),
     secondary: tokens.accent,
-    onSecondary: Colors.white,
+    onSecondary: isLight ? Colors.white : const Color(0xFF201B45),
     secondaryContainer: tokens.accent2,
-    onSecondaryContainer: Colors.white,
+    onSecondaryContainer: isLight ? Colors.white : const Color(0xFF201B45),
     error: isLight ? const Color(0xFFB3261E) : const Color(0xFFF2B8B5),
     onError: isLight ? Colors.white : const Color(0xFF141B33),
     surface: tokens.card,

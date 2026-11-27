@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:settle_app/app/responsive_shell.dart';
 import 'package:settle_app/features/guide/gtd_guide_page.dart';
+
 import 'widget_utils.dart';
 
 void main() {
-  /// 宽屏整壳：引导卡 in-flow 于内容列顶部（页面 AppBar 之上）。
+  /// 宽屏整壳：引导提示位于页面标题下方。
   Future<void> pumpShellWide(WidgetTester tester, TestEnv env) async {
     await tester.binding.setSurfaceSize(const Size(1000, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -13,13 +14,15 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('首启（prefs 空）显示引导卡：标题/铁律/每日动作/CTA', (tester) async {
+  testWidgets('首启（prefs 空）显示简明引导提示与指南入口', (tester) async {
     final env = await TestEnv.create();
     await pumpShellWide(tester, env);
     expect(find.byKey(const Key('onboarding_card')), findsOneWidget);
     expect(find.text('Welcome to Settle'), findsOneWidget);
-    expect(find.text('Capture everything into the inbox'), findsOneWidget);
-    expect(find.text('Sunday: 20-minute review'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('onboarding_card'))).dy,
+      greaterThanOrEqualTo(tester.getBottomLeft(find.byType(AppBar)).dy),
+    );
     expect(find.byKey(const Key('onboarding_open_guide')), findsOneWidget);
     await env.db.close();
   });

@@ -274,6 +274,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayTitle => 'Today';
 
   @override
+  String todayTaskCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks',
+      one: '1 task',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String todayOverdue(int count) {
     return '$count overdue';
   }

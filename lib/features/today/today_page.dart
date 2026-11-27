@@ -14,7 +14,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// 逾期/今日两区经 `groupKey`（0/1）分组，区头由 `buildDateHeader` 注入。
 /// 仓库约定：普通 Provider 无 watchByStatus 成员，改文件级 StreamProvider。
 final _todayProvider = StreamProvider<List<Task>>(
-    (ref) => ref.watch(taskRepositoryProvider).watchToday());
+  (ref) => ref.watch(taskRepositoryProvider).watchToday(),
+);
 
 /// 今日页批量操作集（Task 2 接线 onAction 实现；本 Task 仅展示按钮）。
 const _batchActions = [
@@ -25,7 +26,9 @@ const _batchActions = [
 ];
 
 class TodayPage extends ConsumerWidget {
-  const TodayPage({super.key});
+  const TodayPage({super.key, this.guide});
+
+  final Widget? guide;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,57 +36,82 @@ class TodayPage extends ConsumerWidget {
     final tasks = ref.watch(_todayProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.todayTitle)),
-      body: tasks.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
-        data: (rows) {
-          // 两区都空 → 整体空态（逾期区非空时仅显示逾期区，不出整体空态）。
-          if (rows.isEmpty) {
-            return Center(
-              child: PageRuleHint(
-                icon: Icons.today,
-                title: l10n.ruleTodayTitle,
-                message: l10n.ruleTodayMessage,
-              ),
-            );
-          }
-          final todayStart = _todayStart();
-          bool isOverdue(Task t) {
-            final d = t.dueDate;
-            if (d == null) return false;
-            return DateTime.fromMillisecondsSinceEpoch(d).isBefore(todayStart);
-          }
-
-          final overdueCount = rows.where(isOverdue).length;
-          return TaskListView(
-            tasks: rows,
-            reorderEnabled: true,
-            selectionEnabled: true,
-            focusEnabled: true,
-            actions: _batchActions,
-            // 逾期区（键 0）置顶，今日区（键 1）其后；区头由 buildDateHeader 注入。
-            groupKey: (t) => isOverdue(t) ? 0 : 1,
-            buildDateHeader: (context, key) => key == 0
-                ? _OverdueHeader(count: overdueCount)
-                : const SizedBox.shrink(),
-            isOverdue: isOverdue,
-            subtitleBuilder: (context, t) {
-              final d = t.dueDate;
-              if (d == null) return null;
-              final isLight = Theme.of(context).brightness == Brightness.light;
-              final tokens = isLight ? AppTokens.light : AppTokens.dark;
-              return Text(
-                DateTime.fromMillisecondsSinceEpoch(d)
-                    .toString()
-                    .substring(0, 10),
-                style: TextStyle(
-                  color: isOverdue(t) ? tokens.danger : tokens.muted,
-                  fontSize: 12,
+      body: Column(
+        children: [
+          if (guide != null) guide!,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 2, 20, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    MaterialLocalizations.of(context)
+                        .formatFullDate(DateTime.now()),
+                  ),
                 ),
-              );
-            },
-          );
-        },
+                if (tasks.asData case final data?)
+                  Text(l10n.todayTaskCount(data.value.length)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: tasks.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('$e')),
+              data: (rows) {
+                // 两区都空 → 整体空态（逾期区非空时仅显示逾期区，不出整体空态）。
+                if (rows.isEmpty) {
+                  return Center(
+                    child: PageRuleHint(
+                      icon: Icons.today,
+                      title: l10n.ruleTodayTitle,
+                      message: l10n.ruleTodayMessage,
+                    ),
+                  );
+                }
+                final todayStart = _todayStart();
+                bool isOverdue(Task t) {
+                  final d = t.dueDate;
+                  if (d == null) return false;
+                  return DateTime.fromMillisecondsSinceEpoch(d)
+                      .isBefore(todayStart);
+                }
+
+                final overdueCount = rows.where(isOverdue).length;
+                return TaskListView(
+                  tasks: rows,
+                  compactRows: true,
+                  reorderEnabled: true,
+                  selectionEnabled: true,
+                  focusEnabled: true,
+                  actions: _batchActions,
+                  // 逾期区（键 0）置顶，今日区（键 1）其后；区头由 buildDateHeader 注入。
+                  groupKey: (t) => isOverdue(t) ? 0 : 1,
+                  buildDateHeader: (context, key) => key == 0
+                      ? _OverdueHeader(count: overdueCount)
+                      : const SizedBox.shrink(),
+                  isOverdue: isOverdue,
+                  subtitleBuilder: (context, t) {
+                    final d = t.dueDate;
+                    if (d == null) return null;
+                    final isLight =
+                        Theme.of(context).brightness == Brightness.light;
+                    final tokens = isLight ? AppTokens.light : AppTokens.dark;
+                    return Text(
+                      DateTime.fromMillisecondsSinceEpoch(d)
+                          .toString()
+                          .substring(0, 10),
+                      style: TextStyle(
+                        color: isOverdue(t) ? tokens.danger : tokens.muted,
+                        fontSize: 12,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
