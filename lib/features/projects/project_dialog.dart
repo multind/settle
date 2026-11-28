@@ -54,6 +54,7 @@ class _ProjectDialogState extends ConsumerState<ProjectDialog> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
     return Dialog(
+      constraints: const BoxConstraints(maxWidth: 560),
       backgroundColor: Colors.transparent,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
@@ -72,22 +73,36 @@ class _ProjectDialogState extends ConsumerState<ProjectDialog> {
           children: [
             Text(
               widget.project == null ? l10n.newProject : l10n.editProject,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
+              style: Theme.of(context).textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 16),
-            TextField(
-              key: const Key('project_name_field'),
-              controller: _name,
-              decoration: InputDecoration(labelText: l10n.projectName),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const Key('project_goal_field'),
-              controller: _goal,
-              decoration: InputDecoration(labelText: l10n.projectGoal),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      key: const Key('project_name_field'),
+                      controller: _name,
+                      decoration: InputDecoration(labelText: l10n.projectName),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const Key('project_goal_field'),
+                      controller: _goal,
+                      minLines: 4,
+                      maxLines: 10,
+                      keyboardType: TextInputType.multiline,
+                      textAlignVertical: TextAlignVertical.top,
+                      decoration: InputDecoration(
+                        labelText: l10n.projectGoal,
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             Row(

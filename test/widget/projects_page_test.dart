@@ -50,6 +50,26 @@ void main() {
     await env.db.close();
   });
 
+  testWidgets('项目编辑支持多行目标并保留完整内容', (tester) async {
+    final env = await TestEnv.create();
+    final id = await seedProject(env, '客户交付');
+    final goal = List.generate(14, (index) => '项目说明第${index + 1}行').join('\n');
+    await env.db.update(env.db.projects).write(ProjectsCompanion(goal: Value(goal)));
+    await tester.pumpWidget(env.wrap(const ProjectsPage()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('edit_project_$id')));
+    await tester.pumpAndSettle();
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('project_goal_field')),
+    );
+    expect(field.minLines, greaterThan(1));
+    expect(field.controller!.text, goal);
+    await tester.tap(find.byKey(const Key('project_save')));
+    await tester.pumpAndSettle();
+    expect((await env.db.select(env.db.projects).getSingle()).goal, goal);
+    await env.db.close();
+  });
+
   testWidgets('删除项目走二次确认并级联删除任务（验收⑤/§5.2）', (tester) async {
     final env = await TestEnv.create();
     final p = await seedProject(env, '客户交付');
