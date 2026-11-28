@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,13 +18,17 @@ class FilePickerBackupGateway implements BackupFileGateway {
   @override
   Future<String?> saveBackup(String json) async {
     final bytes = Uint8List.fromList(utf8.encode(json));
+    final writesInPicker = Platform.isAndroid || Platform.isIOS;
     final path = await FilePicker.platform.saveFile(
       dialogTitle: 'Export Settle backup',
       fileName: 'settle_backup_${DateTime.now().millisecondsSinceEpoch}.json',
-      bytes: bytes, // 保留：Android/iOS 平台由插件写入
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+      bytes: writesInPicker ? bytes : null,
     );
-    if (path == null) return null; // 用户取消
-    await File(path).writeAsBytes(bytes); // 桌面平台真正落盘
+    if (path != null && !writesInPicker) {
+      await File(path).writeAsBytes(bytes, flush: true);
+    }
     return path;
   }
 
@@ -42,4 +47,5 @@ class FilePickerBackupGateway implements BackupFileGateway {
 }
 
 final backupFileGatewayProvider = Provider<BackupFileGateway>(
-    (ref) => FilePickerBackupGateway());
+  (ref) => FilePickerBackupGateway(),
+);

@@ -27,6 +27,7 @@ class TaskFormFields extends ConsumerStatefulWidget {
     this.initial,
     this.initialTagIds = const {},
     this.allowStatusChange = true,
+    this.collapseDetails = false,
   });
 
   /// 编辑既有任务时的初始值；创建时传 null。
@@ -35,6 +36,7 @@ class TaskFormFields extends ConsumerStatefulWidget {
 
   /// 编辑场景禁止改状态（避免误把已完成任务改回等待）。
   final bool allowStatusChange;
+  final bool collapseDetails;
 
   @override
   ConsumerState<TaskFormFields> createState() => TaskFormFieldsState();
@@ -42,6 +44,7 @@ class TaskFormFields extends ConsumerStatefulWidget {
 
 class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
   final _formKey = GlobalKey<FormState>();
+  final _detailsController = ExpansibleController();
   late final TextEditingController _title;
   late final TextEditingController _notes;
   late final TextEditingController _waitingOn;
@@ -111,6 +114,7 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
 
   @override
   void dispose() {
+    _detailsController.dispose();
     _title.dispose();
     _notes.dispose();
     _waitingOn.dispose();
@@ -120,7 +124,10 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
 
   /// 校验并返回草稿；校验失败返回 null。
   TaskDraft? validate() {
-    if (!_formKey.currentState!.validate()) return null;
+    if (!_formKey.currentState!.validate()) {
+      if (widget.collapseDetails) _detailsController.expand();
+      return null;
+    }
     return TaskDraft(
       title: _title.text.trim(),
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
@@ -156,7 +163,10 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
 
   /// 链式选择日期+时间：先 showDatePicker 再 showTimePicker。
   /// 无既有值时时间默认 09:00；有既有值时保留原时分。
-  Future<void> _pickDateTime(DateTime? current, void Function(DateTime) apply) async {
+  Future<void> _pickDateTime(
+    DateTime? current,
+    void Function(DateTime) apply,
+  ) async {
     final date = await showDatePicker(
       context: context,
       initialDate: current ?? DateTime.now(),
@@ -216,11 +226,11 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
   }
 
   String _statusLabel(AppLocalizations l10n, TaskStatus s) => switch (s) {
-        TaskStatus.nextAction => l10n.statusNextAction,
-        TaskStatus.waiting => l10n.statusWaiting,
-        TaskStatus.someday => l10n.statusSomeday,
-        TaskStatus.done => l10n.statusDone,
-      };
+    TaskStatus.nextAction => l10n.statusNextAction,
+    TaskStatus.waiting => l10n.statusWaiting,
+    TaskStatus.someday => l10n.statusSomeday,
+    TaskStatus.done => l10n.statusDone,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -228,6 +238,229 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
     final projects = ref.watch(_projectsProvider);
     final contexts = ref.watch(_contextsProvider);
     final tags = ref.watch(_tagsProvider);
+    final fieldGap = SizedBox(height: widget.collapseDetails ? 12 : 4);
+    final details = <Widget>[
+      if (widget.allowStatusChange) ...[
+        fieldGap,
+        DropdownButtonFormField<TaskStatus>(
+          key: const Key('task_status_field'),
+          initialValue: _status,
+          decoration: InputDecoration(labelText: l10n.taskStatus),
+          items: [
+            for (final s in TaskStatus.values)
+              DropdownMenuItem<TaskStatus>(
+                value: s,
+                child: Text(_statusLabel(l10n, s)),
+              ),
+          ],
+          onChanged: (v) =>
+              setState(() => _status = v ?? TaskStatus.nextAction),
+        ),
+      ],
+      if (_status == TaskStatus.waiting) ...[
+        fieldGap,
+        TextFormField(
+          key: const Key('task_waiting_on_field'),
+          controller: _waitingOn,
+          decoration: InputDecoration(labelText: l10n.taskWaitingOn),
+          validator: (v) =>
+              (v == null || v.trim().isEmpty) ? l10n.waitingOnRequired : null,
+        ),
+      ],
+      fieldGap,
+      TextFormField(
+        key: const Key('task_notes_field'),
+        controller: _notes,
+        decoration: InputDecoration(labelText: l10n.taskNotes),
+        maxLines: 2,
+      ),
+      fieldGap,
+      Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<EnergyLevel?>(
+              key: const Key('task_energy_field'),
+              initialValue: _energy,
+              decoration: InputDecoration(labelText: l10n.taskEnergy),
+              items: [
+                const DropdownMenuItem<EnergyLevel?>(
+                  value: null,
+                  child: Text('-'),
+                ),
+                for (final e in EnergyLevel.values)
+                  DropdownMenuItem<EnergyLevel?>(
+                    value: e,
+                    child: Text(e.storage),
+                  ),
+              ],
+              onChanged: (v) => setState(() => _energy = v),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonFormField<PriorityLevel?>(
+              key: const Key('task_priority_field'),
+              initialValue: _priority,
+              decoration: InputDecoration(labelText: l10n.taskPriority),
+              items: [
+                const DropdownMenuItem<PriorityLevel?>(
+                  value: null,
+                  child: Text('-'),
+                ),
+                for (final p in PriorityLevel.values)
+                  DropdownMenuItem<PriorityLevel?>(
+                    value: p,
+                    child: Text(p.storage),
+                  ),
+              ],
+              onChanged: (v) => setState(() => _priority = v),
+            ),
+          ),
+        ],
+      ),
+      fieldGap,
+      Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _dateTimeTile(
+              label: l10n.taskDueDate,
+              value: _dueDate,
+              clearKey: const Key('clear_due'),
+              onClear: () => setState(() => _dueDate = null),
+              onTap: () =>
+                  _pickDateTime(_dueDate, (v) => setState(() => _dueDate = v)),
+            ),
+            const Divider(height: 1, indent: 16, endIndent: 16),
+            _dateTimeTile(
+              label: l10n.taskScheduled,
+              value: _scheduled,
+              clearKey: const Key('clear_scheduled'),
+              onClear: () => setState(() => _scheduled = null),
+              onTap: () => _pickDateTime(
+                _scheduled,
+                (v) => setState(() => _scheduled = v),
+              ),
+            ),
+            const Divider(height: 1, indent: 16, endIndent: 16),
+            _dateTimeTile(
+              tileKey: const Key('task_reminder_field'),
+              label: l10n.reminder,
+              value: _reminderAt,
+              clearKey: const Key('clear_reminder'),
+              onClear: () => setState(() => _reminderAt = null),
+              onTap: () => _pickDateTime(
+                _reminderAt,
+                (v) => setState(() => _reminderAt = v),
+              ),
+            ),
+          ],
+        ),
+      ),
+      fieldGap,
+      DropdownButtonFormField<String?>(
+        key: const Key('task_repeat_field'),
+        initialValue: _repeatKind,
+        decoration: InputDecoration(labelText: l10n.repeat),
+        items: [
+          DropdownMenuItem<String?>(value: null, child: Text(l10n.repeatNone)),
+          DropdownMenuItem<String?>(
+            value: 'daily',
+            child: Text(l10n.repeatDaily),
+          ),
+          DropdownMenuItem<String?>(
+            value: 'weekly',
+            child: Text(l10n.repeatWeekly),
+          ),
+          DropdownMenuItem<String?>(
+            value: 'monthly',
+            child: Text(l10n.repeatMonthly),
+          ),
+          DropdownMenuItem<String?>(
+            value: 'every',
+            child: Text(l10n.repeatEveryN),
+          ),
+        ],
+        onChanged: (v) => setState(() => _repeatKind = v),
+      ),
+      if (_repeatKind == 'every') ...[
+        fieldGap,
+        TextFormField(
+          key: const Key('task_repeat_interval'),
+          controller: _repeatInterval,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(labelText: l10n.repeatEveryN),
+          validator: (v) {
+            final n = int.tryParse((v ?? '').trim());
+            if (n == null || n < 1 || n > 365)
+              return l10n.repeatIntervalInvalid;
+            return null;
+          },
+        ),
+      ],
+      fieldGap,
+      projects.when(
+        data: (list) => DropdownButtonFormField<int?>(
+          key: const Key('task_project_field'),
+          initialValue: _projectId,
+          decoration: InputDecoration(labelText: l10n.taskProject),
+          items: [
+            const DropdownMenuItem<int?>(value: null, child: Text('—')),
+            for (final p in list)
+              DropdownMenuItem<int?>(value: p.id, child: Text(p.name)),
+          ],
+          onChanged: (v) => setState(() => _projectId = v),
+        ),
+        loading: () => const SizedBox.shrink(),
+        error: (_, __) => const SizedBox.shrink(),
+      ),
+      fieldGap,
+      contexts.when(
+        data: (list) => DropdownButtonFormField<int?>(
+          key: const Key('task_context_field'),
+          initialValue: _contextId,
+          decoration: InputDecoration(labelText: l10n.taskContext),
+          items: [
+            const DropdownMenuItem<int?>(value: null, child: Text('—')),
+            for (final c in list)
+              DropdownMenuItem<int?>(value: c.id, child: Text(c.name)),
+          ],
+          onChanged: (v) => setState(() => _contextId = v),
+        ),
+        loading: () => const SizedBox.shrink(),
+        error: (_, __) => const SizedBox.shrink(),
+      ),
+      const SizedBox(height: 8),
+      tags.when(
+        data: (list) => Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final t in list)
+              FilterChip(
+                key: Key('tag_chip_${t.id}'),
+                label: Text(t.name),
+                selected: _tagIds.contains(t.id),
+                onSelected: (sel) => setState(() {
+                  if (sel) {
+                    _tagIds.add(t.id);
+                  } else {
+                    _tagIds.remove(t.id);
+                  }
+                }),
+              ),
+          ],
+        ),
+        loading: () => const SizedBox.shrink(),
+        error: (_, __) => const SizedBox.shrink(),
+      ),
+    ];
     return Form(
       key: _formKey,
       child: Column(
@@ -238,192 +471,23 @@ class TaskFormFieldsState extends ConsumerState<TaskFormFields> {
             key: const Key('task_title_field'),
             controller: _title,
             decoration: InputDecoration(labelText: l10n.taskTitle),
-            validator: (v) => (v == null || v.trim().isEmpty) ? l10n.taskTitle : null,
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? l10n.taskTitle : null,
           ),
-          if (widget.allowStatusChange) ...[
-            const SizedBox(height: 4),
-            DropdownButtonFormField<TaskStatus>(
-              key: const Key('task_status_field'),
-              initialValue: _status,
-              decoration: InputDecoration(labelText: l10n.taskStatus),
-              items: [
-                for (final s in TaskStatus.values)
-                  DropdownMenuItem<TaskStatus>(value: s, child: Text(_statusLabel(l10n, s))),
-              ],
-              onChanged: (v) => setState(() => _status = v ?? TaskStatus.nextAction),
+          if (widget.collapseDetails) ...[
+            const SizedBox(height: 12),
+            ExpansionTile(
+              key: const Key('task_details'),
+              controller: _detailsController,
+              maintainState: true,
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 8),
+              expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+              title: Text(l10n.clarifyDetails),
+              children: details,
             ),
-          ],
-          if (_status == TaskStatus.waiting) ...[
-            const SizedBox(height: 4),
-            TextFormField(
-              key: const Key('task_waiting_on_field'),
-              controller: _waitingOn,
-              decoration: InputDecoration(labelText: l10n.taskWaitingOn),
-              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.waitingOnRequired : null,
-            ),
-          ],
-          const SizedBox(height: 4),
-          TextFormField(
-            key: const Key('task_notes_field'),
-            controller: _notes,
-            decoration: InputDecoration(labelText: l10n.taskNotes),
-            maxLines: 2,
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<EnergyLevel?>(
-                  key: const Key('task_energy_field'),
-                  initialValue: _energy,
-                  decoration: InputDecoration(labelText: l10n.taskEnergy),
-                  items: [
-                    const DropdownMenuItem<EnergyLevel?>(value: null, child: Text('-')),
-                    for (final e in EnergyLevel.values)
-                      DropdownMenuItem<EnergyLevel?>(value: e, child: Text(e.storage)),
-                  ],
-                  onChanged: (v) => setState(() => _energy = v),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonFormField<PriorityLevel?>(
-                  key: const Key('task_priority_field'),
-                  initialValue: _priority,
-                  decoration: InputDecoration(labelText: l10n.taskPriority),
-                  items: [
-                    const DropdownMenuItem<PriorityLevel?>(value: null, child: Text('-')),
-                    for (final p in PriorityLevel.values)
-                      DropdownMenuItem<PriorityLevel?>(value: p, child: Text(p.storage)),
-                  ],
-                  onChanged: (v) => setState(() => _priority = v),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _dateTimeTile(
-                  label: l10n.taskDueDate,
-                  value: _dueDate,
-                  clearKey: const Key('clear_due'),
-                  onClear: () => setState(() => _dueDate = null),
-                  onTap: () =>
-                      _pickDateTime(_dueDate, (v) => setState(() => _dueDate = v)),
-                ),
-                const Divider(height: 1, indent: 16, endIndent: 16),
-                _dateTimeTile(
-                  label: l10n.taskScheduled,
-                  value: _scheduled,
-                  clearKey: const Key('clear_scheduled'),
-                  onClear: () => setState(() => _scheduled = null),
-                  onTap: () =>
-                      _pickDateTime(_scheduled, (v) => setState(() => _scheduled = v)),
-                ),
-                const Divider(height: 1, indent: 16, endIndent: 16),
-                _dateTimeTile(
-                  tileKey: const Key('task_reminder_field'),
-                  label: l10n.reminder,
-                  value: _reminderAt,
-                  clearKey: const Key('clear_reminder'),
-                  onClear: () => setState(() => _reminderAt = null),
-                  onTap: () =>
-                      _pickDateTime(_reminderAt, (v) => setState(() => _reminderAt = v)),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-          DropdownButtonFormField<String?>(
-            key: const Key('task_repeat_field'),
-            initialValue: _repeatKind,
-            decoration: InputDecoration(labelText: l10n.repeat),
-            items: [
-              DropdownMenuItem<String?>(value: null, child: Text(l10n.repeatNone)),
-              DropdownMenuItem<String?>(value: 'daily', child: Text(l10n.repeatDaily)),
-              DropdownMenuItem<String?>(value: 'weekly', child: Text(l10n.repeatWeekly)),
-              DropdownMenuItem<String?>(value: 'monthly', child: Text(l10n.repeatMonthly)),
-              DropdownMenuItem<String?>(value: 'every', child: Text(l10n.repeatEveryN)),
-            ],
-            onChanged: (v) => setState(() => _repeatKind = v),
-          ),
-          if (_repeatKind == 'every') ...[
-            const SizedBox(height: 4),
-            TextFormField(
-              key: const Key('task_repeat_interval'),
-              controller: _repeatInterval,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.repeatEveryN),
-              validator: (v) {
-                final n = int.tryParse((v ?? '').trim());
-                if (n == null || n < 1 || n > 365) return l10n.repeatIntervalInvalid;
-                return null;
-              },
-            ),
-          ],
-          const SizedBox(height: 4),
-          projects.when(
-            data: (list) => DropdownButtonFormField<int?>(
-              key: const Key('task_project_field'),
-              initialValue: _projectId,
-              decoration: InputDecoration(labelText: l10n.taskProject),
-              items: [
-                const DropdownMenuItem<int?>(value: null, child: Text('—')),
-                for (final p in list) DropdownMenuItem<int?>(value: p.id, child: Text(p.name)),
-              ],
-              onChanged: (v) => setState(() => _projectId = v),
-            ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          const SizedBox(height: 4),
-          contexts.when(
-            data: (list) => DropdownButtonFormField<int?>(
-              key: const Key('task_context_field'),
-              initialValue: _contextId,
-              decoration: InputDecoration(labelText: l10n.taskContext),
-              items: [
-                const DropdownMenuItem<int?>(value: null, child: Text('—')),
-                for (final c in list) DropdownMenuItem<int?>(value: c.id, child: Text(c.name)),
-              ],
-              onChanged: (v) => setState(() => _contextId = v),
-            ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          const SizedBox(height: 8),
-          tags.when(
-            data: (list) => Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final t in list)
-                  FilterChip(
-                    key: Key('tag_chip_${t.id}'),
-                    label: Text(t.name),
-                    selected: _tagIds.contains(t.id),
-                    onSelected: (sel) => setState(() {
-                      if (sel) {
-                        _tagIds.add(t.id);
-                      } else {
-                        _tagIds.remove(t.id);
-                      }
-                    }),
-                  ),
-              ],
-            ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
+          ] else
+            ...details,
         ],
       ),
     );

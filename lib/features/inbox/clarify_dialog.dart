@@ -55,7 +55,9 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
           item,
           ClarifyToProject(
             name: name,
-            goal: _projectGoal.text.trim().isEmpty ? null : _projectGoal.text.trim(),
+            goal: _projectGoal.text.trim().isEmpty
+                ? null
+                : _projectGoal.text.trim(),
           ),
         );
       case _Decision.delete:
@@ -69,11 +71,13 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
     final l10n = AppLocalizations.of(context)!;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final tokens = isLight ? AppTokens.light : AppTokens.dark;
+    final theme = Theme.of(context);
     return Dialog(
+      constraints: const BoxConstraints(maxWidth: 520),
       backgroundColor: Colors.transparent,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: GlassContainer(
         color: tokens.card,
         blur: 12,
@@ -81,61 +85,107 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
         borderColor: tokens.stroke,
         borderRadius: BorderRadius.circular(AppTokens.radiusContainer),
         shadow: tokens.shadow,
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               l10n.clarify,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
+              style: Theme.of(context).textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.item.rawText, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 12),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: tokens.field,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              l10n.clarifyOriginal,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: tokens.muted,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.item.rawText,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     SegmentedButton<_Decision>(
                       key: const Key('clarify_decision'),
                       segments: [
-                        ButtonSegment(value: _Decision.task, label: Text(l10n.decisionAction)),
-                        ButtonSegment(value: _Decision.project, label: Text(l10n.decisionProject)),
-                        ButtonSegment(value: _Decision.delete, label: Text(l10n.decisionDelete)),
+                        ButtonSegment(
+                          value: _Decision.task,
+                          label: Text(l10n.decisionAction),
+                        ),
+                        ButtonSegment(
+                          value: _Decision.project,
+                          label: Text(l10n.decisionProject),
+                        ),
+                        ButtonSegment(
+                          value: _Decision.delete,
+                          label: Text(l10n.decisionDelete),
+                        ),
                       ],
                       selected: {_decision},
-                      onSelectionChanged: (s) => setState(() => _decision = s.first),
+                      onSelectionChanged: (s) =>
+                          setState(() => _decision = s.first),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
                     if (_decision == _Decision.task)
-                      TaskFormFields(key: _taskFormKey, initial: TaskDraft(title: widget.item.rawText))
+                      TaskFormFields(
+                        key: _taskFormKey,
+                        initial: TaskDraft(title: widget.item.rawText),
+                        collapseDetails: true,
+                      )
                     else if (_decision == _Decision.project) ...[
                       TextField(
                         key: const Key('clarify_project_name'),
                         controller: _projectName,
-                        decoration: InputDecoration(labelText: l10n.projectName),
+                        decoration: InputDecoration(
+                          labelText: l10n.projectName,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       TextField(
                         key: const Key('clarify_project_goal'),
                         controller: _projectGoal,
-                        decoration: InputDecoration(labelText: l10n.projectGoal),
+                        decoration: InputDecoration(
+                          labelText: l10n.projectGoal,
+                        ),
                       ),
                     ] else
                       Text(
                         l10n.confirmDeleteInbox,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                   ],
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+            Divider(height: 1, color: tokens.stroke),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -144,12 +194,21 @@ class _ClarifyDialogState extends ConsumerState<ClarifyDialog> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l10n.cancel),
                 ),
-                const SizedBox(width: 12),
-                GradientButton(
+                const SizedBox(width: 16),
+                FilledButton(
                   key: const Key('clarify_confirm'),
                   onPressed: _confirm,
-                  minimumSize: const Size(72, 40),
-                  child: Text(l10n.save),
+                  style: _decision == _Decision.delete
+                      ? FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.error,
+                          foregroundColor: theme.colorScheme.onError,
+                        )
+                      : null,
+                  child: Text(switch (_decision) {
+                    _Decision.task => l10n.clarifyCreateAction,
+                    _Decision.project => l10n.clarifyCreateProject,
+                    _Decision.delete => l10n.decisionDelete,
+                  }),
                 ),
               ],
             ),

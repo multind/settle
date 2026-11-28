@@ -24,6 +24,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('open_clarify')));
     await tester.pumpAndSettle();
+    final details = find.text('Task details');
+    final notes = find.byKey(const Key('task_notes_field'));
+    expect(notes, findsNothing);
+    await tester.tap(details);
+    await tester.pumpAndSettle();
+    await tester.enterText(notes, '附上本周进度');
+    await tester.tap(details);
+    await tester.pumpAndSettle();
+    expect(notes, findsNothing);
     await tester.enterText(find.byKey(const Key('task_title_field')), '写周报');
     await tester.tap(find.byKey(const Key('clarify_confirm')));
     await tester.pumpAndSettle();
@@ -32,6 +41,7 @@ void main() {
     final tasks = await env.db.select(env.db.tasks).get();
     expect(tasks, hasLength(1));
     expect(tasks.single.title, '写周报');
+    expect(tasks.single.notes, '附上本周进度');
     expect(tasks.single.status, 'next_action');
     await env.db.close();
   });
@@ -95,6 +105,8 @@ void main() {
     await tester.pumpWidget(env.wrap(_ClarifyHost(itemId: id)));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('open_clarify')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Task details'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('task_status_field')));
     await tester.pumpAndSettle();

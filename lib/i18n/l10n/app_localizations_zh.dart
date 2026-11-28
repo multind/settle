@@ -166,6 +166,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statusDone => '完成';
 
   @override
+  String get clarifyOriginal => '收集原文';
+
+  @override
+  String get clarifyDetails => '任务详情';
+
+  @override
+  String get clarifyCreateAction => '创建行动';
+
+  @override
+  String get clarifyCreateProject => '创建项目';
+
+  @override
   String get decisionAction => '转为行动';
 
   @override
@@ -238,6 +250,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get newReview => '新建回顾';
 
   @override
+  String get appearance => '外观';
+
+  @override
+  String get themeLight => '日间模式';
+
+  @override
+  String get themeDark => '夜间模式';
+
+  @override
   String get language => '语言';
 
   @override
@@ -256,6 +277,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importBackup => '恢复备份（JSON）';
 
   @override
+  String get backupExportFailed => '备份导出失败，请选择可写入的位置后重试。';
+
+  @override
   String get exportedTo => '备份已导出';
 
   @override
@@ -272,6 +296,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get todayTitle => '今日';
+
+  @override
+  String todayTaskCount(int count) {
+    return '$count 项待办';
+  }
 
   @override
   String todayOverdue(int count) {

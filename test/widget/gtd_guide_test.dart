@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:settle_app/app/responsive_shell.dart';
+import 'package:settle_app/app/theme.dart';
 import 'package:settle_app/features/guide/gtd_guide_page.dart';
 import 'package:settle_app/features/settings/settings_page.dart';
 import 'widget_utils.dart';
@@ -72,7 +73,7 @@ void main() {
     final icon = tester.widget<Icon>(find.descendant(
         of: find.byKey(const Key('nav_item_11')),
         matching: find.byType(Icon)));
-    expect(icon.color, const Color(0xFF3D7CFB));
+    expect(icon.color, AppTokens.light.primary);
     await env.db.close();
   });
 

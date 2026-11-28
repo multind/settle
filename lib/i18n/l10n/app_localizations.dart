@@ -410,6 +410,30 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get statusDone;
 
+  /// No description provided for @clarifyOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original note'**
+  String get clarifyOriginal;
+
+  /// No description provided for @clarifyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Task details'**
+  String get clarifyDetails;
+
+  /// No description provided for @clarifyCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create action'**
+  String get clarifyCreateAction;
+
+  /// No description provided for @clarifyCreateProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Create project'**
+  String get clarifyCreateProject;
+
   /// No description provided for @decisionAction.
   ///
   /// In en, this message translates to:
@@ -554,6 +578,24 @@ abstract class AppLocalizations {
   /// **'New review'**
   String get newReview;
 
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light mode'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get themeDark;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
@@ -590,6 +632,12 @@ abstract class AppLocalizations {
   /// **'Restore backup (JSON)'**
   String get importBackup;
 
+  /// No description provided for @backupExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export the backup. Choose a writable location and try again.'**
+  String get backupExportFailed;
+
   /// No description provided for @exportedTo.
   ///
   /// In en, this message translates to:
@@ -625,6 +673,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Today'**
   String get todayTitle;
+
+  /// No description provided for @todayTaskCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 task} other{{count} tasks}}'**
+  String todayTaskCount(int count);
 
   /// No description provided for @todayOverdue.
   ///

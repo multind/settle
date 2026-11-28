@@ -62,6 +62,7 @@ class TaskListView extends ConsumerStatefulWidget {
     super.key,
     required this.tasks,
     this.reorderEnabled = false,
+    this.compactRows = false,
     this.selectionEnabled = false,
     this.focusEnabled = false,
     this.sortMode = TaskSortMode.standard,
@@ -80,6 +81,8 @@ class TaskListView extends ConsumerStatefulWidget {
 
   /// 重排开（今日/随时/即将）。
   final bool reorderEnabled;
+
+  final bool compactRows;
 
   /// 多选开（六页全开）。
   final bool selectionEnabled;
@@ -132,6 +135,7 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   bool _selectionMode = false;
   final Set<int> _selected = {};
   int _focusIndex = 0;
+  int? _hoveredTaskId;
 
   /// 行 id → 焦点节点（Task 4 用 [moveFocus]/[focusRow] 请求键盘焦点）。
   final Map<int, FocusNode> _focusNodes = {};
@@ -164,7 +168,9 @@ class TaskListViewState extends ConsumerState<TaskListView> {
           node.dispose();
         }
       });
-      _focusIndex = _items.isEmpty ? 0 : _focusIndex.clamp(0, _items.length - 1);
+      _focusIndex = _items.isEmpty
+          ? 0
+          : _focusIndex.clamp(0, _items.length - 1);
       _selected.removeWhere((id) => !ids.contains(id));
       if (_selected.isEmpty) _selectionMode = false;
     }
@@ -181,11 +187,11 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   // —— 排序比较器（公共统一，六页差异收敛点）——
 
   static int _priorityIndex(String? p) => switch (p) {
-        'high' => 0,
-        'medium' => 1,
-        'low' => 2,
-        _ => 3,
-      };
+    'high' => 0,
+    'medium' => 1,
+    'low' => 2,
+    _ => 3,
+  };
 
   /// 标准：优先级 → sortOrder → id 升序终局 tiebreak
   /// （today/anytime 收尾清单：tiebreak 统一为 sortOrder → id）。
@@ -212,9 +218,11 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   /// 排序后展平：可选分组（组按键升序，组内保持比较器序）。
   List<Task> _buildOrdered(List<Task> tasks) {
     final sorted = tasks.toList()
-      ..sort(widget.sortMode == TaskSortMode.reverseChronological
-          ? _reverseChronologicalCompare
-          : _standardCompare);
+      ..sort(
+        widget.sortMode == TaskSortMode.reverseChronological
+            ? _reverseChronologicalCompare
+            : _standardCompare,
+      );
     if (widget.groupKey == null) return sorted;
     final groups = <Comparable, List<Task>>{};
     for (final t in sorted) {
@@ -228,8 +236,9 @@ class TaskListViewState extends ConsumerState<TaskListView> {
 
   int get focusIndex => _focusIndex;
 
-  Task? get focusedTask =>
-      _items.isEmpty || _focusIndex >= _items.length ? null : _items[_focusIndex];
+  Task? get focusedTask => _items.isEmpty || _focusIndex >= _items.length
+      ? null
+      : _items[_focusIndex];
 
   bool get selectionMode => _selectionMode;
 
@@ -295,7 +304,8 @@ class TaskListViewState extends ConsumerState<TaskListView> {
       !_selectionMode && _hasRowFocus && _items.isNotEmpty;
 
   /// Enter/Delete 门控：非选择模式、行获焦、焦点任务存在。
-  bool get _canOperateRow => !_selectionMode && _hasRowFocus && focusedTask != null;
+  bool get _canOperateRow =>
+      !_selectionMode && _hasRowFocus && focusedTask != null;
 
   // —— 构建 ——
 
@@ -318,13 +328,17 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     for (var i = 0; i < _items.length; i++) {
       final t = _items[i];
       final group = widget.groupKey?.call(t);
-      if (group != null && (lastGroup == null || group.compareTo(lastGroup) != 0)) {
+      if (group != null &&
+          (lastGroup == null || group.compareTo(lastGroup) != 0)) {
         // 组头：KeyedSubtree 占位，绝不挂拖拽监听（Task 3 会在上面放 DragTarget）。
-        children.add(KeyedSubtree(
-          key: ValueKey('task_header_$group'),
-          child: widget.buildDateHeader?.call(context, group) ??
-              const SizedBox.shrink(),
-        ));
+        children.add(
+          KeyedSubtree(
+            key: ValueKey('task_header_$group'),
+            child:
+                widget.buildDateHeader?.call(context, group) ??
+                const SizedBox.shrink(),
+          ),
+        );
         positions.add(-1);
         lastGroup = group;
         childIndex++;
@@ -386,8 +400,9 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     if (!widget.focusEnabled || !shortcutsEnabled) return column;
     final bindings = ref.watch(shortcutSettingsControllerProvider);
     final shortcuts = <ShortcutActivator, Intent>{
-      for (final action in shortcutActions
-          .where((a) => a.layer == ShortcutLayer.list))
+      for (final action in shortcutActions.where(
+        (a) => a.layer == ShortcutLayer.list,
+      ))
         for (final activator in activatorsFor(bindings.bindingFor(action.id)))
           activator: switch (action.id) {
             'listMoveUp' => const _ListMoveFocusIntent(1),
@@ -496,7 +511,8 @@ class TaskListViewState extends ConsumerState<TaskListView> {
 
   Widget _buildRow(int index, {int? dragIndex}) {
     final t = _items[index];
-    final focused = widget.focusEnabled && !_selectionMode && index == _focusIndex;
+    final focused =
+        widget.focusEnabled && !_selectionMode && index == _focusIndex;
     final selected = _selected.contains(t.id);
     final l10n = AppLocalizations.of(context)!;
     final isLight = Theme.of(context).brightness == Brightness.light;
@@ -506,15 +522,23 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         ? _buildLogbookTile(t, l10n, tokens, selected)
         : _buildStandardTile(t, l10n, tokens, selected, dragIndex);
 
-    Widget row = GlassContainer(
-      color: focused ? tokens.selectedBg : tokens.cardSolid,
-      blur: 5,
-      saturate: 1.0,
-      borderColor: tokens.stroke,
-      borderRadius: BorderRadius.circular(AppTokens.radiusRow),
-      shadow: tokens.shadowSm,
-      child: tile,
-    );
+    Widget row = widget.compactRows
+        ? Container(
+            decoration: BoxDecoration(
+              color: focused ? tokens.selectedBg : null,
+              border: Border(bottom: BorderSide(color: tokens.stroke)),
+            ),
+            child: Material(type: MaterialType.transparency, child: tile),
+          )
+        : GlassContainer(
+            color: focused ? tokens.selectedBg : tokens.cardSolid,
+            blur: 5,
+            saturate: 1.0,
+            borderColor: tokens.stroke,
+            borderRadius: BorderRadius.circular(AppTokens.radiusRow),
+            shadow: tokens.shadowSm,
+            child: tile,
+          );
     // 逾期行：左侧 1px danger 色条（描边在圆角容器外，视觉独立于 hairline）。
     if (widget.isOverdue?.call(t) ?? false) {
       row = Container(
@@ -525,18 +549,36 @@ class TaskListViewState extends ConsumerState<TaskListView> {
         child: row,
       );
     }
-    final rowWidget = Padding(
+    Widget rowWidget = Padding(
       key: Key('task_row_${t.id}'),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: widget.compactRows ? 0 : 6,
+      ),
       child: row,
     );
+    if (widget.compactRows && dragIndex != null) {
+      rowWidget = MouseRegion(
+        onEnter: (_) => setState(() => _hoveredTaskId = t.id),
+        onExit: (_) {
+          if (_hoveredTaskId == t.id) setState(() => _hoveredTaskId = null);
+        },
+        child: rowWidget,
+      );
+    }
     if (!widget.focusEnabled) return rowWidget;
     return Focus(
       key: Key('task_focus_${t.id}'),
-      focusNode:
-          _focusNodes.putIfAbsent(t.id, () => FocusNode(debugLabel: 'task_focus_${t.id}')),
+      focusNode: _focusNodes.putIfAbsent(
+        t.id,
+        () => FocusNode(debugLabel: 'task_focus_${t.id}'),
+      ),
       onFocusChange: (hasFocus) {
-        if (hasFocus && !_selectionMode) setState(() => _focusIndex = index);
+        if (hasFocus && !_selectionMode || widget.compactRows) {
+          setState(() {
+            if (hasFocus && !_selectionMode) _focusIndex = index;
+          });
+        }
       },
       child: rowWidget,
     );
@@ -579,11 +621,16 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   }
 
   ListTile _buildStandardTile(
-      Task t, AppLocalizations l10n, AppTokenSet tokens, bool selected,
-      int? dragIndex) {
+    Task t,
+    AppLocalizations l10n,
+    AppTokenSet tokens,
+    bool selected,
+    int? dragIndex,
+  ) {
     if (_selectionMode) {
       return ListTile(
         key: Key('task_tile_${t.id}'),
+        dense: widget.compactRows,
         title: Text(t.title),
         subtitle: widget.subtitleBuilder?.call(context, t),
         leading: GlassCheckbox(
@@ -596,7 +643,13 @@ class TaskListViewState extends ConsumerState<TaskListView> {
     }
     return ListTile(
       key: Key('task_tile_${t.id}'),
-      title: Text(t.title),
+      dense: widget.compactRows,
+      title: Text(
+        t.title,
+        style: widget.compactRows
+            ? const TextStyle(fontWeight: FontWeight.w600)
+            : null,
+      ),
       subtitle: widget.subtitleBuilder?.call(context, t),
       leading: IconButton(
         key: Key('task_done_${t.id}'),
@@ -607,12 +660,21 @@ class TaskListViewState extends ConsumerState<TaskListView> {
       // 桌面重排行：行内拖拽手柄（仅任务行；组头无手柄）。
       trailing: dragIndex == null
           ? null
-          : ReorderableDragStartListener(
-              key: Key('task_handle_${t.id}'),
-              index: dragIndex,
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: Icon(Icons.drag_handle, size: 20, color: tokens.muted),
+          : Visibility(
+              visible:
+                  !widget.compactRows ||
+                  _hoveredTaskId == t.id ||
+                  (_focusNodes[t.id]?.hasFocus ?? false),
+              maintainState: true,
+              maintainAnimation: true,
+              maintainSize: true,
+              child: ReorderableDragStartListener(
+                key: Key('task_handle_${t.id}'),
+                index: dragIndex,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(Icons.drag_handle, size: 20, color: tokens.muted),
+                ),
               ),
             ),
       onTap: () => showDialog<void>(
@@ -627,7 +689,11 @@ class TaskListViewState extends ConsumerState<TaskListView> {
   }
 
   ListTile _buildLogbookTile(
-      Task t, AppLocalizations l10n, AppTokenSet tokens, bool selected) {
+    Task t,
+    AppLocalizations l10n,
+    AppTokenSet tokens,
+    bool selected,
+  ) {
     if (_selectionMode) {
       return ListTile(
         key: Key('logbook_tile_${t.id}'),
@@ -646,31 +712,34 @@ class TaskListViewState extends ConsumerState<TaskListView> {
       title: Text(t.title),
       subtitle: widget.subtitleBuilder?.call(context, t),
       leading: const GlassCheckbox(value: true, onChanged: null),
-      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-        // 图标+tooltip（比文本按钮更稳）：英文 'Restore'/'Delete' 在 280dp
-        // 窄屏下文本宽度占满 trailing 槽位，触发 _RenderListTile
-        // 「Trailing widget consumes the entire tile width」断言。
-        IconButton(
-          key: Key('logbook_reopen_${t.id}'),
-          tooltip: l10n.logbookRestore,
-          visualDensity: VisualDensity.compact,
-          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-          padding: EdgeInsets.zero,
-          icon: const Icon(Icons.replay, size: 20),
-          color: tokens.muted,
-          onPressed: () => ref.read(taskRepositoryProvider).reopen(t.id),
-        ),
-        IconButton(
-          key: Key('logbook_delete_${t.id}'),
-          tooltip: l10n.delete,
-          visualDensity: VisualDensity.compact,
-          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-          padding: EdgeInsets.zero,
-          icon: const Icon(Icons.delete_outline, size: 20),
-          color: tokens.danger,
-          onPressed: () => _confirmDelete(context, t),
-        ),
-      ]),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 图标+tooltip（比文本按钮更稳）：英文 'Restore'/'Delete' 在 280dp
+          // 窄屏下文本宽度占满 trailing 槽位，触发 _RenderListTile
+          // 「Trailing widget consumes the entire tile width」断言。
+          IconButton(
+            key: Key('logbook_reopen_${t.id}'),
+            tooltip: l10n.logbookRestore,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.replay, size: 20),
+            color: tokens.muted,
+            onPressed: () => ref.read(taskRepositoryProvider).reopen(t.id),
+          ),
+          IconButton(
+            key: Key('logbook_delete_${t.id}'),
+            tooltip: l10n.delete,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.delete_outline, size: 20),
+            color: tokens.danger,
+            onPressed: () => _confirmDelete(context, t),
+          ),
+        ],
+      ),
       // 互斥：重排模式长按为拖拽手柄，不触发多选。
       onLongPress: widget.selectionEnabled && !widget.reorderEnabled
           ? () => _enterSelection(t.id)
@@ -703,42 +772,42 @@ class TaskListViewState extends ConsumerState<TaskListView> {
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: tokens.stroke)),
       ),
-      child: Row(children: [
-        IconButton(
-          key: const Key('task_selection_exit'),
-          tooltip: l10n.exitSelection,
-          visualDensity: VisualDensity.compact,
-          icon: const Icon(Icons.close),
-          onPressed: exitSelection,
-        ),
-        Expanded(
-          child: Text(
-            l10n.taskListSelectedCount(_selected.length),
-            style: TextStyle(fontWeight: FontWeight.w600, color: tokens.text),
-          ),
-        ),
-        for (final action in widget.actions)
+      child: Row(
+        children: [
           IconButton(
-            key: Key('task_selection_action_${action.name}'),
-            tooltip: _actionTooltip(l10n, action),
+            key: const Key('task_selection_exit'),
+            tooltip: l10n.exitSelection,
             visualDensity: VisualDensity.compact,
-            // 选中任意行即可点：组件内置默认处理（onAction 注入时委托回调）。
-            onPressed: _selected.isEmpty
-                ? null
-                : () => _handleAction(action),
-            icon: Icon(_actionIcon(action)),
+            icon: const Icon(Icons.close),
+            onPressed: exitSelection,
           ),
-      ]),
+          Expanded(
+            child: Text(
+              l10n.taskListSelectedCount(_selected.length),
+              style: TextStyle(fontWeight: FontWeight.w600, color: tokens.text),
+            ),
+          ),
+          for (final action in widget.actions)
+            IconButton(
+              key: Key('task_selection_action_${action.name}'),
+              tooltip: _actionTooltip(l10n, action),
+              visualDensity: VisualDensity.compact,
+              // 选中任意行即可点：组件内置默认处理（onAction 注入时委托回调）。
+              onPressed: _selected.isEmpty ? null : () => _handleAction(action),
+              icon: Icon(_actionIcon(action)),
+            ),
+        ],
+      ),
     );
   }
 
   IconData _actionIcon(TaskListAction action) => switch (action) {
-        TaskListAction.complete => Icons.check,
-        TaskListAction.delete => Icons.delete_outline,
-        TaskListAction.setDate => Icons.event,
-        TaskListAction.move => Icons.drive_file_move_outline,
-        TaskListAction.restore => Icons.replay,
-      };
+    TaskListAction.complete => Icons.check,
+    TaskListAction.delete => Icons.delete_outline,
+    TaskListAction.setDate => Icons.event,
+    TaskListAction.move => Icons.drive_file_move_outline,
+    TaskListAction.restore => Icons.replay,
+  };
 
   String _actionTooltip(AppLocalizations l10n, TaskListAction action) =>
       switch (action) {

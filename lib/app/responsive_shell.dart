@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:settle_app/app/theme.dart';
 import 'package:settle_app/app/window_controller.dart';
 import 'package:settle_app/core/shortcuts/shortcut_actions.dart';
@@ -34,6 +33,8 @@ class ResponsiveShell extends ConsumerStatefulWidget {
   const ResponsiveShell({super.key});
 
   static const double breakpoint = 600;
+  static const double expandedSidebarBreakpoint = 960;
+  static const double workspaceMaxWidth = 900;
 
   @override
   ConsumerState<ResponsiveShell> createState() => _ResponsiveShellState();
@@ -61,7 +62,8 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   void initState() {
     super.initState();
     _showGuideCard =
-        !(ref.read(sharedPreferencesProvider).getBool('gtd_guide_seen') ?? false);
+        !(ref.read(sharedPreferencesProvider).getBool('gtd_guide_seen') ??
+            false);
     _pages = [
       const InboxPage(), // 0 收件箱
       const TodayPage(), // 1 今日
@@ -147,7 +149,13 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           body: isWide
               ? Row(
                   children: [
-                    _buildSidebar(l10n, tokens),
+                    _buildSidebar(
+                      l10n,
+                      tokens,
+                      compact:
+                          constraints.maxWidth <
+                          ResponsiveShell.expandedSidebarBreakpoint,
+                    ),
                     Expanded(child: _pageColumn()),
                   ],
                 )
@@ -245,83 +253,117 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
         // 恢复焦点逻辑。已知残余限制：焦点所在控件被销毁时（如快捷键切页
         // 移除带焦点的控件）primary focus 可能回 null，autofocus 不重复
         // 触发，需再次点击/Tab 恢复——超出本次启动焦点修复范围。
-        child: Focus(
-          autofocus: true,
-          skipTraversal: true,
-          child: shell,
-        ),
+        child: Focus(autofocus: true, skipTraversal: true, child: shell),
       ),
     );
   }
 
-  /// 宽屏分组侧边栏（规格 §2.2）：纯底 + 右侧 1px hairline，可滚动（ListView）。
-  /// 结构完全由 [_navSpecs] 派生：收件箱置顶无组标题，其后按组归属插入组标题。
-  Widget _buildSidebar(AppLocalizations l10n, AppTokenSet tokens) {
+  Widget _buildSidebar(
+    AppLocalizations l10n,
+    AppTokenSet tokens, {
+    required bool compact,
+  }) {
+    Widget destination(_NavSpec spec) =>
+        _navItem(tokens, spec, _labelOf(l10n, spec.labelKey), compact: compact);
+
     return Container(
-      width: 232,
+      key: const Key('custom_sidebar'),
+      width: compact ? 64 : 208,
       decoration: BoxDecoration(
         color: tokens.sidebar,
-        border: Border(
-          right: BorderSide(color: tokens.stroke, width: 1),
-        ),
+        border: Border(right: BorderSide(color: tokens.stroke)),
       ),
-      child: ListView(
-        key: const Key('custom_sidebar'),
-        padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
         children: [
-          const _BrandMark(),
-          for (var i = 0; i < _navSpecs.length; i++) ...[
-            // 组首项：在组标题前插入（收件箱 group 为空，天然跳过）。
-            if (_navSpecs[i].group != null &&
-                (i == 0 || _navSpecs[i - 1].group != _navSpecs[i].group))
-              _groupTitle(
-                tokens,
-                Key('nav_group_${_navSpecs[i].group!.name}'),
-                _labelOf(l10n, _navSpecs[i].group!.labelKey),
-              ),
-            _navItem(tokens, _navSpecs[i], _labelOf(l10n, _navSpecs[i].labelKey)),
-          ],
+          if (compact)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              child: Icon(Icons.inbox_outlined, color: tokens.primary),
+            )
+          else
+            const Align(alignment: Alignment.centerLeft, child: _BrandMark()),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                for (var i = 0; i < _navSpecs.length - 2; i++) ...[
+                  if (_navSpecs[i].group != null &&
+                      _navSpecs[i].group != _navSpecs[i - 1].group)
+                    if (compact)
+                      const Divider(indent: 17, endIndent: 17)
+                    else
+                      _groupTitle(
+                        tokens,
+                        Key('nav_group_${_navSpecs[i].group!.name}'),
+                        _labelOf(l10n, _navSpecs[i].group!.labelKey),
+                      ),
+                  destination(_navSpecs[i]),
+                ],
+              ],
+            ),
+          ),
+          const Divider(indent: 12, endIndent: 12),
+          for (final spec in _navSpecs.skip(_navSpecs.length - 2))
+            destination(spec),
+          const SizedBox(height: 8),
         ],
       ),
     );
   }
 
-  /// 侧边栏单项（规格 §2.2）：InkWell 切换 `_index`；
-  /// 选中态复用 v0.2 语义（selectedBg 圆角底 + primary 图标/文字）。
-  Widget _navItem(AppTokenSet tokens, _NavSpec spec, String label) {
+  Widget _navItem(
+    AppTokenSet tokens,
+    _NavSpec spec,
+    String label, {
+    required bool compact,
+  }) {
     final selected = _index == spec.index;
-    return Padding(
+    final color = selected ? tokens.primary : tokens.muted;
+    final item = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
       child: InkWell(
         key: Key('nav_item_${spec.index}'),
-        onTap: () => setState(() => _index = spec.index),
+        onTap: () => _switchTo(spec.index),
         borderRadius: BorderRadius.circular(AppTokens.radiusButton),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: selected ? tokens.selectedBg : Colors.transparent,
             borderRadius: BorderRadius.circular(AppTokens.radiusButton),
           ),
           child: Row(
+            mainAxisAlignment: compact
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
             children: [
               Icon(
-                spec.icon,
+                selected ? spec.selectedIcon : spec.icon,
                 size: 18,
-                color: selected ? tokens.primary : tokens.muted,
+                color: color,
               ),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                  color: selected ? tokens.primary : tokens.muted,
+              if (!compact) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: color,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
       ),
+    );
+    return Semantics(
+      selected: selected,
+      child: compact ? Tooltip(message: label, child: item) : item,
     );
   }
 
@@ -394,7 +436,8 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   void _dismissGuideCard() {
     setState(() => _showGuideCard = false);
     unawaited(
-        ref.read(sharedPreferencesProvider).setBool('gtd_guide_seen', true));
+      ref.read(sharedPreferencesProvider).setBool('gtd_guide_seen', true),
+    );
   }
 
   /// 打开完整指南：视为已看过（置位 + 隐藏卡片）并切到指南页 index 11。
@@ -402,25 +445,34 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   void _openGuide() {
     setState(() => _showGuideCard = false);
     unawaited(
-        ref.read(sharedPreferencesProvider).setBool('gtd_guide_seen', true));
+      ref.read(sharedPreferencesProvider).setBool('gtd_guide_seen', true),
+    );
     _switchTo(11);
   }
 
-  /// 内容列：引导卡显示时以 in-flow 布局置于页面之上（页面 AppBar 之上、
-  /// 全局 FAB 与底部导航之外），从结构上杜绝遮挡任何 FAB/导航元素。
   Widget _pageColumn() {
-    if (!_showGuideCard) return _pages[_index];
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-          child: OnboardingCard(
-            onDismiss: _dismissGuideCard,
-            onOpenGuide: _openGuide,
-          ),
+    final guide = _showGuideCard
+        ? Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: OnboardingCard(
+              onDismiss: _dismissGuideCard,
+              onOpenGuide: _openGuide,
+            ),
+          )
+        : null;
+    final page = switch (_index) {
+      0 => InboxPage(guide: guide),
+      1 => TodayPage(guide: guide),
+      _ => _pages[_index],
+    };
+    if (_index > 1) return page;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: ResponsiveShell.workspaceMaxWidth,
         ),
-        Expanded(child: _pages[_index]),
-      ],
+        child: SizedBox.expand(child: page),
+      ),
     );
   }
 
@@ -434,8 +486,9 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
       backgroundColor: tokens.cardSolid,
       showDragHandle: false,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(AppTokens.radiusContainer)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppTokens.radiusContainer),
+        ),
       ),
       builder: (sheetContext) => SafeArea(
         child: Column(
@@ -459,18 +512,18 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 
   /// 底部栏目的地（规格 §2.3）：inNarrow 4 页 + 「更多」槽位，均由规范表派生。
   List<NavigationDestination> _barDestinations(AppLocalizations l10n) => [
-        for (final spec in _navSpecs.where((s) => s.inNarrow))
-          NavigationDestination(
-            icon: Icon(spec.icon),
-            selectedIcon: Icon(spec.selectedIcon),
-            label: _labelOf(l10n, spec.labelKey),
-          ),
-        NavigationDestination(
-          icon: const Icon(Icons.more_horiz),
-          selectedIcon: const Icon(Icons.more_horiz),
-          label: _labelOf(l10n, 'navMore'),
-        ),
-      ];
+    for (final spec in _navSpecs.where((s) => s.inNarrow))
+      NavigationDestination(
+        icon: Icon(spec.icon),
+        selectedIcon: Icon(spec.selectedIcon),
+        label: _labelOf(l10n, spec.labelKey),
+      ),
+    NavigationDestination(
+      icon: const Icon(Icons.more_horiz),
+      selectedIcon: const Icon(Icons.more_horiz),
+      label: _labelOf(l10n, 'navMore'),
+    ),
+  ];
 }
 
 /// 侧边栏组归属（规格 §2.2）。name 直接派生组标题 Key（nav_group_$name）。
@@ -629,19 +682,6 @@ const List<_NavSpec> _navSpecs = [
     group: _NavGroup.system,
     inMore: true,
   ),
-];
-
-/// 快捷键数字键表（Ctrl/Cmd+1..9，按侧边栏项序；下标 n ↔ 第 n+1 项）。
-const List<LogicalKeyboardKey> _digitKeys = [
-  LogicalKeyboardKey.digit1,
-  LogicalKeyboardKey.digit2,
-  LogicalKeyboardKey.digit3,
-  LogicalKeyboardKey.digit4,
-  LogicalKeyboardKey.digit5,
-  LogicalKeyboardKey.digit6,
-  LogicalKeyboardKey.digit7,
-  LogicalKeyboardKey.digit8,
-  LogicalKeyboardKey.digit9,
 ];
 
 /// 由 l10n key 解析本地化文本（AppLocalizations 无 byKey 查找，集中此一处）。

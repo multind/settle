@@ -166,6 +166,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusDone => 'Done';
 
   @override
+  String get clarifyOriginal => 'Original note';
+
+  @override
+  String get clarifyDetails => 'Task details';
+
+  @override
+  String get clarifyCreateAction => 'Create action';
+
+  @override
+  String get clarifyCreateProject => 'Create project';
+
+  @override
   String get decisionAction => 'Turn into action';
 
   @override
@@ -238,6 +250,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newReview => 'New review';
 
   @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get themeLight => 'Light mode';
+
+  @override
+  String get themeDark => 'Dark mode';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -256,6 +277,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importBackup => 'Restore backup (JSON)';
 
   @override
+  String get backupExportFailed =>
+      'Could not export the backup. Choose a writable location and try again.';
+
+  @override
   String get exportedTo => 'Backup exported';
 
   @override
@@ -272,6 +297,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todayTitle => 'Today';
+
+  @override
+  String todayTaskCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tasks',
+      one: '1 task',
+    );
+    return '$_temp0';
+  }
 
   @override
   String todayOverdue(int count) {

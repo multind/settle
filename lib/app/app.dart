@@ -5,7 +5,7 @@ import 'package:settle_app/app/responsive_shell.dart';
 import 'package:settle_app/app/theme.dart';
 import 'package:settle_app/features/settings/settings_controller.dart';
 
-/// 整应用入口（规格 §7.1 / §7.4）：双主题跟随系统 + 响应式外壳。
+/// 整应用入口（规格 §7.1 / §7.4）：应用外观设置 + 响应式外壳。
 class SettleApp extends ConsumerWidget {
   const SettleApp({super.key});
 
@@ -20,7 +20,7 @@ class SettleApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: buildAppTheme(Brightness.light),
       darkTheme: buildAppTheme(Brightness.dark),
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
       builder: (context, child) {
         // 纯色背景由主题 scaffoldBackgroundColor 提供，无需额外背景组件。
         return child ?? const SizedBox.shrink();
